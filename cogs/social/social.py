@@ -436,8 +436,7 @@ class Social:
         if data["SOC"]["VITRINE"]:
             em.set_image(url=data["SOC"]["VITRINE"])
         em.set_footer(
-            text="{}{}".format(self.api.grade(membre)[0], " | {}".format(membre.game) if membre.game else ""),
-            icon_url=self.api.grade(membre)[1])
+            text="Serveur {}{}".format(ctx.message.server.name, " | {}".format(membre.game) if membre.game else ""))
         await self.bot.say(embed=em)
 
     @_carte.command(pass_context=True)
