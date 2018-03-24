@@ -30,16 +30,17 @@ class SocialAPI:
     def get(self, user: discord.Member, sub: str = None):
         """Retourne le dict de l'utilisateur contenant toutes les données disponibles"""
         server = user.server
-        if server.id in self.soc:
-            if user.id not in self.soc[server.id]:
-                clef = str(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(3)))
-                self.soc[server.id][user.id] = {"CLEF": clef,
-                                                "STATS": {},
-                                                "SOC": {},
-                                                "ECO": {},
-                                                "LOGS": [],
-                                                "ENRG": time.time()}
-                self.update(user)
+        if server.id not in self.soc:
+            self.soc[server.id] = {}
+        if user.id not in self.soc[server.id]:
+            clef = str(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(3)))
+            self.soc[server.id][user.id] = {"CLEF": clef,
+                                            "STATS": {},
+                                            "SOC": {},
+                                            "ECO": {},
+                                            "LOGS": [],
+                                            "ENRG": time.time()}
+            self.update(user)
         return self.soc[server.id][user.id][sub] if sub else self.soc[server.id][user.id]
 
     def update(self, user: discord.Member = None, serverid: int = None):
