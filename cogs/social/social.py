@@ -605,9 +605,9 @@ def check_folders():
 
 
 def check_files():
-    if not os.path.isfile("data/social/user.json"):
-        print("Création de Social/user.json")
-        dataIO.save_json("data/social/user.json", {})
+    if not os.path.isfile("data/social/soc.json"):
+        print("Création de Social/soc.json")
+        dataIO.save_json("data/social/soc.json", {})
     if not os.path.isfile("data/social/sys.json"):
         print("Création de Social/sys.json")
         dataIO.save_json("data/social/sys.json", {})
