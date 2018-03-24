@@ -316,7 +316,7 @@ class Social:
             await self.bot.say("**Activé** | Les messages de départ seront affichés sur {}".format(channel.mention))
         fileIO("data/social/sys.json", "save", self.sys)
 
-    @soc.command(pass_context=True)
+    @socmod.command(pass_context=True)
     async def majmsg(self, ctx, max: int, channel: discord.Channel = None):
         """Recherche et met à jour les dates des premiers messages des membres rétroactivement
         ! Tout message supprimé n'est PAS pris en compte car inaccessible !
