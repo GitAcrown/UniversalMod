@@ -67,22 +67,41 @@ class SocialAPI:
                         "TRS": [],
                         "SAC": {}}}
         for cat in tree:
-            if user:
-                if cat not in self.soc[server][user.id]:
-                    self.soc[server][user.id][cat] = tree[cat]
-            else:
-                for u in self.soc[server]:
-                    if cat not in self.soc[server][u]:
-                        self.soc[server][u][cat] = tree[cat]
-            for sub in tree[cat]:
+            if server:
                 if user:
-                    if sub not in self.soc[server][user.id][cat]:
-                        self.soc[server][user.id][cat][sub] = tree[cat][sub]
+                    if cat not in self.soc[server][user.id]:
+                        self.soc[server][user.id][cat] = tree[cat]
                 else:
                     for u in self.soc[server]:
-                        if cat in self.soc[server][u]:  # Sécurité en +
-                            if sub not in self.soc[server][u][cat]:
-                                self.soc[server][u][cat][sub] = tree[cat][sub]
+                        if cat not in self.soc[server][u]:
+                            self.soc[server][u][cat] = tree[cat]
+                for sub in tree[cat]:
+                    if user:
+                        if sub not in self.soc[server][user.id][cat]:
+                            self.soc[server][user.id][cat][sub] = tree[cat][sub]
+                    else:
+                        for u in self.soc[server]:
+                            if cat in self.soc[server][u]:  # Sécurité en +
+                                if sub not in self.soc[server][u][cat]:
+                                    self.soc[server][u][cat][sub] = tree[cat][sub]
+            else:
+                for server in self.soc:
+                    if user:
+                        if cat not in self.soc[server][user.id]:
+                            self.soc[server][user.id][cat] = tree[cat]
+                    else:
+                        for u in self.soc[server]:
+                            if cat not in self.soc[server][u]:
+                                self.soc[server][u][cat] = tree[cat]
+                    for sub in tree[cat]:
+                        if user:
+                            if sub not in self.soc[server][user.id][cat]:
+                                self.soc[server][user.id][cat][sub] = tree[cat][sub]
+                        else:
+                            for u in self.soc[server]:
+                                if cat in self.soc[server][u]:  # Sécurité en +
+                                    if sub not in self.soc[server][u][cat]:
+                                        self.soc[server][u][cat][sub] = tree[cat][sub]
         if not user:
             fileIO("data/social/soc.json", "save", self.soc)
         return True
@@ -377,7 +396,7 @@ class Social:
                                            "**Solde** `{} crédits`\n"
                                            "`{}`\🔥".format(membre.id, data["CLEF"], data["ECO"]["SOLDE"],
                                                             len(data["SOC"]["FLAMMES"])))
-        servnb = self.api.nb_servers(user)
+        servnb = self.api.nb_servers(membre)
         timestamp = ctx.message.timestamp
         creation = (timestamp - membre.created_at).days
         datecreation = membre.created_at.strftime("%d/%m/%Y")
@@ -443,7 +462,7 @@ class Social:
             await self.bot.say(
                 "**Inconnu** | Je ne reconnais que 3 sexes: **Neutre**, **Feminin** et **Masculin**.\n"
                 "*Veillez à ne pas mettre d'accents !*")
-        self.api.sync(user, ctx.message.server, "SOC", "SEXE")
+        self.api.sync(ctx.message.author, ctx.message.server, "SOC", "SEXE")
         self.smart_save()
 
     @_carte.command(pass_context=True)
@@ -459,7 +478,7 @@ class Social:
             await self.bot.say("**Succès** | Votre bio n'affichera aucun texte.")
         self.api.add_log(ctx.message.author, "Changement de bio")
         u["BIO"] = " ".join(texte)
-        self.api.sync(user, ctx.message.server, "SOC", "BIO")
+        self.api.sync(ctx.message.author, ctx.message.server, "SOC", "BIO")
         self.smart_save()
 
     @_carte.command(pass_context=True)
@@ -482,7 +501,7 @@ class Social:
             await self.bot.say("**Retirée** | Aucune image ne s'affichera sur votre carte")
             u["VITRINE"] = None
         self.api.add_log(ctx.message.author, "Image vitrine modifiée")
-        self.api.sync(user, ctx.message.server, "SOC", "VITRINE")
+        self.api.sync(ctx.message.author, ctx.message.server, "SOC", "VITRINE")
         self.smart_save()
 
 # TRIGGERS ----------------------------------------------
