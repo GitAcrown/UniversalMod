@@ -446,7 +446,7 @@ class Social:
     @_carte.command(pass_context=True)
     async def succes(self, ctx, afficher: str = None):
         """Permet de voir ses succès débloqués ou d'en choisir un pour afficher ses détails en précisant sa clef"""
-        p = self.api.get(ctx.message.user, "SOC")
+        p = self.api.get(ctx.message.author, "SOC")
         if not afficher:
             txt = ""
             aide = True
@@ -459,14 +459,14 @@ class Social:
                 txt = random.choice(["Vous n'en avez débloqué aucun :(", "Désolé, mais vous n'avez aucun succès.",
                                      "Aucun succès à l'horizon...", "Oups... vous n'avez pas de succès débloqués."])
                 aide = False
-            em = discord.Embed(color=ctx.message.user.color, title="Vos succès débloqués", description=txt)
+            em = discord.Embed(color=ctx.message.author.color, title="Vos succès débloqués", description=txt)
             if aide:
                 em.set_footer(text="Faîtes '{}c succes' + la clef (en gras) pour afficher les détails du succès")
             await self.bot.say(embed=em)
         else:
             if afficher.lower() in p["SUCCES"]:
                 suc = p["SUCCES"][afficher.lower()]
-                em = discord.Embed(color=ctx.message.user.color, title="Succès | {}".format(suc["NOM"]),
+                em = discord.Embed(color=ctx.message.author.color, title="Succès | {}".format(suc["NOM"]),
                                    description=suc["DESC"])
                 em.set_thumbnail(url=suc["IMAGE"])
                 em.set_footer(text="✔ = Afficher ce succès sur ma carte de membre")
