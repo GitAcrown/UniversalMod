@@ -3,6 +3,7 @@ import random
 import re
 import string
 import time
+import asyncio
 from datetime import datetime
 
 import discord
@@ -33,6 +34,11 @@ class SocialAPI:
         if server.id not in self.soc:
             self.soc[server.id] = {}
         if user.id not in self.soc[server.id]:
+            sync = False
+            for s in self.soc:
+                if s != server.id:
+                    if user.id in self.soc[s]:
+                        sync = True  # Il était déjà sur un ancien serveur
             clef = str(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(3)))
             self.soc[server.id][user.id] = {"CLEF": clef,
                                             "STATS": {},
@@ -41,6 +47,8 @@ class SocialAPI:
                                             "LOGS": [],
                                             "ENRG": time.time()}
             self.update(user)
+            if sync:
+                self.auto_sync(user)
         return self.soc[server.id][user.id][sub] if sub else self.soc[server.id][user.id]
 
     def update(self, user: discord.Member = None, serverid: int = None):
@@ -58,6 +66,7 @@ class SocialAPI:
                 "SOC": {"BIO": "",
                         "VITRINE": None,
                         "SUCCES": {},
+                        "DISPLAY": None,
                         "FLAMMES": [],
                         "MSG_FLUX": {},
                         "MSG_SAVE": {},
@@ -107,6 +116,19 @@ class SocialAPI:
             fileIO("data/social/soc.json", "save", self.soc)
         return True
 
+    def auto_sync(self, user: discord.Member):
+        new_server = user.server
+        to_sync = {"SOC": ["BIO", "VITRINE", "SUCCES", "DISPLAY", "SEXE"],
+                   "ECO": [],
+                   "STATS": []}
+        for server in self.soc:
+            if server != new_server.id:
+                if user.id in self.soc[server]:
+                    for cat in to_sync:
+                        for sub in to_sync[cat]:
+                            self.soc[new_server.id][user.id][cat][sub] = self.soc[server][user.id][cat][sub]
+        return True
+
     def nb_servers(self, user: discord.Member):
         nb = 0
         for s in self.soc:
@@ -114,7 +136,8 @@ class SocialAPI:
                 nb += 1
         return nb
 
-    def sync(self, user: discord.Member, servbase: discord.Server, categorie: str, data=None):
+    def sync(self, user: discord.Member, categorie: str, data=None):
+        servbase = user.server
         tosync = self.soc[servbase.id][user.id][categorie][data] if data else self.soc[servbase.id][user.id][categorie]
         for s in self.soc:
             if user.id in self.soc[s]:
@@ -124,11 +147,17 @@ class SocialAPI:
                     self.soc[s][user.id][categorie] = tosync
         return True
 
-    def add_log(self, user: discord.Member, event: str):
-        p = self.get(user)
+    def add_log(self, user: discord.Member, event: str, universal=False):
         jour = time.strftime("%d/%m/%Y", time.localtime())
         heure = time.strftime("%H:%M", time.localtime())
-        p["LOGS"].append([heure, jour, event])
+        if universal:
+            for server in self.soc:
+                if user.id in self.soc[server]:
+                    p = self.soc[server][user.id]
+                    p["LOGS"].append([heure, jour, event])
+        else:
+            p = self.get(user)
+            p["LOGS"].append([heure, jour, event])
         return True
 
     def color_disp(self, user: discord.Member):
@@ -144,6 +173,35 @@ class SocialAPI:
                 return 0x9ea0a3  # Gris
         else:
             return 0x2e6cc9  # Bleu
+
+    def g_succes(self, user: discord.Member, clef: str, nom: str, description: str, image: str, needed: int = 1, modif: int = 1):
+        """Ajoute un succès de paramètres nom, description & image en suivant la condition 'needed' en ajoutant des
+        points avec 'modif'"""
+        u = self.get(user, "SOC")
+        clef = clef.lower()
+        if clef not in u["SUCCES"]:
+            u["SUCCES"][clef] = {"DESC": description,
+                                 "IMAGE": image,
+                                 "POINTS": 0,
+                                 "UNLOCK": False,
+                                 "NOM": nom}
+        if u["SUCCES"][clef]["UNLOCK"]:
+            return False
+        u["SUCCES"][clef]["POINTS"] += modif
+        if u["SUCCES"][clef]["POINTS"] >= needed:
+            for server in self.soc:
+                if user.id in self.soc[server]:
+                    u = self.soc[server][user.id]
+                    if clef not in u["SUCCES"]:
+                        u["SUCCES"][clef] = {"DESC": description,
+                                             "IMAGE": image,
+                                             "POINTS": needed,
+                                             "UNLOCK": True,
+                                             "NOM": nom}
+                    else:
+                        u["SUCCES"][clef]["UNLOCK"] = True
+            self.add_log(user, "Succès débloqué : [__{}__]({})".format(nom, image), True)
+        return True
 
     def namelist(self, user: discord.Member):
         server = user.server
@@ -368,6 +426,10 @@ class Social:
             if u in data:
                 self.soc[server.id][u]["ENRG"] = ts
         self.api.apisave()
+        await self.bot.say("**Terminé** | Les cartes de membres ont été mises à jour."
+
+    def check(self, reaction, user):
+        return not user.bot
 
     # COMMANDES UTILISATEURS ==========
 
@@ -382,6 +444,61 @@ class Social:
             await ctx.invoke(self.profil, membre=membre)
 
     @_carte.command(pass_context=True)
+    async def succes(self, ctx, afficher: str = None):
+        """Permet de voir ses succès débloqués ou d'en choisir un pour afficher ses détails en précisant sa clef"""
+        p = self.api.get(ctx.message.user, "SOC")
+        if not afficher:
+            txt = ""
+            aide = True
+            if p["SUCCES"]:
+                for suc in p["SUCCES"]:
+                    if p["SUCCES"][suc]["UNLOCK"]:
+                        txt += "**{}** | [__{}__]({})\n".format(suc.upper(), p["SUCCES"][suc]["NOM"],
+                                                                p["SUCCES"][suc]["IMAGE"])
+            else:
+                txt = random.choice(["Vous n'en avez débloqué aucun :(", "Désolé, mais vous n'avez aucun succès.",
+                                     "Aucun succès à l'horizon...", "Oups... vous n'avez pas de succès débloqués."])
+                aide = False
+            em = discord.Embed(color=ctx.message.user.color, title="Vos succès débloqués", description=txt)
+            if aide:
+                em.set_footer(text="Faîtes '{}c succes' + la clef (en gras) pour afficher les détails du succès")
+            await self.bot.say(embed=em)
+        else:
+            if afficher.lower() in p["SUCCES"]:
+                suc = p["SUCCES"][afficher.lower()]
+                em = discord.Embed(color=ctx.message.user.color, title="Succès | {}".format(suc["NOM"]),
+                                   description=suc["DESC"])
+                em.set_thumbnail(url=suc["IMAGE"])
+                em.set_footer(text="✔ = Afficher ce succès sur ma carte de membre")
+                menu = await self.bot.say(embed=em)
+                await self.bot.add_reaction(menu, "✔")
+                await asyncio.sleep(0.25)
+                rep = await self.bot.wait_for_reaction(["✔"], message=menu, timeout=30,
+                                                       check=self.check, user=ctx.message.author)
+                if rep is None:
+                    em.set_footer(text="")
+                    await self.bot.edit_message(menu, embed=em)
+                    await self.bot.clear_reactions(menu)
+                    return
+                elif rep.reaction.emoji == "✔":
+                    em.set_footer(text="✔ Ce succès sera affiché sur votre Carte (coin supérieur gauche)")
+                    await self.bot.edit_message(menu, embed=em)
+                    await self.bot.clear_reactions(menu)
+                    p["DISPLAY"] = [suc["NOM"], suc["IMAGE"]]*
+                    self.api.sync(ctx.message.author, "SOC", "DISPLAY")
+                    self.smart_save()
+                    return
+                else:
+                    em.set_footer(text="")
+                    await self.bot.edit_message(menu, embed=em)
+                    await self.bot.clear_reactions(menu)
+                    return
+            else:
+                await self.bot.say("**Introuvable** | Vérifiez que vous avez "
+                                   "bien tapé la clé correspondante au succès que vous désirez voir.")
+
+
+    @_carte.command(pass_context=True)
     async def profil(self, ctx, membre: discord.Member = None):
         """Affiche la carte de membre de l'utilisateur"""
         formatname = membre.name if membre.display_name == membre.name else "{} «{}»".format(membre.name,
@@ -389,13 +506,16 @@ class Social:
         pseudos, surnoms = self.api.namelist(membre)
         today = time.strftime("%d/%m/%Y", time.localtime())
         data = self.api.get(membre)
-        em = discord.Embed(title=formatname, description=data["SOC"]["BIO"], color=self.api.color_disp(membre))
+        if data["SOC"]["DISPLAY"]:
+            em = discord.Embed(color=self.api.color_disp(membre), description=data["SOC"]["BIO"])
+            em.set_author(name=formatname, icon_url=data["SOC"]["DISPLAY"][1])
+        else:
+            em = discord.Embed(title=formatname, description=data["SOC"]["BIO"], color=self.api.color_disp(membre))
         if membre.avatar_url:
             em.set_thumbnail(url=membre.avatar_url)
         em.add_field(name="Données", value="**ID** `{}`\n"
-                                           "**Clef** `{}`\n"
                                            "**Solde** `{} crédits`\n"
-                                           "`{}`\🔥".format(membre.id, data["CLEF"], data["ECO"]["SOLDE"],
+                                           "`{}`\🔥".format(membre.id, data["ECO"]["SOLDE"],
                                                             len(data["SOC"]["FLAMMES"])))
         servnb = self.api.nb_servers(membre)
         timestamp = ctx.message.timestamp
@@ -462,7 +582,9 @@ class Social:
             await self.bot.say(
                 "**Inconnu** | Je ne reconnais que 3 sexes: **Neutre**, **Feminin** et **Masculin**.\n"
                 "*Veillez à ne pas mettre d'accents !*")
-        self.api.sync(ctx.message.author, ctx.message.server, "SOC", "SEXE")
+        self.api.g_succes(ctx.message.author, "SEX", "Changement de sexe", "Tu as changé de sexe ! (...)",
+                          "https://i.imgur.com/0H85GZ7.png")
+        self.api.sync(ctx.message.author, "SOC", "SEXE")
         self.smart_save()
 
     @_carte.command(pass_context=True)
@@ -478,7 +600,9 @@ class Social:
             await self.bot.say("**Succès** | Votre bio n'affichera aucun texte.")
         self.api.add_log(ctx.message.author, "Changement de bio")
         u["BIO"] = " ".join(texte)
-        self.api.sync(ctx.message.author, ctx.message.server, "SOC", "BIO")
+        self.api.g_succes(ctx.message.author, "BIO", "Identité", "Tu as enfin mis une description !",
+                          "https://i.imgur.com/R7LmQWe.png")
+        self.api.sync(ctx.message.author, "SOC", "BIO")
         self.smart_save()
 
     @_carte.command(pass_context=True)
@@ -501,7 +625,9 @@ class Social:
             await self.bot.say("**Retirée** | Aucune image ne s'affichera sur votre carte")
             u["VITRINE"] = None
         self.api.add_log(ctx.message.author, "Image vitrine modifiée")
-        self.api.sync(ctx.message.author, ctx.message.server, "SOC", "VITRINE")
+        self.api.g_succes(ctx.message.author, "VIT", "Une nouvelle beauté", "Tu as changé ton image vitrine !",
+                          "https://i.imgur.com/DPk4EYT.png")
+        self.api.sync(ctx.message.author, "SOC", "VITRINE")
         self.smart_save()
 
 # TRIGGERS ----------------------------------------------
