@@ -426,7 +426,7 @@ class Social:
             if u in data:
                 self.soc[server.id][u]["ENRG"] = ts
         self.api.apisave()
-        await self.bot.say("**Terminé** | Les cartes de membres ont été mises à jour."
+        await self.bot.say("**Terminé** | Les cartes de membres ont été mises à jour.")
 
     def check(self, reaction, user):
         return not user.bot
@@ -484,7 +484,7 @@ class Social:
                     em.set_footer(text="✔ Ce succès sera affiché sur votre Carte (coin supérieur gauche)")
                     await self.bot.edit_message(menu, embed=em)
                     await self.bot.clear_reactions(menu)
-                    p["DISPLAY"] = [suc["NOM"], suc["IMAGE"]]*
+                    p["DISPLAY"] = [suc["NOM"], suc["IMAGE"]]
                     self.api.sync(ctx.message.author, "SOC", "DISPLAY")
                     self.smart_save()
                     return
