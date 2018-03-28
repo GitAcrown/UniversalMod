@@ -466,7 +466,8 @@ class Social:
                 aide = False
             em = discord.Embed(color=ctx.message.author.color, title="Vos succès débloqués", description=txt)
             if aide:
-                em.set_footer(text="Faîtes '{}c succes' + la clef (en gras) pour afficher les détails du succès")
+                em.set_footer(text="Faîtes '{}c succes' + la clef (en gras) pour afficher les détails "
+                                   "du succès".format(ctx.prefix))
             await self.bot.say(embed=em)
         else:
             if afficher.lower() in p["SUCCES"]:
