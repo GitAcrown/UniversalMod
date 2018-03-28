@@ -76,8 +76,8 @@ class SocialAPI:
                 "ECO": {"SOLDE": 100,
                         "TRS": [],
                         "SAC": {}}}
-        for cat in tree:
-            if server:
+        if server:
+            for cat in tree:
                 if user:
                     if cat not in self.soc[server][user.id]:
                         self.soc[server][user.id][cat] = tree[cat]
@@ -94,8 +94,9 @@ class SocialAPI:
                             if cat in self.soc[server][u]:  # Sécurité en +
                                 if sub not in self.soc[server][u][cat]:
                                     self.soc[server][u][cat][sub] = tree[cat][sub]
-            else:
-                for server in self.soc:
+        else:
+            for server in self.soc:
+                for cat in tree:
                     if user:
                         if cat not in self.soc[server][user.id]:
                             self.soc[server][user.id][cat] = tree[cat]
