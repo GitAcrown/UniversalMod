@@ -196,7 +196,7 @@ class SocialAPI:
         if u["SUCCES"][clef]["POINTS"] >= needed:
             for server in self.soc:
                 if user.id in self.soc[server]:
-                    u = self.soc[server][user.id]
+                    u = self.soc[server][user.id]["SOC"]
                     if clef not in u["SUCCES"]:
                         u["SUCCES"][clef] = {"DESC": description,
                                              "IMAGE": image,
