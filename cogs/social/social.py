@@ -51,9 +51,11 @@ class SocialAPI:
                 self.auto_sync(user)
         return self.soc[server.id][user.id][sub] if sub else self.soc[server.id][user.id]
 
-    def update(self, user: discord.Member = None, serverid: int = None):
-        if user:
+    def update(self, user: discord.Member = None, serverid: int = None, all: bool = False):
+        if user and not all:
             server = user.server.id
+        elif user and all:
+            server = None
         else:
             server = serverid
         tree = {"STATS": {"MSG_TOTAL": 0,
@@ -179,6 +181,8 @@ class SocialAPI:
         """Ajoute un succès de paramètres nom, description & image en suivant la condition 'needed' en ajoutant des
         points avec 'modif'"""
         u = self.get(user, "SOC")
+        if "SUCCES" not in u:
+            self.update(user, all=True)
         clef = clef.lower()
         if clef not in u["SUCCES"]:
             u["SUCCES"][clef] = {"DESC": description,
