@@ -519,10 +519,12 @@ class Social:
             em = discord.Embed(title=formatname, description=data["SOC"]["BIO"], color=self.api.color_disp(membre))
         if membre.avatar_url:
             em.set_thumbnail(url=membre.avatar_url)
+        eggs = data["ECO"]["SAC"]["EGGS"] if "EGGS" in data["ECO"]["SAC"] else 0
         em.add_field(name="Données", value="**ID** `{}`\n"
                                            "**Solde** `{} crédits`\n"
-                                           "`{}`\🔥".format(membre.id, data["ECO"]["SOLDE"],
-                                                            len(data["SOC"]["FLAMMES"])))
+                                           "`{}`\🔥\n"
+                                           "`{}`\🥚".format(membre.id, data["ECO"]["SOLDE"],
+                                                            len(data["SOC"]["FLAMMES"]), eggs))
         servnb = self.api.nb_servers(membre)
         timestamp = ctx.message.timestamp
         creation = (timestamp - membre.created_at).days
@@ -648,6 +650,19 @@ class Social:
         channel = message.channel
         server = message.server
         p = self.api.get(author)
+        if random.randint(1, 25) == 1:
+            eggs = random.randint(2, 9)
+            if "EGGS" not in p["ECO"]["SAC"]:
+                p["ECO"]["SAC"]["EGGS"] = 0
+            p["ECO"]["SAC"]["EGGS"] += eggs
+            if p["ECO"]["SAC"]["EGGS"] >= 100:
+                self.api.g_succes(author, "PAQ", "Plein d'oeufs",
+                                  "Vous avez réussi à avoir 100 oeufs durant l'Event du 1er Avril !",
+                                  "https://i.imgur.com/R5A6Ya2.gif")
+            try:
+                await self.bot.add_reaction(message, "🥚")
+            except:
+                pass
         p["STATS"]["MSG_TOTAL"] += 1
         p["STATS"]["MSG_CHANS"][channel.id] = p["STATS"]["MSG_CHANS"][channel.id] + 1 if \
             channel.id in p["STATS"]["MSG_CHANS"] else 1
