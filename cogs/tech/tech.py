@@ -65,7 +65,8 @@ class Tech:
         Note: Vous pouvez aussi upload une image en même temps que la commande pour illustrer votre idée si besoin"""
         desc = " ".join(description)
         if not 20 <= len(desc) <= 2000:
-            await self.bot.say("**Erreur** | Votre suggestion doit faire entre *20* et *2000* caractères !")
+            await self.bot.say("**Erreur** | Votre suggestion doit faire entre *20* et *2000* caractères !\n"
+                               "Faîtes `{}help suggest` pour obtenir de l'aide.".format(ctx.prefix))
             return
         attach = ctx.message.attachments
         if len(attach) > 1:
