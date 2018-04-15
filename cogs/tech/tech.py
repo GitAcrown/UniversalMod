@@ -63,6 +63,10 @@ class Tech:
 
         [description] = La description de votre idée
         Note: Vous pouvez aussi upload une image en même temps que la commande pour illustrer votre idée si besoin"""
+        desc = " ".join(description)
+        if not 20 <= len(desc) <= 2000:
+            await self.bot.say("**Erreur** | Votre suggestion doit faire entre *20* et *2000* caractères !")
+            return
         attach = ctx.message.attachments
         if len(attach) > 1:
             await self.bot.say("**Erreur** | N'envoyez qu'un seul fichier !")
@@ -72,7 +76,6 @@ class Tech:
             url = a["url"]
         else:
             url = None
-        desc = " ".join(description)
         channel = self.bot.get_channel("435023505520721922")
         em = discord.Embed(description=desc, color=ctx.message.author.color)
         if url:
