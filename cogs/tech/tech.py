@@ -81,7 +81,7 @@ class Tech:
         em = discord.Embed(description=desc, color=ctx.message.author.color)
         if url:
             em.set_image(url=url)
-        em.set_footer(text="— {}".format(str(ctx.message.author)))
+        em.set_footer(text="— {} | Sur {}".format(str(ctx.message.author), self.bot.user.name))
         await self.bot.send_message(channel, embed=em)
         await self.bot.say("**Succès** | Votre suggestion a été envoyée !")
 
