@@ -271,7 +271,7 @@ class Finance:
         await self.bot.add_reaction(msg, "✔")
         await self.bot.add_reaction(msg, "✖")
         await asyncio.sleep(0.25)
-        rep = await self.bot.wait_for_reaction(["✔"], message=msg, timeout=30,
+        rep = await self.bot.wait_for_reaction(["✔", "✖"], message=msg, timeout=30,
                                                check=self.check, user=ctx.message.author)
         if rep is None or rep.reaction.emoji == "✖":
             await self.bot.say("**Annulé** | N'hésitez pas à refaire la commande dès que vous voudrez en ouvrir un")
@@ -320,7 +320,7 @@ class Finance:
                 await self.bot.add_reaction(msg, "✔")
                 await self.bot.add_reaction(msg, "✖")
                 await asyncio.sleep(0.25)
-                rep = await self.bot.wait_for_reaction(["✔"], message=msg, timeout=20,
+                rep = await self.bot.wait_for_reaction(["✔", "✖"], message=msg, timeout=20,
                                                        check=self.check, user=ctx.message.author)
                 if rep is None or rep.reaction.emoji == "✖":
                     await self.bot.say("**OK !** ─ Vous pourrez toujours en ouvrir un plus tard avec `{}b new` ".format(
