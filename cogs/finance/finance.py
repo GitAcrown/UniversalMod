@@ -310,7 +310,7 @@ class Finance:
                         somme = str(i.somme) if i.somme < 0 else "+{}".format(i.somme)
                     txt += "**{}** ─ *{}* [{}]\n".format(somme, i.desc, i.id)
                 em.add_field(name="Historique des transactions", value=txt)
-            em.set_footer(text="Compte ouvert le {}".format(data["CREE"]))
+            em.set_footer(text="Compte ouvert le {}".format(data.timestamp))
             await self.bot.say(embed=em)
         else:
             if user != ctx.message.author:
