@@ -50,7 +50,7 @@ class FinanceAPI:
         if server.id not in self.eco:
             self.eco[server.id] = {}
             self._save()
-        if user.id not in self.eco:
+        if user.id not in self.eco[server.id]:
             if m:  # make
                 self.new(user)
             else:
