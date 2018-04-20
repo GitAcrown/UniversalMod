@@ -126,7 +126,7 @@ class FinanceAPI:
         Renvoie une liste d'obj_transaction()"""
         user = self.get(user, True)
         if user:
-            h = user.transactions[-nombre:]
+            h = user["TRSAC"][-nombre:]
             liste = []
             for i in h:
                 liste.append(self.obj_transaction(i))
