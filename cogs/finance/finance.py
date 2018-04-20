@@ -138,10 +138,10 @@ class FinanceAPI:
         """Dépose des crédits sur le compte de la personne
 
         Renvoie un bool correspondant à l'acceptation de la transaction"""
-        user = self.get(user, True)
+        data = self.get(user, True)
         if nombre <= 0:
             return False
-        user["SOLDE"] += nombre
+        data["SOLDE"] += nombre
         t = self.apd_transaction(user, "DEPOT", nombre, raison)
         self._save()
         return t
@@ -150,11 +150,11 @@ class FinanceAPI:
         """Retire des crédits sur le compte de la personne
 
         Renvoie un bool correspondant à l'acceptation de la transaction"""
-        user = self.get(user, True)
+        data = self.get(user, True)
         if nombre < 0:
             nombre = -nombre
-        if (user["SOLDE"] - nombre) >= 0:
-            user["SOLDE"] -= nombre
+        if (data["SOLDE"] - nombre) >= 0:
+            data["SOLDE"] -= nombre
             t = self.apd_transaction(user, "PERTE", -nombre, raison)
             self._save()
             return t
@@ -164,9 +164,9 @@ class FinanceAPI:
         """Règle les crédits de la personne à cette somme précise
 
         Renvoie un bool correspondant à l'acceptation de la transaction"""
-        user = self.get(user, True)
+        data = self.get(user, True)
         if nombre > 0:
-            user["SOLDE"] = nombre
+            data["SOLDE"] = nombre
             t = self.apd_transaction(user, "SET", nombre, raison)
             self._save()
             return t
@@ -308,7 +308,8 @@ class Finance:
                         somme = "!{}".format(i.somme)
                     else:
                         somme = str(i.somme) if i.somme < 0 else "+{}".format(i.somme)
-                    txt += "**{}** ─ *{}* [{}]\n".format(somme, i.desc, i.id)
+                    desc = i.desc if len(i.desc) <= 40 else i.desc[:38] + "..."
+                    txt += "**{}** ─ *{}* [{}]\n".format(somme, desc, i.id)
                 em.add_field(name="Historique des transactions", value=txt)
             em.set_footer(text="Compte ouvert le {}".format(data.timestamp))
             await self.bot.say(embed=em)
