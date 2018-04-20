@@ -178,14 +178,14 @@ class FinanceAPI:
         Renvoie un bool correspondant à l'acceptation de la transaction"""
         if crean is debit:
             return False
-        crean = self.get(crean, True)
-        debit = self.get(debit, True)
+        debitdata = self.get(debit, True)
         if nombre > 0:
-            if (debit["SOLDE"] - nombre) >= 0:
+            if (debitdata["SOLDE"] - nombre) >= 0:
                 ta = self.perte_credits(debit, nombre, raison)
                 tb = self.depot_credits(crean, nombre, raison)
                 self.link_transactions(ta.id, tb.id)
                 return True
+            return False
         return False
 
     def get_accounts(self, server: discord.Server = None):
