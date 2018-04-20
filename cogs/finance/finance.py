@@ -313,7 +313,7 @@ class Finance:
             em.set_footer(text="Compte ouvert le {}".format(data["CREE"]))
             await self.bot.say(embed=em)
         else:
-            if user:
+            if user != ctx.message.author:
                 await self.bot.say("**Introuvable** | Cette personne ne possède pas de compte bancaire sur ce serveur")
             else:
                 msg = await self.bot.say("**Vous n'avez pas de compte bancaire** | Voulez-vous en ouvrir un ?")
