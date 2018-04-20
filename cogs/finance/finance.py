@@ -257,7 +257,7 @@ class Finance:
                 membre = ctx.message.author
             await ctx.invoke(self.compte, user=membre)
 
-    @_banque.comamnd(pass_context=True)
+    @_banque.command(pass_context=True)
     async def new(self, ctx):
         """Ouvrir un compte bancaire sur ce serveur"""
         user = ctx.message.author

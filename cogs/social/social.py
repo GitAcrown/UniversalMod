@@ -1,9 +1,9 @@
+import asyncio
 import os
 import random
 import re
 import string
 import time
-import asyncio
 from datetime import datetime
 
 import discord
@@ -519,12 +519,10 @@ class Social:
             em = discord.Embed(title=formatname, description=data["SOC"]["BIO"], color=self.api.color_disp(membre))
         if membre.avatar_url:
             em.set_thumbnail(url=membre.avatar_url)
-        eggs = data["ECO"]["SAC"]["EGGS"] if "EGGS" in data["ECO"]["SAC"] else 0
         em.add_field(name="Données", value="**ID** `{}`\n"
                                            "**Solde** `{} crédits`\n"
-                                           "`{}`\🔥\n"
-                                           "`{}`\🥚".format(membre.id, data["ECO"]["SOLDE"],
-                                                            len(data["SOC"]["FLAMMES"]), eggs))
+                                           "`{}`\🔥".format(membre.id, data["ECO"]["SOLDE"],
+                                                            len(data["SOC"]["FLAMMES"])))
         servnb = self.api.nb_servers(membre)
         timestamp = ctx.message.timestamp
         creation = (timestamp - membre.created_at).days
