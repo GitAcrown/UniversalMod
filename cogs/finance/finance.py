@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import operator
 import os
 import random
 import string
@@ -203,6 +204,15 @@ class FinanceAPI:
             return liste
         return False
 
+    def gen_palmares(self, server: discord.Server, nombre: int):
+        """Renvoie une liste ordonnée des membres les plus riches"""
+        if server.id in self.eco:
+            liste = [[self.eco[server.id][u]["SOLDE"], u] for u in self.eco[server.id]]
+            sort = sorted(liste, key=operator.itemgetter(0), reverse=True)
+            return sort[:nombre]
+        else:
+            return False
+
     def reset_server_data(self, server: discord.Server, all: bool = False):
         """Supprime les données d'un serveur"""
         if all:
@@ -383,6 +393,29 @@ class Finance:
                                    "Faîtes `{}b new` pour en ouvrir un.".format(ctx.prefix))
         else:
             await self.bot.say("**Erreur** | Le membre n'a pas de compte bancaire")
+
+    @commands.command(aliases=["classement"], pass_context=True)
+    async def palmares(self, ctx, nombre: int = 20):
+        """Affiche un classement des X membres les plus riches du serveur"""
+        server = ctx.message.server
+        palm = self.api.gen_palmares(server, nombre)
+        uid = ctx.message.author.id
+        txt = ""
+        for l in palm:
+            if len(txt) > 1980:
+                await self.bot.say("**Trop grand** | Discord n'accepte pas des messages aussi longs, "
+                                   "réduisez le nombre")
+                return
+            if l[1] == uid:
+                txt = "__**{}**__ ─ {}\n".format(server.get_member(l[1]).name, l[0])
+            else:
+                txt = "**{}** ─ {}\n".format(server.get_member(l[1]).name, l[0])
+        em = discord.Embed(title="Palmares", description=txt, color=0xf2d348)
+        em.set_footer(text="Sur le serveur {}".format(server.name))
+        try:
+            await self.bot.say(embed=em)
+        except:
+            await self.bot.say("**Erreur** | Le classement est trop long pour être envoyé, réduisez le nombre")
 
     @commands.group(name="modbanque", aliases=["modbank", "mb"], pass_context=True)
     async def _modbanque(self, ctx):
