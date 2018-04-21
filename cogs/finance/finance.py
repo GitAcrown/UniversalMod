@@ -275,6 +275,16 @@ class Finance:
             return self.sys[server.id]["MONEY_NAME"]
         return self.sys[server.id]["MONEY_NAME_PLURIEL"]  # par défaut le pluriel
 
+    def server_update(self, server: discord.Server):
+        if server.id not in self.sys:
+            self.sys[server.id] = self.sys_defaut
+            fileIO("data/finance/sys.json", "save", self.sys)
+        for cat in self.sys_defaut:
+            if cat not in self.sys[server.id]:
+                self.sys[server.id][cat] = self.sys_default[cat]
+        fileIO("data/finance/sys.json", "save", self.sys)
+        return True
+
     def check(self, reaction, user):
         return not user.bot
 
@@ -486,6 +496,7 @@ class Finance:
 
         ATTENTION : Utiliser cette commande de manière excessive interdira les membres de transférer leur argent sur d'autres serveurs"""
         get = self.api.get(user)
+        self.server_update(ctx.message.server)
         if somme < 0:
             await self.bot.say("**Erreur** | La valeur ne peut pas être négative")
             return
@@ -521,7 +532,8 @@ class Finance:
                         await self.bot.delete_message(msg)
                         return
                     elif rep.reaction.emoji == "✔":
-                        self.api.new(ctx.message.author)
+                        self.sys[ctx.message.server.id]["MODDED"] = True
+                        fileIO("data/finance/sys.json", "save", self.sys)
                         await self.bot.say("**OK !** ─ Cet avertissement ne s'affichera plus à l'avenir (sauf reset)")
                         await self.bot.delete_message(msg)
                     else:
