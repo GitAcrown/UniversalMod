@@ -135,6 +135,26 @@ class FinanceAPI:
         else:
             return False
 
+    def total_server_credits(self, server: discord.Server):
+        """Renvoie le nombre de crédits possédés au total sur le serveur"""
+        if server.id not in self.eco:
+            self.eco[server.id] = {}
+            self._save()
+        total = 0
+        for u in self.eco[server.id]:
+            total += self.eco[server.id][u]["SOLDE"]
+        return total
+
+    def enough_credits(self, user:discord.Member, need:int):
+        """Vérifie si le membre possède assez d'argent
+
+        Renvoie un bool"""
+        data = self.get(user)
+        if data:
+            if data.solde - need >= 0:
+                return True
+        return False
+
     def depot_credits(self, user: discord.Member, nombre: int, raison: str):
         """Dépose des crédits sur le compte de la personne
 
@@ -240,7 +260,8 @@ class Finance:
         self.bot = bot
         self.api = FinanceAPI(bot, "data/finance/eco.json")
         self.sys = dataIO.load_json("data/finance/sys.json")
-        self.sys_defaut = {"MONEY_NAME": "crédit", "MONEY_NAME_PLURIEL": "crédits", "MONEY_SYMBOLE": "cds"}
+        self.sys_defaut = {"MONEY_NAME": "crédit", "MONEY_NAME_PLURIEL": "crédits", "MONEY_SYMBOLE": "cds",
+                           "MODDED": False}
 
     def credits_str(self, server: discord.Server, nombre=None, reduc: bool = False):
         if server.id not in self.sys:
@@ -413,20 +434,26 @@ class Finance:
                 txt += "**{}.** **{}** ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
             n += 1
         em = discord.Embed(title="Palmares", description=txt, color=0xf2d348)
-        em.set_footer(text="Sur le serveur {}".format(server.name))
+        total = self.api.total_server_credits(server)
+        em.set_footer(text="Sur le serveur {} | Total = {}{}".format(server.name, total,
+                                                                     self.credits_str(server, total, True)))
         try:
             await self.bot.say(embed=em)
         except:
             await self.bot.say("**Erreur** | Le classement est trop long pour être envoyé, réduisez le nombre")
 
+    # ------------- JEUX & AUTRE -------------------
+
+    # ------------- MODERATION ---------------------
+
     @commands.group(name="modbanque", aliases=["modbank", "mb"], pass_context=True)
+    @checks.admin_or_permissions(ban_members=True)
     async def _modbanque(self, ctx):
-        """Opérations bancaires"""
+        """Paramètres du module Finance et commandes de modération"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
     @_modbanque.command(pass_context=True)
-    @checks.admin_or_permissions(ban_members=True)
     async def monnaie(self, ctx, *form):
         """Permet de changer le nom de la monnaie
 
@@ -454,19 +481,66 @@ class Finance:
             await self.bot.say("**Format** | *singulier*/*pluriel*/*symbole* (ou raccourcis)")
 
     @_modbanque.command(pass_context=True)
-    @checks.admin_or_permissions(ban_members=True)
-    async def setsolde(self, ctx, user: discord.Member, somme:int, *raison):
-        """Modifie le solde d'un membre"""
+    async def modif(self, ctx, user: discord.Member, type:str, somme:int, *raison):
+        """Modifie le solde d'un membre (+/-/!)
+
+        ATTENTION : Utiliser cette commande de manière excessive interdira les membres de transférer leur argent sur d'autres serveurs"""
         get = self.api.get(user)
         if somme < 0:
-            await self.bot.say("**Erreur** | Le solde ne peut pas être négatif")
+            await self.bot.say("**Erreur** | La valeur ne peut pas être négative")
             return
+        if not raison:
+            raison = "Solde modifié par {}".format(str(ctx.message.author))
+        else:
+            raison = " ".join(raison)
+        total = self.api.total_server_credits(ctx.message.server)
         if get:
-            if not raison:
-                raison = "Solde modifié par {}".format(str(ctx.message.author))
+
+            avert = False
+            if somme > int(total / 3) and type == "+":
+                avert = True
+            elif somme >= get.solde and type == "!":
+                if (somme - get.solde) > int(total /3):
+                    avert = True
+            if avert:
+                if not self.sys[ctx.message.server.id]["MODDED"]:
+                    msg = await self.bot.say("**Avertissement** ─ L'opération que vous allez réaliser est excessive "
+                                             "(>33% de l'argent total de ce serveur)\n*En faisant ça, "
+                                             "vous allez déséquilibrer l'économie sur le serveur et possiblement celle des "
+                                             "autres (à travers le transfert de crédit d'un serveur à un autre). C'est "
+                                             "pourquoi __une telle action va fermer cette possibilité aux membres de votre "
+                                             "serveur__ (jusqu'au reset des données de celui-ci)*\n"
+                                             "**Êtes-vous certain de le faire ?**")
+                    await self.bot.add_reaction(msg, "✔")
+                    await self.bot.add_reaction(msg, "✖")
+                    await asyncio.sleep(0.25)
+                    rep = await self.bot.wait_for_reaction(["✔", "✖"], message=msg, timeout=15,
+                                                           check=self.check, user=ctx.message.author)
+                    if rep is None or rep.reaction.emoji == "✖":
+                        await self.bot.say("**Opération annulée**")
+                        await self.bot.delete_message(msg)
+                        return
+                    elif rep.reaction.emoji == "✔":
+                        self.api.new(ctx.message.author)
+                        await self.bot.say("**OK !** ─ Cet avertissement ne s'affichera plus à l'avenir (sauf reset)")
+                        await self.bot.delete_message(msg)
+                    else:
+                        await self.bot.say("**Annulée** ─ La réponse n'est pas claire ...")
+                        return
+
+            if type == "+":
+                done = self.api.depot_credits(user, somme, raison)
+            elif type == "-":
+                if self.api.enough_credits(user, somme):
+                    done = self.api.perte_credits(user, somme, raison)
+                else:
+                    await self.bot.say("**Erreur** | La valeur dépasse l'argent que le membre possède")
+                    return
+            elif type == "!":
+                done = self.api.set_credits(user, somme, raison)
             else:
-                raison = " ".join(raison)
-            done = self.api.set_credits(user, somme, raison)
+                await self.bot.say("**Type inconnu** | **+** (Ajouter x), **-** (Retirer x), **!** (Régler sur x)")
+                return
             if done:
                 await self.bot.say("**Succès** | Le solde de l'utilisateur a été modifié")
             else:
@@ -475,7 +549,6 @@ class Finance:
             await self.bot.say("**Impossible** | L'utilisateur ne possède pas de compte")
 
     @_modbanque.command(pass_context=True)
-    @checks.admin_or_permissions(ban_members=True)
     async def forcenew(self, ctx, user: discord.Member):
         """Ouvre un compte de force à la place de l'utilisateur"""
         if not self.api.get(user):
@@ -485,7 +558,6 @@ class Finance:
             await self.bot.say("**Erreur** | Ce membre possède déjà un compte bancaire")
 
     @_modbanque.command(pass_context=True)
-    @checks.admin_or_permissions(ban_members=True)
     async def deleteuser(self, ctx, user: discord.Member):
         """Supprime le compte bancaire d'un membre"""
         if self.api.get(user):
@@ -495,7 +567,6 @@ class Finance:
             await self.bot.say("**Erreur** | Le membre ne possède pas de compte bancaire")
 
     @_modbanque.command(pass_context=True)
-    @checks.admin_or_permissions(ban_members=True)
     async def resetserveur(self, ctx):
         """Reset les données du serveur, y compris la monnaie et les comptes bancaires des membres"""
         self.api.reset_server_data(ctx.message.server)
