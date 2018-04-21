@@ -1,8 +1,6 @@
 import asyncio
 import os
 import random
-import re
-import aiohttp
 import zipfile
 
 import discord
@@ -84,6 +82,35 @@ class Tech:
         em.set_footer(text="— {} | Sur {}".format(str(ctx.message.author), self.bot.user.name))
         await self.bot.send_message(channel, embed=em)
         await self.bot.say("**Succès** | Votre suggestion a été envoyée !")
+
+    @commands.command(pass_context=True, hidden=True)
+    async def forcesuggest(self, ctx, user: discord.Member, *description):
+        """Suggérer une idée au développeur au nom de quelqu'un d'autre
+
+        <user> = Utilisateur
+        [description] = La description de votre idée
+        Note: Vous pouvez aussi upload une image en même temps que la commande pour illustrer votre idée si besoin"""
+        desc = " ".join(description)
+        if not 20 <= len(desc) <= 2000:
+            await self.bot.say("**Erreur** | Votre suggestion doit faire entre *20* et *2000* caractères !\n"
+                               "Faîtes `{}help suggest` pour obtenir de l'aide.".format(ctx.prefix))
+            return
+        attach = ctx.message.attachments
+        if len(attach) > 1:
+            await self.bot.say("**Erreur** | N'envoyez qu'un seul fichier !")
+            return
+        if attach:
+            a = attach[0]
+            url = a["url"]
+        else:
+            url = None
+        channel = self.bot.get_channel("435023505520721922")
+        em = discord.Embed(description=desc, color=user.color)
+        if url:
+            em.set_image(url=url)
+        em.set_footer(text="— {} | Sur {}".format(str(user), self.bot.user.name))
+        await self.bot.send_message(channel, embed=em)
+        await self.bot.say("**Succès** | La suggestion a été envoyée !")
 
 def check_folders():
     if not os.path.exists("data/tech"):
