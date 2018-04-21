@@ -400,6 +400,7 @@ class Finance:
         server = ctx.message.server
         palm = self.api.gen_palmares(server, nombre)
         uid = ctx.message.author.id
+        n = 1
         txt = ""
         for l in palm:
             if len(txt) > 1980:
@@ -407,9 +408,10 @@ class Finance:
                                    "réduisez le nombre")
                 return
             if l[1] == uid:
-                txt = "__**{}**__ ─ {}\n".format(server.get_member(l[1]).name, l[0])
+                txt += "{}.__**{}**__ ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
             else:
-                txt = "**{}** ─ {}\n".format(server.get_member(l[1]).name, l[0])
+                txt += "{}.**{}** ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
+            n += 1
         em = discord.Embed(title="Palmares", description=txt, color=0xf2d348)
         em.set_footer(text="Sur le serveur {}".format(server.name))
         try:
