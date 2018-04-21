@@ -31,6 +31,8 @@ class FinanceAPI:
 
         Renvoie True si créé, False si déjà présent"""
         server = user.server
+        if server.id == "321734343695532033":
+            return False
         if server.id not in self.eco:
             self.eco[server.id] = {}
         if user.id not in self.eco:
@@ -319,9 +321,13 @@ class Finance:
             await self.bot.delete_message(msg)
             return
         elif rep.reaction.emoji == "✔":
-            self.api.new(ctx.message.author)
-            await self.bot.say("**Créé** | Ton compte a été ouvert avec succès {} !".format(
+            done = self.api.new(ctx.message.author)
+            if done:
+                await self.bot.say("**Créé** | Ton compte a été ouvert avec succès {} !".format(
                 ctx.message.author.name))
+            else:
+                await self.bot.say("**Erreur** | Le compte n'a pas pu être créé, "
+                                   "le serveur est probablement sur *blacklist*")
             await self.bot.delete_message(msg)
             return
         else:
@@ -370,9 +376,13 @@ class Finance:
                     await self.bot.delete_message(msg)
                     return
                 elif rep.reaction.emoji == "✔":
-                    self.api.new(ctx.message.author)
-                    await self.bot.say("**Créé** | Ton compte a été ouvert avec succès {} !".format(
-                        ctx.message.author.name))
+                    done = self.api.new(ctx.message.author)
+                    if done:
+                        await self.bot.say("**Créé** | Ton compte a été ouvert avec succès {} !".format(
+                            ctx.message.author.name))
+                    else:
+                        await self.bot.say("**Erreur** | Le compte n'a pas pu être créé, "
+                                           "le serveur est probablement sur *blacklist*")
                     await self.bot.delete_message(msg)
                     return
                 else:
