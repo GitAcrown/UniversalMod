@@ -508,18 +508,18 @@ class Finance:
         if get:
 
             avert = False
-            if somme > int(total / 3) and type == "+":
+            if somme > int(total / 2) and type == "+":
                 avert = True
             elif somme >= get.solde and type == "!":
-                if (somme - get.solde) > int(total /3):
+                if (somme - get.solde) > int(total /2):
                     avert = True
             if avert:
                 if not self.sys[ctx.message.server.id]["MODDED"]:
                     msg = await self.bot.say("**Avertissement** ─ L'opération que vous allez réaliser est excessive "
-                                             "(>33% de l'argent total de ce serveur)\n*En faisant ça, "
+                                             "(>50% de l'argent total de ce serveur)\n*En faisant ça, "
                                              "vous allez déséquilibrer l'économie sur le serveur et possiblement celle des "
                                              "autres (à travers le transfert de crédit d'un serveur à un autre). C'est "
-                                             "pourquoi __une telle action va fermer cette possibilité aux membres de votre "
+                                             "pourquoi_une telle action va fermer cette possibilité aux membres de votre "
                                              "serveur__ (jusqu'au reset des données de celui-ci)*\n"
                                              "**Êtes-vous certain de le faire ?**")
                     await self.bot.add_reaction(msg, "✔")
