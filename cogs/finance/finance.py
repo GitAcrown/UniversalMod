@@ -186,7 +186,7 @@ class FinanceAPI:
 
         Renvoie un bool correspondant à l'acceptation de la transaction"""
         data = self.get(user, True)
-        if nombre > 0:
+        if nombre >= 0:
             data["SOLDE"] = nombre
             t = self.apd_transaction(user, "SET", nombre, raison)
             self._save()
