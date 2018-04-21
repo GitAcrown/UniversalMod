@@ -408,9 +408,9 @@ class Finance:
                                    "réduisez le nombre")
                 return
             if l[1] == uid:
-                txt += "{}.__**{}**__ ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
+                txt += "**{}.** __**{}**__ ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
             else:
-                txt += "{}.**{}** ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
+                txt += "**{}.** **{}** ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
             n += 1
         em = discord.Embed(title="Palmares", description=txt, color=0xf2d348)
         em.set_footer(text="Sur le serveur {}".format(server.name))
