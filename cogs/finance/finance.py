@@ -281,7 +281,7 @@ class Finance:
             fileIO("data/finance/sys.json", "save", self.sys)
         for cat in self.sys_defaut:
             if cat not in self.sys[server.id]:
-                self.sys[server.id][cat] = self.sys_default[cat]
+                self.sys[server.id][cat] = self.sys_defaut[cat]
         fileIO("data/finance/sys.json", "save", self.sys)
         return True
 
