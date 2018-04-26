@@ -264,6 +264,8 @@ class Assist:
                     return  # Calcule un truc (Simpy)
                 if await self.execute(message, "wikipedia {}", r"(?:re)?cherche (.*)"):
                     return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
+                if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
+                    return # Propose une aide sur la commande
 
     async def react(self, reaction, user):
         message = reaction.message
