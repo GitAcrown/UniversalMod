@@ -188,6 +188,7 @@ class Assist:
                 if len(args) > count:
                     args = args[:count]
                 args = tuple(args[:count])
+            await self.bot.send_message(message.channel, "{}/{}".format(args, count))
             command = commandstr % args
             prefix = self.bot.settings.get_prefixes(server)[0]
             new_message = deepcopy(message)
