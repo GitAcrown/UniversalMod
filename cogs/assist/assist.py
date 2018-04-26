@@ -140,14 +140,16 @@ class Assist:
     #========== COMMANDES-FONCTIONS ============
 
     @commands.command(pass_context=True)
-    async def calcule(self, ctx, calcul: str):
+    async def calcule(self, ctx, *calcul):
         """Permet de calculer une expression donnée"""
+        calcul = " ".join(calcul)
         em = discord.Embed(title=calcul, description=str(sympify(calcul)), color=ctx.message.author.color)
         await self.bot.say(embed=em)
 
     @commands.command(pass_context=True)
-    async def wikipedia(self, ctx, recherche: str):
+    async def wikipedia(self, ctx, *recherche):
         """Cherche quelque chose sur Wikipedia (FR ou EN)"""
+        recherche = " ".join(recherche)
         r = self.wiki(recherche)
         if type(r) is str:
             await self.bot.say(r)
