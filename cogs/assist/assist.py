@@ -183,9 +183,9 @@ class Assist:
             if count > 1:
                 args = args[0]
             else:
-                while args < count:
+                while len(args) < count:
                     args.append("")
-                if args > count:
+                if len(args) > count:
                     args = args[:count]
                 args = tuple(args[:count])
             command = commandstr % args
