@@ -239,14 +239,14 @@ class Assist:
             if content.startswith("§") or content.lower().startswith("spoil:"):
                 balise = "spoil:" if content.lower().startswith("spoil:") else "§"
                 await self.bot.delete_message(message)
-                self.sys[server.id]["SPOILS"][message.id] = {"TEXTE": content.replace(balise, ""),
-                                                             "AUTEUR": message.author.name,
-                                                             "AUTEURIMG": message.author.avatar_url,
-                                                             "COLOR": message.author.color}
                 em = discord.Embed(color=message.author.color)
                 em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                 em.set_footer(text="👁 ─ Voir le spoil")
                 msg = await self.bot.send_message(channel, embed=em)
+                self.sys[server.id]["SPOILS"][msg.id] = {"TEXTE": content.replace(balise, ""),
+                                                             "AUTEUR": message.author.name,
+                                                             "AUTEURIMG": message.author.avatar_url,
+                                                             "COLOR": message.author.color}
                 await self.bot.add_reaction(msg, "👁")
                 return
 
