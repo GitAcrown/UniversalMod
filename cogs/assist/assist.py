@@ -208,6 +208,8 @@ class Assist:
                     self.sys[server.id]["AFK"].remove([afk[0], afk[1], afk[2]])
             if content.lower().startswith("afk"):
                 raison = content.lower().replace("afk", "", 1)
+                if raison.startswith(" "):
+                    raison = raison[1:]
                 self.sys[server.id]["AFK"].append([author.id, author.name, raison])
             if message.mentions:
                 for m in message.mentions:
