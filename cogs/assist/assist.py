@@ -169,8 +169,7 @@ class Assist:
         msg = msg.replace("`", "")
         output = re.compile(regex, re.IGNORECASE | re.DOTALL).findall(msg)
         if output:
-
-            return [i for i in output[0] if i]
+            return list([i for i in output[0] if i])
         else:
             return False
 
