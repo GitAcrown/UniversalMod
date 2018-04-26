@@ -180,7 +180,7 @@ class Assist:
         count = commandstr.count("%s")
         args = self._decode(message, regex)
         if args:
-            if count > 1:
+            if count == 1:
                 args = args[0]
             else:
                 while len(args) < count:
