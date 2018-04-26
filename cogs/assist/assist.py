@@ -108,7 +108,7 @@ class Assist:
                     resum = "Contenu indisponible"
                 if len(resum) + len(r) > 1995:
                     resum = self.redux(resum, limite=1950)
-                em = discord.Embed(title=r.capitalize(), description=resum)
+                em = discord.Embed(title=r.capitalize(), description=resum, color=0xeeeeee)
                 em.set_thumbnail(url=image)
                 em.set_footer(text="Similaire: {}".format(", ".join(s[0])))
                 return em
@@ -271,9 +271,7 @@ class Assist:
             fileIO("data/assist/sys.json", "save", self.sys)
         if reaction.emoji == "👁":
             if not user.bot:
-                await self.bot.send_message(message.channel, "Emoji détecté (Debug)")
                 if message.id in self.sys[server.id]["SPOILS"]:
-                    await self.bot.send_message(message.channel, "Message reconnu (Debug)")
                     try:
                         await self.bot.remove_reaction(message, "👁", user)
                     except:
