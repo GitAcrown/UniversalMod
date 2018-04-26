@@ -176,11 +176,18 @@ class Assist:
     async def execute(self, message: discord.Message, commandstr: str, regex):
         """Transforme un message en commande et l'exécute (pour les commandes simples)"""
         server = message.channel.server
-        commandstr = commandstr.replace("{}", "%s") # Aucazou
+        commandstr = commandstr.replace("{}", "%s")  # Aucazou
         count = commandstr.count("%s")
         args = self._decode(message, regex)
         if args:
-            args = tuple(args[:count])
+            if count > 1:
+                args = args[0]
+            else:
+                while args < count:
+                    args.append("")
+                if args > count:
+                    args = args[:count]
+                args = tuple(args[:count])
             command = commandstr % args
             prefix = self.bot.settings.get_prefixes(server)[0]
             new_message = deepcopy(message)
