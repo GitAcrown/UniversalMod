@@ -254,7 +254,7 @@ class Assist:
             fileIO("data/assist/sys.json", "save", self.sys)
         if reaction.emoji == "📩":
             if message.id in self.sys[server.id]["SPOILS"]:
-                self.bot.remove_reaction(message, "📩", user)
+                await self.bot.remove_reaction(message, "📩", user)
                 param = self.sys[server.id]["SPOILS"][message.id]
                 em = discord.Embed(color=param["COLOR"], description=param["TEXTE"])
                 em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])

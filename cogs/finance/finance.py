@@ -464,7 +464,32 @@ class Finance:
 
     # ------------- JEUX & AUTRE -------------------
 
-    # ------------- MODERATION ---------------------
+    @commands.command(aliases=["mas"], pass_context=True)
+    async def slot(self, ctx, offre:int):
+        """Jouer à la machine à sous
+
+        L'offre doit être comprise entre 10 et 100"""
+        user = ctx.message.author
+        if not 10 <= offre <= 100:
+            await self.bot.say("**Offre invalide** | Elle doit être comprise entre 10 et 100.")
+        data = self.api.get(user)
+        if data:
+            if self.api.enough_credits(user, offre):
+                roue = [":zap:", ":gem:", ":cherries:", ":strawberry:", ":watermelon:", ":tangerine:", ":lemon:",
+                        ":four_leaf_clover:", ":100:"]
+                plus_after = [":zap:", ":gem:", ":cherries:"]
+                plus_before = [":lemon:", ":four_leaf_clover:", ":100:"]
+                roue = plus_before + roue + plus_after
+                cols = []
+                for i in range(3):
+                    n = random.randint(3, 11)
+                    cols.append([roue[n - 1], roue[n], roue[n + 1]])
+                    if i is 1:
+                        centre = [roue[n - 1], roue[n], roue[n + 1]
+                disp = " {}|{}|{}\n".format()
+
+
+# ------------- MODERATION ---------------------
 
     @commands.group(name="modbanque", aliases=["modbank", "mb"], pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
