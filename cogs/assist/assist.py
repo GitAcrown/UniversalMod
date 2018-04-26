@@ -143,7 +143,7 @@ class Assist:
     async def calcule(self, ctx, *calcul):
         """Permet de calculer une expression donnée"""
         calcul = " ".join(calcul)
-        em = discord.Embed(title=calcul, description=str(sympify(calcul)), color=ctx.message.author.color)
+        em = discord.Embed(title=calcul, description="`" + str(sympify(calcul)) + "`", color=ctx.message.author.color)
         await self.bot.say(embed=em)
 
     @commands.command(pass_context=True)
@@ -205,6 +205,8 @@ class Assist:
             return
         server = channel.server
         author = message.author
+        if author.bot:
+            return
         content = message.content
         if "@everyone" in content or "@here" in content:  # Pour les petits malins
             content = content.replace("@everyone", "everyone")
@@ -258,7 +260,7 @@ class Assist:
                     return  # Ban un membre
                 if await self.execute(message, "kick {}", r"kick <@(.\d+)>"):
                     return  # Kick un membre
-                if await self.execute(message, "calcul {}", r"(?:combien|calcule*) (?:font|fait)?(.*)"):
+                if await self.execute(message, "calcule {}", r"(?:combien|calcule*) (?:font|fait)?(.*)"):
                     return  # Calcule un truc (Simpy)
                 if await self.execute(message, "wikipedia {}", r"(?:re)?cherche (.*)"):
                     return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
