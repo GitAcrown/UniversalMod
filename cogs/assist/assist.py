@@ -169,16 +169,19 @@ class Assist:
         msg = msg.replace("`", "")
         output = re.compile(regex, re.IGNORECASE | re.DOTALL).findall(msg)
         if output:
-            return tuple(output[0])
+
+            return [i for i in output[0] if i]
         else:
             return False
 
     async def execute(self, message: discord.Message, commandstr: str, regex):
         """Transforme un message en commande et l'exécute (pour les commandes simples)"""
         server = message.channel.server
-        commandstr = commandstr.replace("{}", "%s")  # Aucazou
+        commandstr = commandstr.replace("{}", "%s") # Aucazou
+        count = commandstr.count("%s")
         args = self._decode(message, regex)
         if args:
+            args = tuple(args[:count])
             command = commandstr % args
             prefix = self.bot.settings.get_prefixes(server)[0]
             new_message = deepcopy(message)
@@ -225,12 +228,13 @@ class Assist:
                                                                      "Ce membre sera de retour sous peu".format(afk[1]))
 
         if self.sys[server.id]["ANTI-SPOIL"]:
-            if content.startswith("§"):
-                self.sys[server.id]["SPOILS"][message.id] = {"TEXTE": content.replace("§", ""),
+            if content.startswith("§") or content.lower().startswith("spoil:"):
+                balise = "spoil:" if content.lower().startswith("spoil:") else "§"
+                await self.bot.delete_message(message)
+                self.sys[server.id]["SPOILS"][message.id] = {"TEXTE": content.replace(balise, ""),
                                                              "AUTEUR": message.author.name,
                                                              "AUTEURIMG": message.author.avatar_url,
                                                              "COLOR": message.author.color}
-                await self.bot.delete_message(message)
                 em = discord.Embed(color=message.author.color)
                 em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                 em.set_footer(text="📩 ─ Réveler le spoil")
@@ -258,22 +262,26 @@ class Assist:
             self.sys[server.id] = self.def_sys
             fileIO("data/assist/sys.json", "save", self.sys)
         if reaction.emoji == "📩":
-            if message.id in self.sys[server.id]["SPOILS"]:
-                await self.bot.remove_reaction(message, "📩", user)
-                param = self.sys[server.id]["SPOILS"][message.id]
-                em = discord.Embed(color=param["COLOR"], description=param["TEXTE"])
-                em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
-                await self.bot.send_message(user, embed=em)
-        
+            if not user.bot:
+                if message.id in self.sys[server.id]["SPOILS"]:
+                    await self.bot.remove_reaction(message, "📩", user)
+                    param = self.sys[server.id]["SPOILS"][message.id]
+                    em = discord.Embed(color=param["COLOR"], description=param["TEXTE"])
+                    em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
+                    await self.bot.send_message(user, embed=em)
+
+
 def check_folders():
     if not os.path.exists("data/assist"):
         print("Creation du fichier assist ...")
         os.makedirs("data/assist")
 
+
 def check_files():
     if not os.path.isfile("data/assist/sys.json"):
         print("Création de assist/sys.json ...")
         fileIO("data/assist/sys.json", "save", {})
+
 
 def setup(bot):
     check_folders()
