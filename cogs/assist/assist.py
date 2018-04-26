@@ -179,6 +179,7 @@ class Assist:
         commandstr = commandstr.replace("{}", "%s")  # Aucazou
         count = commandstr.count("%s")
         args = self._decode(message, regex)
+        total = args
         if args:
             if count == 1:
                 args = args[0]
@@ -188,7 +189,7 @@ class Assist:
                 if len(args) > count:
                     args = args[:count]
                 args = tuple(args[:count])
-            await self.bot.send_message(message.channel, "{}/{}".format(args, count))
+            await self.bot.send_message(message.channel, "{}/{}/{}".format(args, count, total))
             command = commandstr % args
             prefix = self.bot.settings.get_prefixes(server)[0]
             new_message = deepcopy(message)
