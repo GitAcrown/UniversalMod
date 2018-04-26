@@ -245,9 +245,9 @@ class Assist:
                                                              "COLOR": message.author.color}
                 em = discord.Embed(color=message.author.color)
                 em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-                em.set_footer(text="📩 ─ Réveler le spoil")
+                em.set_footer(text="👁 ─ Voir le spoil")
                 msg = await self.bot.send_message(channel, embed=em)
-                await self.bot.add_reaction(msg, "📩")
+                await self.bot.add_reaction(msg, "👁")
                 return
 
         if self.sys[server.id]["ASSIST"]:  # SYSTEME ASSISTANT
@@ -269,14 +269,22 @@ class Assist:
         if server.id not in self.sys:
             self.sys[server.id] = self.def_sys
             fileIO("data/assist/sys.json", "save", self.sys)
-        if reaction.emoji == "📩":
+        if reaction.emoji == "👁":
             if not user.bot:
+                await self.bot.send_message(message.channel, "Emoji détecté (Debug)")
                 if message.id in self.sys[server.id]["SPOILS"]:
-                    await self.bot.remove_reaction(message, "📩", user)
+                    await self.bot.send_message(message.channel, "Message reconnu (Debug)")
+                    try:
+                        await self.bot.remove_reaction(message, "👁", user)
+                    except:
+                        pass
                     param = self.sys[server.id]["SPOILS"][message.id]
                     em = discord.Embed(color=param["COLOR"], description=param["TEXTE"])
                     em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
-                    await self.bot.send_message(user, embed=em)
+                    try:
+                        await self.bot.send_message(user, embed=em)
+                    except:
+                        print("SPOIL - Impossible d'envoyer un message à {} (Bloqué)".format(str(user)))
 
 
 def check_folders():
