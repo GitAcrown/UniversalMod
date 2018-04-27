@@ -464,11 +464,11 @@ class Finance:
 
     # ------------- JEUX & AUTRE -------------------
 
-    """@commands.command(aliases=["mas"], pass_context=True)
+    @commands.command(aliases=["mas"], pass_context=True)
     async def slot(self, ctx, offre:int):
-        Jouer à la machine à sous
+        """Jouer à la machine à sous
 
-        L'offre doit être comprise entre 10 et 100
+        L'offre doit être comprise entre 10 et 100"""
         user = ctx.message.author
         if not 10 <= offre <= 100:
             await self.bot.say("**Offre invalide** | Elle doit être comprise entre 10 et 100.")
@@ -485,9 +485,15 @@ class Finance:
                     n = random.randint(3, 11)
                     cols.append([roue[n - 1], roue[n], roue[n + 1]])
                     if i is 1:
-                        centre = [roue[n - 1], roue[n], roue[n + 1]
-                disp = " {}|{}|{}\n".format"""
-
+                        centre = [roue[n - 1], roue[n], roue[n + 1]]
+                disp =  " {}|{}|{}\n".format(cols[0][0], cols[0][1], cols[0][2])
+                disp += "**>**{}**|**{}**|**{}\n".format(cols[1][0], cols[1][1], cols[1][2])
+                disp += " {}|{}|{}\n".format(cols[2][0], cols[2][1], cols[2][2])
+                c = lambda emoji: centre.count(emoji)
+                if c(":100:") == 3:
+                    offre *= 100
+                elif c(":zap:") == 3:
+                    offre *=
 
 # ------------- MODERATION ---------------------
 

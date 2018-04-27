@@ -1,4 +1,5 @@
 import os
+import random
 import re
 from copy import deepcopy
 
@@ -239,16 +240,17 @@ class Assist:
 
         if self.sys[server.id]["ANTI-SPOIL"]:
             if content.startswith("§") or content.lower().startswith("spoil:"):
+                rs = lambda: random.randint(0, 255)
+                color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
                 balise = "spoil:" if content.lower().startswith("spoil:") else "§"
                 await self.bot.delete_message(message)
-                em = discord.Embed(color=message.author.color)
+                em = discord.Embed(color=color)
                 em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                 em.set_footer(text="👁 ─ Voir le spoil")
                 msg = await self.bot.send_message(channel, embed=em)
                 self.sys[server.id]["SPOILS"][msg.id] = {"TEXTE": content.replace(balise, ""),
                                                              "AUTEUR": message.author.name,
-                                                             "AUTEURIMG": message.author.avatar_url,
-                                                             "COLOR": message.author.color}
+                                                             "AUTEURIMG": message.author.avatar_url}
                 await self.bot.add_reaction(msg, "👁")
                 return
 
@@ -265,7 +267,7 @@ class Assist:
                 if await self.execute(message, "wikipedia {}", r"(?:re)?cherche (.*)"):
                     return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
                 if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
-                    return # Propose une aide sur la commande
+                    return  # Propose une aide sur la commande
 
     async def react(self, reaction, user):
         message = reaction.message
@@ -280,8 +282,10 @@ class Assist:
                         await self.bot.remove_reaction(message, "👁", user)
                     except:
                         pass
+                    rs = lambda: random.randint(0, 255)
+                    color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
                     param = self.sys[server.id]["SPOILS"][message.id]
-                    em = discord.Embed(color=param["COLOR"], description=param["TEXTE"])
+                    em = discord.Embed(color=color, description=param["TEXTE"])
                     em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
                     try:
                         await self.bot.send_message(user, embed=em)
