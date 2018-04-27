@@ -464,12 +464,14 @@ class Finance:
 
     # ------------- JEUX & AUTRE -------------------
 
-    @commands.command(aliases=["mas"], pass_context=True)
-    async def slot(self, ctx, offre:int):
-        """Jouer à la machine à sous
+    """@commands.command(aliases=["mas"], pass_context=True)
+    async def slot(self, ctx, offre:int = None):
+        Jouer à la machine à sous
 
-        L'offre doit être comprise entre 10 et 100"""
+        L'offre doit être comprise entre 10 et 100
         user = ctx.message.author
+        if not offre:
+            return  # TODO Afficher les gains possibles
         if not 10 <= offre <= 100:
             await self.bot.say("**Offre invalide** | Elle doit être comprise entre 10 et 100.")
         data = self.api.get(user)
@@ -493,7 +495,8 @@ class Finance:
                 if c(":100:") == 3:
                     offre *= 100
                 elif c(":zap:") == 3:
-                    offre *=
+                    offre *= 30"""
+
 
 # ------------- MODERATION ---------------------
 
