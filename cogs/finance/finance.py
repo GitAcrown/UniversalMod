@@ -464,16 +464,28 @@ class Finance:
 
     # ------------- JEUX & AUTRE -------------------
 
-    """@commands.command(aliases=["mas"], pass_context=True)
-    async def slot(self, ctx, offre:int = None):
-        Jouer à la machine à sous
+    @commands.command(aliases=["mas"], pass_context=True)
+    async def slot(self, ctx, offre: int = None):
+        """Jouer à la machine à sous
 
-        L'offre doit être comprise entre 10 et 100
+        L'offre doit être comprise entre 10 et 100"""
         user = ctx.message.author
+        server = ctx.message.server
         if not offre:
-            return  # TODO Afficher les gains possibles
+            txt = ":100: x3 = Offre x 100\n" \
+                  ":gem: x3 = Offre x 10\n" \
+                  ":gem: x2 = Offre + 200" \
+                  ":four_leaf_clover: x3 = Offre x 5\n" \
+                  ":four_leaf_clover: x2 = Offre + 50" \
+                  "fruit x3 = Offre x 3\n" \
+                  "fruit x2 = Offre x 2\n" \
+                  ":zap: x1 ou x2 = Perte immédiate\n" \
+                  ":zap: x3 = Offre x 300"
+            em = discord.Embed(title="Gains possibles")
+            await self.bot.say(embed=em)
         if not 10 <= offre <= 100:
             await self.bot.say("**Offre invalide** | Elle doit être comprise entre 10 et 100.")
+        base = offre
         data = self.api.get(user)
         if data:
             if self.api.enough_credits(user, offre):
@@ -482,21 +494,69 @@ class Finance:
                 plus_after = [":zap:", ":gem:", ":cherries:"]
                 plus_before = [":lemon:", ":four_leaf_clover:", ":100:"]
                 roue = plus_before + roue + plus_after
-                cols = []
+                cols = [":cherries:", ":strawberry:", ":watermelon:", ":tangerine:", ":lemon:"]
                 for i in range(3):
                     n = random.randint(3, 11)
                     cols.append([roue[n - 1], roue[n], roue[n + 1]])
-                    if i is 1:
-                        centre = [roue[n - 1], roue[n], roue[n + 1]]
-                disp =  " {}|{}|{}\n".format(cols[0][0], cols[0][1], cols[0][2])
-                disp += "**>**{}**|**{}**|**{}\n".format(cols[1][0], cols[1][1], cols[1][2])
-                disp += " {}|{}|{}\n".format(cols[2][0], cols[2][1], cols[2][2])
-                c = lambda emoji: centre.count(emoji)
-                if c(":100:") == 3:
+                centre = [cols[0][1], cols[1][1], cols[1]]
+                disp = " {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
+                disp += "**>**{}**|**{}**|**{}\n".format(cols[0][1], cols[1][1], cols[2][1])
+                disp += " {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
+                c = lambda x: roue.count(":" + x + ":")
+                if ":zap:" in centre:
+                    if c("zap") == 3:
+                        offre *= 300
+                        msg = "3x :zap: ─ Tu gagnes **{}** {}"
+                    else:
+                        offre = 0
+                        msg = "Tu t'es fait :zap: ─ Tu gagnes rien !"
+                elif c("100") == 3:
                     offre *= 100
-                elif c(":zap:") == 3:
-                    offre *= 30"""
-
+                    msg = "3x :100: ─ Tu gagnes **{}** {}"
+                elif c("gem") == 3:
+                    offre *= 10
+                    msg = "3x :gem: ─ Tu gagnes **{}** {}"
+                elif c("gem") == 2:
+                    offre += 200
+                    msg = "2x :gem: ─ Tu gagnes **{}** {}"
+                elif c("four_leaf_clover") == 3:
+                    offre *= 5
+                    msg = "3x :four_leaf_clover: ─ Tu gagnes **{}** {}"
+                elif c("four_leaf_clover") == 2:
+                    offre += 50
+                    msg = "2x :four_leaf_clover: ─ Tu gagnes **{}** {}"
+                elif c("cherries") == 3 or c("strawberry") == 3 or c("watermelon") == 3 or c("tangerine") == 3 or c(
+                        "lemon") == 3:
+                    offre *= 3
+                    msg = "3x un fruit ─ Tu gagnes **{}** {}"
+                elif c("cherries") == 2 or c("strawberry") == 2 or c("watermelon") == 2 or c("tangerine") == 2 or c(
+                        "lemon") == 2:
+                    offre *= 2
+                    msg = "2x un fruit ─ Tu gagnes **{}** {}"
+                else:
+                    offre = 0
+                    msg = "Perdu ─ Tu perds ta mise !"
+                intros = ["Ça tourne", "Croisez les doigts", "Peut-être cette fois-ci", "Alleeeezzz",
+                          "Ah les jeux d'argent", "Les dés sont lancés", "Il vous faut un peu de CHANCE"]
+                intro = "**{}** •••".format(random.choice(intros))
+                em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=intro, color=0x4286f4)
+                m = await self.bot.say(embed=em)
+                await asyncio.sleep(3)
+                if "{}" in msg:
+                    msg.format(offre, self.credits_str(server, offre, True))
+                if offre > 0:
+                    gain = offre - base
+                    self.api.depot_credits(user, gain, "Gain machine à sous")
+                    em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp, color=0x41f468)
+                else:
+                    self.api.perte_credits(user, base, "Perte machine à sous")
+                    em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp, color=0xf44141)
+                em.set_footer(text=msg)
+                await self.bot.edit_message(m, embed=em)
+            else:
+                await self.bot.say("**Solde insuffisant** ─ Réduisez votre offre si possible")
+        else:
+            await self.bot.say("**Vous n'avez pas de compte** ─ Ouvrez-en un avec `{}b new`".format(ctx.prefix))
 
 # ------------- MODERATION ---------------------
 
