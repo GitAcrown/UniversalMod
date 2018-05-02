@@ -474,11 +474,11 @@ class Finance:
         if not offre:
             txt = ":100: x3 = Offre x 100\n" \
                   ":gem: x3 = Offre x 10\n" \
-                  ":gem: x2 = Offre + 100" \
+                  ":gem: x2 = Offre + 100\n" \
                   ":four_leaf_clover: x3 = Offre x 5\n" \
                   ":four_leaf_clover: x2 = Offre + 50\n" \
-                  "fruit x3 = Offre x 3\n" \
-                  "fruit x2 = Offre x 2\n" \
+                  "**fruit** x3 = Offre x 3\n" \
+                  "**fruit** x2 = Offre x 2\n" \
                   ":zap: x1 ou x2 = Perte immédiate\n" \
                   ":zap: x3 = Offre x 300"
             em = discord.Embed(title="Gains possibles", description=txt)
@@ -550,8 +550,7 @@ class Finance:
                     else:
                         await self.bot.edit_message(m, embed=em)
                     await asyncio.sleep(1)
-                if "{}" in msg:
-                    msg.format(offre, self.credits_str(server, offre, True))
+                msg.format(offre, self.credits_str(server, offre, True))
                 if offre > 0:
                     gain = offre - base
                     self.api.depot_credits(user, gain, "Gain machine à sous")
