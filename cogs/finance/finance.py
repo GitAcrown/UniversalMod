@@ -500,9 +500,9 @@ class Finance:
                     n = random.randint(3, 11)
                     cols.append([roue[n - 1], roue[n], roue[n + 1]])
                 centre = [cols[0][1], cols[1][1], cols[1]]
-                disp = "   {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
-                disp += ">{}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
-                disp += "   {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
+                disp = "    {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
+                disp += "**>**{}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
+                disp += "  {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
                 c = lambda x: roue.count(":" + x + ":")
                 if ":zap:" in centre:
                     if c("zap") == 3:
@@ -550,7 +550,6 @@ class Finance:
                     else:
                         await self.bot.edit_message(m, embed=em)
                     await asyncio.sleep(1)
-                msg.format(offre, self.credits_str(server, offre, True))
                 if offre > 0:
                     gain = offre - base
                     self.api.depot_credits(user, gain, "Gain machine à sous")
@@ -558,7 +557,7 @@ class Finance:
                 else:
                     self.api.perte_credits(user, base, "Perte machine à sous")
                     em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp, color=0xf44141)
-                em.set_footer(text=msg)
+                em.set_footer(text=msg.format(offre, self.credits_str(server, offre, True)))
                 await self.bot.edit_message(m, embed=em)
             else:
                 await self.bot.say("**Solde insuffisant** ─ Réduisez votre offre si possible")
