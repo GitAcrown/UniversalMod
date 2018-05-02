@@ -468,7 +468,7 @@ class Finance:
     async def slot(self, ctx, offre: int = None):
         """Jouer à la machine à sous
 
-        L'offre doit être comprise entre 10 et 100"""
+        L'offre doit être comprise entre 5 et 200"""
         user = ctx.message.author
         server = ctx.message.server
         if not offre:
@@ -484,8 +484,9 @@ class Finance:
             em = discord.Embed(title="Gains possibles", description=txt)
             await self.bot.say(embed=em)
             return
-        if not 10 <= offre <= 100:
-            await self.bot.say("**Offre invalide** | Elle doit être comprise entre 10 et 100.")
+        if not 5 <= offre <= 200:
+            await self.bot.say("**Offre invalide** | Elle doit être comprise entre 5 et 200.")
+            return
         base = offre
         data = self.api.get(user)
         if data:
