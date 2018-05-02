@@ -481,8 +481,9 @@ class Finance:
                   "fruit x2 = Offre x 2\n" \
                   ":zap: x1 ou x2 = Perte immédiate\n" \
                   ":zap: x3 = Offre x 300"
-            em = discord.Embed(title="Gains possibles")
+            em = discord.Embed(title="Gains possibles", description=txt)
             await self.bot.say(embed=em)
+            return
         if not 10 <= offre <= 100:
             await self.bot.say("**Offre invalide** | Elle doit être comprise entre 10 et 100.")
         base = offre
