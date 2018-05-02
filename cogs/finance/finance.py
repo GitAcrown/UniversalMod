@@ -476,7 +476,7 @@ class Finance:
                   ":gem: x3 = Offre x 10\n" \
                   ":gem: x2 = Offre + 100" \
                   ":four_leaf_clover: x3 = Offre x 5\n" \
-                  ":four_leaf_clover: x2 = Offre + 50" \
+                  ":four_leaf_clover: x2 = Offre + 50\n" \
                   "fruit x3 = Offre x 3\n" \
                   "fruit x2 = Offre x 2\n" \
                   ":zap: x1 ou x2 = Perte immédiate\n" \
@@ -500,32 +500,32 @@ class Finance:
                     n = random.randint(3, 11)
                     cols.append([roue[n - 1], roue[n], roue[n + 1]])
                 centre = [cols[0][1], cols[1][1], cols[1]]
-                disp = "  {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
+                disp = "   {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
                 disp += ">{}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
-                disp += "  {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
+                disp += "   {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
                 c = lambda x: roue.count(":" + x + ":")
                 if ":zap:" in centre:
                     if c("zap") == 3:
                         offre *= 300
-                        msg = "3x :zap: ─ Tu gagnes **{}** {}"
+                        msg = "3x ⚡ ─ Tu gagnes **{}** {}"
                     else:
                         offre = 0
-                        msg = "Tu t'es fait :zap: ─ Tu gagnes rien !"
+                        msg = "Tu t'es fait ⚡ ─ Tu gagnes rien !"
                 elif c("100") == 3:
                     offre *= 100
-                    msg = "3x :100: ─ Tu gagnes **{}** {}"
+                    msg = "3x 💯 ─ Tu gagnes **{}** {}"
                 elif c("gem") == 3:
                     offre *= 10
-                    msg = "3x :gem: ─ Tu gagnes **{}** {}"
+                    msg = "3x 💎 ─ Tu gagnes **{}** {}"
                 elif c("gem") == 2:
                     offre += 100
-                    msg = "2x :gem: ─ Tu gagnes **{}** {}"
+                    msg = "2x 💎 ─ Tu gagnes **{}** {}"
                 elif c("four_leaf_clover") == 3:
                     offre *= 5
-                    msg = "3x :four_leaf_clover: ─ Tu gagnes **{}** {}"
+                    msg = "3x 🍀 ─ Tu gagnes **{}** {}"
                 elif c("four_leaf_clover") == 2:
                     offre += 50
-                    msg = "2x :four_leaf_clover: ─ Tu gagnes **{}** {}"
+                    msg = "2x 🍀 ─ Tu gagnes **{}** {}"
                 elif c("cherries") == 3 or c("strawberry") == 3 or c("watermelon") == 3 or c("tangerine") == 3 or c(
                         "lemon") == 3:
                     offre *= 3
@@ -539,10 +539,17 @@ class Finance:
                     msg = "Perdu ─ Tu perds ta mise !"
                 intros = ["Ça tourne", "Croisez les doigts", "Peut-être cette fois-ci", "Alleeeezzz",
                           "Ah les jeux d'argent", "Les dés sont lancés", "Il vous faut un peu de CHANCE"]
-                intro = "**{}** •••".format(random.choice(intros))
-                em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=intro, color=0x4286f4)
-                m = await self.bot.say(embed=em)
-                await asyncio.sleep(3)
+                intro = random.choice(intros)
+                m = None
+                for i in range(3):
+                    points = "•" * (i + 1)
+                    pat = "**{}** {}".format(intro, points)
+                    em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=pat, color=0x4286f4)
+                    if not m:
+                        m = await self.bot.say(embed=em)
+                    else:
+                        await self.bot.edit_message(m, embed=em)
+                    await asyncio.sleep(1)
                 if "{}" in msg:
                     msg.format(offre, self.credits_str(server, offre, True))
                 if offre > 0:
