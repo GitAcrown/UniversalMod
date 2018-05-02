@@ -504,37 +504,37 @@ class Finance:
                 disp += "   {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
                 disp += "**>**{}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
                 disp += "  {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
-                c = lambda x: roue.count(":" + x + ":")
+                c = lambda x: centre.count(":{}:".format(x))
                 if ":zap:" in centre:
                     if c("zap") == 3:
                         offre *= 300
-                        msg = "3x ⚡ ─ Tu gagnes **{}** {}"
+                        msg = "3x ⚡ ─ Tu gagnes {} {}"
                     else:
                         offre = 0
                         msg = "Tu t'es fait ⚡ ─ Tu gagnes rien !"
                 elif c("100") == 3:
                     offre *= 100
-                    msg = "3x 💯 ─ Tu gagnes **{}** {}"
+                    msg = "3x 💯 ─ Tu gagnes {} {}"
                 elif c("gem") == 3:
                     offre *= 10
-                    msg = "3x 💎 ─ Tu gagnes **{}** {}"
+                    msg = "3x 💎 ─ Tu gagnes {} {}"
                 elif c("gem") == 2:
                     offre += 100
-                    msg = "2x 💎 ─ Tu gagnes **{}** {}"
+                    msg = "2x 💎 ─ Tu gagnes {} {}"
                 elif c("four_leaf_clover") == 3:
                     offre *= 5
-                    msg = "3x 🍀 ─ Tu gagnes **{}** {}"
+                    msg = "3x 🍀 ─ Tu gagnes {} {}"
                 elif c("four_leaf_clover") == 2:
                     offre += 50
-                    msg = "2x 🍀 ─ Tu gagnes **{}** {}"
+                    msg = "2x 🍀 ─ Tu gagnes {} {}"
                 elif c("cherries") == 3 or c("strawberry") == 3 or c("watermelon") == 3 or c("tangerine") == 3 or c(
                         "lemon") == 3:
                     offre *= 3
-                    msg = "3x un fruit ─ Tu gagnes **{}** {}"
+                    msg = "3x un fruit ─ Tu gagnes {} {}"
                 elif c("cherries") == 2 or c("strawberry") == 2 or c("watermelon") == 2 or c("tangerine") == 2 or c(
                         "lemon") == 2:
                     offre *= 2
-                    msg = "2x un fruit ─ Tu gagnes **{}** {}"
+                    msg = "2x un fruit ─ Tu gagnes {} {}"
                 else:
                     offre = 0
                     msg = "Perdu ─ Tu perds ta mise !"
