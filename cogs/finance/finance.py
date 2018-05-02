@@ -474,7 +474,7 @@ class Finance:
         if not offre:
             txt = ":100: x3 = Offre x 100\n" \
                   ":gem: x3 = Offre x 10\n" \
-                  ":gem: x2 = Offre + 200" \
+                  ":gem: x2 = Offre + 100" \
                   ":four_leaf_clover: x3 = Offre x 5\n" \
                   ":four_leaf_clover: x2 = Offre + 50" \
                   "fruit x3 = Offre x 3\n" \
@@ -495,14 +495,14 @@ class Finance:
                 plus_after = [":zap:", ":gem:", ":cherries:"]
                 plus_before = [":lemon:", ":four_leaf_clover:", ":100:"]
                 roue = plus_before + roue + plus_after
-                cols = [":cherries:", ":strawberry:", ":watermelon:", ":tangerine:", ":lemon:"]
+                cols = []
                 for i in range(3):
                     n = random.randint(3, 11)
                     cols.append([roue[n - 1], roue[n], roue[n + 1]])
                 centre = [cols[0][1], cols[1][1], cols[1]]
-                disp = " {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
-                disp += "**>**{}**|**{}**|**{}\n".format(cols[0][1], cols[1][1], cols[2][1])
-                disp += " {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
+                disp = "  {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
+                disp += ">{}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
+                disp += "  {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
                 c = lambda x: roue.count(":" + x + ":")
                 if ":zap:" in centre:
                     if c("zap") == 3:
@@ -518,7 +518,7 @@ class Finance:
                     offre *= 10
                     msg = "3x :gem: ─ Tu gagnes **{}** {}"
                 elif c("gem") == 2:
-                    offre += 200
+                    offre += 100
                     msg = "2x :gem: ─ Tu gagnes **{}** {}"
                 elif c("four_leaf_clover") == 3:
                     offre *= 5
