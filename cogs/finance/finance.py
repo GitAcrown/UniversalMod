@@ -263,7 +263,7 @@ class Finance:
         self.api = FinanceAPI(bot, "data/finance/eco.json")
         self.sys = dataIO.load_json("data/finance/sys.json")
         self.sys_defaut = {"MONEY_NAME": "crédit", "MONEY_NAME_PLURIEL": "crédits", "MONEY_SYMBOLE": "cds",
-                           "MODDED": False}
+                           "MODDED": False, "COOLDOWN": {}}
 
     def credits_str(self, server: discord.Server, nombre=None, reduc: bool = False):
         if server.id not in self.sys:
@@ -286,6 +286,32 @@ class Finance:
                 self.sys[server.id][cat] = self.sys_defaut[cat]
         fileIO("data/finance/sys.json", "save", self.sys)
         return True
+
+    def add_cooldown(self, user: discord.Member, nom:str, duree:int):
+        server = user.server
+        self.server_update(server)
+        date = time.time() + duree
+        if nom.lower() not in self.sys[server.id]["COOLDOWN"]:
+            self.sys[server.id]["COOLDOWN"][nom.lower()] = {}
+        if user.id not in self.sys[server.id]["COOLDOWN"][nom.lower()]:
+            self.sys[server.id]["COOLDOWN"][nom.lower()][user.id] = date
+        else:
+            self.sys[server.id]["COOLDOWN"][nom.lower()][user.id] += duree
+        return self.sys[server.id]["COOLDOWN"][nom.lower()][user.id]
+
+    def is_cooldown_blocked(self, user: discord.Member, nom:str): #  Bloqué par le cooldown ?
+        server = user.server
+        self.server_update(server)
+        now = time.time()
+        if nom.lower() not in self.sys[server.id]["COOLDOWN"]:
+            return False
+        if user.id in self.sys[server.id]["COOLDOWN"][nom.lower()]:
+            if now <= self.sys[server.id]["COOLDOWN"][nom.lower()][user.id]:
+                duree = int(self.sys[server.id]["COOLDOWN"][nom.lower()][user.id] - now)
+                return duree
+            else:
+                return False
+        return False
 
     def check(self, reaction, user):
         return not user.bot
@@ -491,77 +517,82 @@ class Finance:
         data = self.api.get(user)
         if data:
             if self.api.enough_credits(user, offre):
-                roue = [":zap:", ":gem:", ":cherries:", ":strawberry:", ":watermelon:", ":tangerine:", ":lemon:",
-                        ":four_leaf_clover:", ":100:"]
-                plus_after = [":zap:", ":gem:", ":cherries:"]
-                plus_before = [":lemon:", ":four_leaf_clover:", ":100:"]
-                roue = plus_before + roue + plus_after
-                cols = []
-                for i in range(3):
-                    n = random.randint(3, 11)
-                    cols.append([roue[n - 1], roue[n], roue[n + 1]])
-                centre = [cols[0][1], cols[1][1], cols[2][1]]
-                disp = "**Offre:** {} {}\n\n".format(base, self.credits_str(server, base))
-                disp += "   {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
-                disp += "**>** {}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
-                disp += "   {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
-                c = lambda x: centre.count(":{}:".format(x))
-                if ":zap:" in centre:
-                    if c("zap") == 3:
-                        offre *= 300
-                        msg = "3x ⚡ ─ Tu gagnes {} {}"
+                cool = self.is_cooldown_blocked(user, "slot")
+                if not cool:
+                    self.add_cooldown(user, "slot", 30)
+                    roue = [":zap:", ":gem:", ":cherries:", ":strawberry:", ":watermelon:", ":tangerine:", ":lemon:",
+                            ":four_leaf_clover:", ":100:"]
+                    plus_after = [":zap:", ":gem:", ":cherries:"]
+                    plus_before = [":lemon:", ":four_leaf_clover:", ":100:"]
+                    roue = plus_before + roue + plus_after
+                    cols = []
+                    for i in range(3):
+                        n = random.randint(3, 11)
+                        cols.append([roue[n - 1], roue[n], roue[n + 1]])
+                    centre = [cols[0][1], cols[1][1], cols[2][1]]
+                    disp = "**Offre:** {} {}\n\n".format(base, self.credits_str(server, base))
+                    disp += "   {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
+                    disp += "**>** {}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
+                    disp += "   {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
+                    c = lambda x: centre.count(":{}:".format(x))
+                    if ":zap:" in centre:
+                        if c("zap") == 3:
+                            offre *= 300
+                            msg = "3x ⚡ ─ Tu gagnes {} {}"
+                        else:
+                            offre = 0
+                            msg = "Tu t'es fait ⚡ ─ Tu perds ta mise !"
+                    elif c("100") == 3:
+                        offre *= 100
+                        msg = "3x 💯 ─ Tu gagnes {} {}"
+                    elif c("gem") == 3:
+                        offre *= 10
+                        msg = "3x 💎 ─ Tu gagnes {} {}"
+                    elif c("gem") == 2:
+                        offre += 100
+                        msg = "2x 💎 ─ Tu gagnes {} {}"
+                    elif c("four_leaf_clover") == 3:
+                        offre *= 5
+                        msg = "3x 🍀 ─ Tu gagnes {} {}"
+                    elif c("four_leaf_clover") == 2:
+                        offre += 50
+                        msg = "2x 🍀 ─ Tu gagnes {} {}"
+                    elif c("cherries") == 3 or c("strawberry") == 3 or c("watermelon") == 3 or c("tangerine") == 3 or c(
+                            "lemon") == 3:
+                        offre *= 3
+                        msg = "3x un fruit ─ Tu gagnes {} {}"
+                    elif c("cherries") == 2 or c("strawberry") == 2 or c("watermelon") == 2 or c("tangerine") == 2 or c(
+                            "lemon") == 2:
+                        offre *= 2
+                        msg = "2x un fruit ─ Tu gagnes {} {}"
                     else:
                         offre = 0
-                        msg = "Tu t'es fait ⚡ ─ Tu perds ta mise !"
-                elif c("100") == 3:
-                    offre *= 100
-                    msg = "3x 💯 ─ Tu gagnes {} {}"
-                elif c("gem") == 3:
-                    offre *= 10
-                    msg = "3x 💎 ─ Tu gagnes {} {}"
-                elif c("gem") == 2:
-                    offre += 100
-                    msg = "2x 💎 ─ Tu gagnes {} {}"
-                elif c("four_leaf_clover") == 3:
-                    offre *= 5
-                    msg = "3x 🍀 ─ Tu gagnes {} {}"
-                elif c("four_leaf_clover") == 2:
-                    offre += 50
-                    msg = "2x 🍀 ─ Tu gagnes {} {}"
-                elif c("cherries") == 3 or c("strawberry") == 3 or c("watermelon") == 3 or c("tangerine") == 3 or c(
-                        "lemon") == 3:
-                    offre *= 3
-                    msg = "3x un fruit ─ Tu gagnes {} {}"
-                elif c("cherries") == 2 or c("strawberry") == 2 or c("watermelon") == 2 or c("tangerine") == 2 or c(
-                        "lemon") == 2:
-                    offre *= 2
-                    msg = "2x un fruit ─ Tu gagnes {} {}"
-                else:
-                    offre = 0
-                    msg = "Perdu ─ Tu perds ta mise !"
-                intros = ["Ça tourne", "Croisez les doigts", "Peut-être cette fois-ci", "Alleeeezzz",
-                          "Ah les jeux d'argent", "Les dés sont lancés", "Il vous faut un peu de CHANCE",
-                          "C'est parti", "Bling bling", "Le début de la richesse"]
-                intro = random.choice(intros)
-                m = None
-                for i in range(3):
-                    points = "•" * (i + 1)
-                    pat = "**{}** {}".format(intro, points)
-                    em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=pat, color=0x4286f4)
-                    if not m:
-                        m = await self.bot.say(embed=em)
+                        msg = "Perdu ─ Tu perds ta mise !"
+                    intros = ["Ça tourne", "Croisez les doigts", "Peut-être cette fois-ci", "Alleeeezzz",
+                              "Ah les jeux d'argent", "Les dés sont lancés", "Il vous faut un peu de CHANCE",
+                              "C'est parti", "Bling bling", "Le début de la richesse"]
+                    intro = random.choice(intros)
+                    m = None
+                    for i in range(3):
+                        points = "•" * (i + 1)
+                        pat = "**{}** {}".format(intro, points)
+                        em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=pat, color=0x4286f4)
+                        if not m:
+                            m = await self.bot.say(embed=em)
+                        else:
+                            await self.bot.edit_message(m, embed=em)
+                        await asyncio.sleep(1)
+                    if offre > 0:
+                        gain = offre - base
+                        self.api.depot_credits(user, gain, "Gain machine à sous")
+                        em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp, color=0x41f468)
                     else:
-                        await self.bot.edit_message(m, embed=em)
-                    await asyncio.sleep(1)
-                if offre > 0:
-                    gain = offre - base
-                    self.api.depot_credits(user, gain, "Gain machine à sous")
-                    em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp, color=0x41f468)
+                        self.api.perte_credits(user, base, "Perte machine à sous")
+                        em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp, color=0xf44141)
+                    em.set_footer(text=msg.format(offre, self.credits_str(server, offre, True)))
+                    await self.bot.edit_message(m, embed=em)
                 else:
-                    self.api.perte_credits(user, base, "Perte machine à sous")
-                    em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp, color=0xf44141)
-                em.set_footer(text=msg.format(offre, self.credits_str(server, offre, True)))
-                await self.bot.edit_message(m, embed=em)
+                    await self.bot.say("**Cooldown** ─ Patientez encore {}s".format(cool))
             else:
                 await self.bot.say("**Solde insuffisant** ─ Réduisez votre offre si possible")
         else:
