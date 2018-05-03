@@ -501,7 +501,7 @@ class Finance:
                     n = random.randint(3, 11)
                     cols.append([roue[n - 1], roue[n], roue[n + 1]])
                 centre = [cols[0][1], cols[1][1], cols[2][1]]
-                disp = " \n"
+                disp = "########\n"
                 disp += "   {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
                 disp += "**>** {}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
                 disp += "   {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
