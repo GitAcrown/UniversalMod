@@ -500,11 +500,11 @@ class Finance:
                 for i in range(3):
                     n = random.randint(3, 11)
                     cols.append([roue[n - 1], roue[n], roue[n + 1]])
-                centre = [cols[0][1], cols[1][1], cols[1]]
+                centre = [cols[0][1], cols[1][1], cols[2][1]]
                 disp = ""
-                disp += "    {}|{}|{}\n".format(cols[0][0], cols[1][0], cols[2][0])
-                disp += "**>**{}|{}|{}\n".format(cols[0][1], cols[1][1], cols[2][1])
-                disp += "  {}|{}|{}\n".format(cols[0][2], cols[1][2], cols[2][2])
+                disp += "|{}|{}|{}|\n".format(cols[0][0], cols[1][0], cols[2][0])
+                disp += "={}|{}|{}=\n".format(cols[0][1], cols[1][1], cols[2][1])
+                disp += "|{}|{}|{}|\n".format(cols[0][2], cols[1][2], cols[2][2])
                 c = lambda x: centre.count(":{}:".format(x))
                 if ":zap:" in centre:
                     if c("zap") == 3:
@@ -540,7 +540,8 @@ class Finance:
                     offre = 0
                     msg = "Perdu ─ Tu perds ta mise !"
                 intros = ["Ça tourne", "Croisez les doigts", "Peut-être cette fois-ci", "Alleeeezzz",
-                          "Ah les jeux d'argent", "Les dés sont lancés", "Il vous faut un peu de CHANCE"]
+                          "Ah les jeux d'argent", "Les dés sont lancés", "Il vous faut un peu de CHANCE",
+                          "C'est parti", "Bling bling", "Le début de la richesse"]
                 intro = random.choice(intros)
                 m = None
                 for i in range(3):
