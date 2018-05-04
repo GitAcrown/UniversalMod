@@ -299,7 +299,7 @@ class Finance:
             self.sys[server.id]["COOLDOWN"][nom.lower()][user.id] += duree
         return self.sys[server.id]["COOLDOWN"][nom.lower()][user.id]
 
-    def is_cooldown_blocked(self, user: discord.Member, nom:str): #  Bloqué par le cooldown ?
+    def is_cooldown_blocked(self, user: discord.Member, nom: str): #  Bloqué par le cooldown ?
         server = user.server
         self.server_update(server)
         now = time.time()
@@ -490,6 +490,31 @@ class Finance:
             await self.bot.say("**Erreur** | Le classement est trop long pour être envoyé, réduisez le nombre")
 
     # ------------- JEUX & AUTRE -------------------
+
+    @commands.command(aliases=["rj"], pass_context=True)
+    async def revenu(self, ctx):
+        """Percevoir son revenu journalier
+
+        Il ne peut pas être perçu si vous avez plus de 10 000 crédits"""
+        user = ctx.message.author
+        server = ctx.message.server
+        date = time.strftime("%d/%m/%Y", time.localtime())
+        data = self.api.get(user, True)
+        if "EXTRA" not in data:
+            data["EXTRA"] = {}
+        if "REVENU_DATE" not in data["EXTRA"]:
+            data["EXTRA"]["REVENU_DATE"] = None
+        if self.api.get(user).solde < 10000:
+            if date != data["EXTRA"]["REVENU_DATE"]:
+                data["EXTRA"]["REVENU_DATE"] = date
+                self.api.depot_credits(user, 50, "Revenu journalier")
+                await self.bot.say("**Revenu** ─ Vous avez reçu 50 {} sur votre compte {} !".format(
+                    self.credits_str(server, 50), user.name))
+            else:
+                await self.bot.say("**Refusé** ─ Vous avez déjà pris votre revenu aujourd'hui")
+        else:
+            await self.bot.say("**Refusé** ─ Vous avez plus de 10 000 {}.".format(
+                self.credits_str(server, 10000, True)))
 
     @commands.command(aliases=["mas"], pass_context=True)
     async def slot(self, ctx, offre: int = None):
