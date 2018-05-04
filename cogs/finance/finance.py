@@ -426,7 +426,7 @@ class Finance:
             if get:
                 somme = str(get.somme) if get.somme < 0 else "+{}".format(get.somme)
                 serveur = "Ici" if get.server_id == ctx.message.server.id else get.server_id
-                txt = "*{}*\n\n**Type** ─ {}\n**Somme** ─ {}\n**Date** ─ Le {} à {}\n**Par** ─ <@{}>\n" \
+                txt = "*{}*\n\n**Type** ─ {}\n**Somme** ─ {}\n**Date** ─ Le {} à {}\n**Compte** ─ <@{}>\n" \
                       "**Serveur** ─ {}".format(get.desc, get.type, somme, get.ts_jour, get.ts_heure, get.user_id,
                                                 serveur)
                 em = discord.Embed(title="Transaction [{}]".format(identifiant), description=txt)
