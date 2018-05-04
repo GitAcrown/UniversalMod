@@ -310,6 +310,7 @@ class Finance:
                 duree = int(self.sys[server.id]["COOLDOWN"][nom.lower()][user.id] - now)
                 return duree
             else:
+                del self.sys[server.id]["COOLDOWN"][nom.lower()][user.id]
                 return False
         return False
 
