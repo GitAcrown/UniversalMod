@@ -161,7 +161,7 @@ class Assist:
         await self.bot.say(result)
 
     async def images(self, ctx, regex, option, images: bool = False):
-        uri = "https://www.google.com/search?hl=en&tbm=isch&tbs=isz:m&q="
+        uri = "https://www.google.com/search?hl=fr&tbm=isch&tbs=isz:m&q="
         num = 7
         if images:
             num = 8
@@ -263,7 +263,7 @@ class Assist:
                 # End of Maps
         # Start of generic search
         else:
-            uri = "https://www.google.com/search?hl=en&q="
+            uri = "https://www.google.com/search?hl=fr&q="
             if isinstance(ctx, str):
                 quary = str(ctx)
             else:
