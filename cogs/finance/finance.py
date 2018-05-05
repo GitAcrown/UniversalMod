@@ -500,6 +500,9 @@ class Finance:
         server = ctx.message.server
         date = time.strftime("%d/%m/%Y", time.localtime())
         data = self.api.get(user, True)
+        if not self.api.get(user):
+            await self.bot.say("**Vous n'avez pas de compte** ─ Ouvrez-en un avec `{}b new`".format(ctx.prefix))
+            return
         if "EXTRA" not in data:
             data["EXTRA"] = {}
         if "REVENU_DATE" not in data["EXTRA"]:
