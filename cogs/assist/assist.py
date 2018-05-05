@@ -1,8 +1,11 @@
 import os
 import random
 import re
+import urllib
 from copy import deepcopy
+from random import choice
 
+import aiohttp
 import discord
 import wikipedia
 from __main__ import send_cmd_help
@@ -19,6 +22,10 @@ class Assist:
         self.bot = bot
         self.sys = dataIO.load_json("data/assist/sys.json")
         self.def_sys = {"ASSIST": True, "ANTI-SPOIL": True, "ASSIST_BALISE": False, "AFK": [], "SPOILS": {}}
+        self.session = aiohttp.ClientSession()
+
+    def __unload(self):
+        self.session.close()
 
     @commands.group(name="assist", pass_context=True, no_pm=True)
     @checks.admin_or_permissions(ban_members=True)
@@ -139,6 +146,147 @@ class Assist:
                     return self.wiki(recherche, "fr", False)
 
     #========== COMMANDES-FONCTIONS ============
+
+    @commands.command(pass_context=True)
+    @commands.cooldown(5, 60, commands.BucketType.server)
+    async def google(self, ctx, text):
+        """Faire une recherche google
+        Exemple: google Chats
+
+        -- Options: Image, Images, Maps
+        - google image qqchose > Retourne la première image
+        - google maps Paris > Recherche google maps de paris
+        - google images chiens > Retourne une image au hasard"""
+        result = await self.get_response(ctx)
+        await self.bot.say(result)
+
+    async def images(self, ctx, regex, option, images: bool = False):
+        uri = "https://www.google.com/search?hl=en&tbm=isch&tbs=isz:m&q="
+        num = 7
+        if images:
+            num = 8
+        if isinstance(ctx, str):
+            quary = str(ctx[num - 1:].lower())
+        else:
+            quary = str(ctx.message.content
+                        [len(ctx.prefix + ctx.command.name) + num:].lower())
+        encode = urllib.parse.quote_plus(quary, encoding='utf-8',
+                                         errors='replace')
+        uir = uri + encode
+        url = None
+        async with self.session.get(uir, headers=option) as resp:
+            test = await resp.content.read()
+            unicoded = test.decode("unicode_escape")
+            query_find = regex[0].findall(unicoded)
+            try:
+                if images:
+                    url = choice(query_find)
+                elif not images:
+                    url = query_find[0]
+                error = False
+            except IndexError:
+                error = True
+        return url, error
+
+    def parsed(self, find, regex, found: bool = True):
+        find = find[:5]
+        for r in find:
+            if regex[3].search(r):
+                m = regex[3].search(r)
+                r = r[:m.start()] + r[m.end():]
+            r = self.unescape(r)
+        for i in range(len(find)):
+            if i == 0:
+                find[i] = "<" + find[i] + ">" + "\n\n**Aussi:**"
+            else:
+                find[i] = "<{}>".format(find[i])
+        return find
+
+    def unescape(self, msg):
+        regex = ["<br \/>", "(?:\\\\[rn])", "(?:\\\\['])", "%25", "\(", "\)"]
+        subs = ["\n", "", "'", "%", "%28", "%29"]
+        for i in range(len(regex)):
+            sub = re.sub(regex[i], subs[i], msg)
+            msg = sub
+        return msg
+
+    async def get_response(self, ctx):
+        if isinstance(ctx, str):
+            search_type = ctx.lower().split(" ")
+            search_valid = str(ctx.lower())
+        else:
+            search_type = ctx.message.content[len(ctx.prefix + ctx.command.name) + 1:].lower().split(" ")
+            search_valid = str(ctx.message.content
+                               [len(ctx.prefix + ctx.command.name) + 1:].lower())
+        option = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'
+        }
+        regex = [
+            re.compile(",\"ou\":\"([^`]*?)\""),
+            re.compile("<h3 class=\"r\"><a href=\"\/url\?url=([^`]*?)&amp;"),
+            re.compile("<h3 class=\"r\"><a href=\"([^`]*?)\""),
+            re.compile("\/url?url=")
+        ]
+
+        # Start of Image
+        if search_type[0] == "image" or search_type[0] == "images":
+            msg = "Votre recherche n'a rien donné."
+            if search_valid == "image" or search_valid == "images":
+                msg = "Vous devez taper votre recherche."
+                return msg
+            else:
+                if search_type[0] == "image":
+                    url, error = await self.images(ctx, regex, option)
+                elif search_type[0] == "images":
+                    url, error = await self.images(ctx, regex, option, images=True)
+                if url and not error:
+                    return url
+                elif error:
+                    return msg
+                    # End of Image
+        # Start of Maps
+        elif search_type[0] == "maps":
+            if search_valid == "maps":
+                msg = "Vous cherchez quoi ?"
+                return msg
+            else:
+                uri = "https://www.google.com/maps/search/"
+                if isinstance(ctx, str):
+                    quary = str(ctx[5:].lower())
+                else:
+                    quary = str(ctx.message.content
+                                [len(ctx.prefix + ctx.command.name) + 6:].lower())
+                encode = urllib.parse.quote_plus(quary, encoding='utf-8',
+                                                 errors='replace')
+                uir = uri + encode
+                return uir
+                # End of Maps
+        # Start of generic search
+        else:
+            uri = "https://www.google.com/search?hl=en&q="
+            if isinstance(ctx, str):
+                quary = str(ctx)
+            else:
+                quary = str(ctx.message.content
+                            [len(ctx.prefix + ctx.command.name) + 1:])
+            encode = urllib.parse.quote_plus(quary, encoding='utf-8',
+                                             errors='replace')
+            uir = uri + encode
+            async with self.session.get(uir, headers=option) as resp:
+                test = str(await resp.content.read())
+                query_find = regex[1].findall(test)
+                if not query_find:
+                    query_find = regex[2].findall(test)
+                    try:
+                        query_find = self.parsed(query_find, regex)
+                    except IndexError:
+                        return IndexError
+                elif regex[3].search(query_find[0]):
+                    query_find = self.parsed(query_find, regex)
+                else:
+                    query_find = self.parsed(query_find, regex, found=False)
+            query_find = "\n".join(query_find)
+            return query_find
 
     @commands.command(pass_context=True)
     async def calcule(self, ctx, *calcul):
