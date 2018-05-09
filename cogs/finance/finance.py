@@ -263,7 +263,7 @@ class Finance:
         self.api = FinanceAPI(bot, "data/finance/eco.json")
         self.sys = dataIO.load_json("data/finance/sys.json")
         self.sys_defaut = {"MONEY_NAME": "crédit", "MONEY_NAME_PLURIEL": "crédits", "MONEY_SYMBOLE": "cds",
-                           "MODDED": False, "COOLDOWN": {}}
+                           "MODDED": False, "COOLDOWN": {}, "GIFTCODES": {}}  # TODO: Pouvoir vider les trucs tempo comme le cooldown
 
     def credits_str(self, server: discord.Server, nombre=None, reduc: bool = False):
         if server.id not in self.sys:
@@ -436,6 +436,26 @@ class Finance:
                 await self.bot.say("**Introuvable** | Mauvais identifiant ou transaction expirée")
         else:
             await self.bot.say("**Erreur** | Identifiant invalide (composé de 5 lettres et chiffres)")
+
+    @_banque.command(pass_context=True)
+    async def unlock(self, ctx, code: str):
+        """Interface permettant de rentrer des codes afin de débloquer des éléments"""
+        data = self.api.get(ctx.message.author)
+        if not data:
+            await self.bot.say("**Vous n'avez pas de compte** ─ Ouvrez-en un avec `{}b new`".format(ctx.prefix))
+            return
+        server = ctx.message.server
+        self.server_update(server)
+        code = code.upper()
+        if code in self.sys[server.id]["GIFTCODES"]:
+            valeur = self.sys[server.id]["GIFTCODES"][code]
+            self.api.depot_credits(ctx.message.author, valeur, "Code cadeau #{}".format(code))
+            await self.bot.say("**Reconnu** ─ **{} {}** ont été ajoutés à votre compte.".format(
+                valeur, self.credits_str(server, valeur)))
+            del self.sys[server.id]["GIFTCODES"][code]
+            fileIO("data/finance/sys.json", "save", self.sys)
+        else:
+            await self.bot.say("**Code non-reconnu** | Le code n'est pas correct ou a déjà été utilisé.")
 
     @commands.command(aliases=["donner"], pass_context=True)
     async def give(self, ctx, user: discord.Member, somme: int, *raison):
@@ -627,7 +647,63 @@ class Finance:
         else:
             await self.bot.say("**Vous n'avez pas de compte** ─ Ouvrez-en un avec `{}b new`".format(ctx.prefix))
 
+    """@commands.command(pass_context=True)
+        async def invest(self, ctx, secteur:str = None, somme: int = None):
+            Permet d'investir de l'argent dans divers secteurs ou en voir les détails
+            user = ctx.message.author
+            server = ctx.message.server
+            txt = "**BE** | **Bois en Estonie** ─ 500{0}/1000{0}/1500{0}\n" \
+                  "**SF** | **Smartfood Food.** ─ 700{0}/1200{0}/2000{0}\n" \
+                  "**PP** | **Puits de pétrole** ─ 1500{0}/2500{0}/3700{0}".format(self.credits_str(server, reduc=True))
+            aide = discord.Embed(title="Investissements possibles", description=txt)
+            aide.set_footer(text="Un investissement octroie (2*Niv)% de sa valeur en bonus quotidien.")
+            if not secteur:
+                await self.bot.say(embed=aide)
+                return
+            if not somme:
+                if secteur == "BE":
+                    nom = "Bois en Estonie"
+                    desc = "*Des hectares de bois du Comté de Viljandi*\n\n"
+                    desc += "**Niv. 1** ─ 500{0} (10/j)\n" \
+                           "**Niv. 2** ─ 1000{0} (40/j)\n" \
+                           "**Niv. 3** ─ 1500{0} (90/j)".format(self.credits_str(server, reduc=True))
+                elif secteur == "SF":
+                    nom = "Smartfood Food."
+                    desc = "*Un repas complet dans une bouteille d'1L*\n\n"
+                    desc += "**Niv. 1** ─ 700{0} (14/j)\n" \
+                            "**Niv. 2** ─ 1200{0} (48/j)\n" \
+                            "**Niv. 3** ─ 2000{0} (120/j)".format(self.credits_str(server, reduc=True))
+                elif secteur == "PP":
+                    nom = "Puits de pétrole"
+                    desc = "*Des petits puits de pétrole en Arabie Saoudite*\n\n"
+                    desc += "**Niv. 1** ─ 1500{0} (30/j)\n" \
+                            "**Niv. 2** ─ 2500{0} (100/j)\n" \
+                            "**Niv. 3** ─ 3700{0} (222/j)".format(self.credits_str(server, reduc=True))
+                else:
+                    await self.bot.say(embed=aide)
+                    return
+
+                em = discord.Embed(title=nom, description=desc)
+                em.set_footer(text="")
+                await self.bot.say(embed=em)
+                return
+            if "EXTRA" not in data:
+                data["EXTRA"] = {}
+            if "INVEST" not in data["EXTRA"]:
+                data["EXTRA"]["INVEST"] = None
+            if secteur
+            if not data["EXTRA"]["INVEST"]:"""
+
 # ------------- MODERATION ---------------------
+
+    def gen_giftcode(self, n:int = 1):
+        codes = []
+        for i in range(n):
+            code1 = str(''.join(random.SystemRandom().choice(string.ascii_uppercase) for _ in range(3)))
+            code2 = str(''.join(random.SystemRandom().choice(string.digits) for _ in range(5)))
+            code = code1 + "-" + code2
+            codes.append(code)
+        return codes
 
     @commands.group(name="modbanque", aliases=["modbank", "mb"], pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
@@ -635,6 +711,34 @@ class Finance:
         """Paramètres du module Finance et commandes de modération"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
+
+    @_modbanque.command(aliases=["code"], pass_context=True)
+    async def giftcode(self, ctx, somme: int, nombre: int = 1):
+        """Permet de générer un ou plusieurs code(s) cadeau échangeable contre de l'argent sur le serveur"""
+        server = ctx.message.server
+        self.server_update(server)
+        total = self.api.total_server_credits(ctx.message.server)
+        if somme < 5:
+            await self.bot.say("**Erreur** | La valeur minimale de chaque code doit être de 5{}.".format(
+                self.credits_str(server, reduc=True)))
+            return
+        if (somme * nombre) >= total:
+            await self.bot.say("**Impossible** | La somme est excessive, le(s) code(s) contiendrait plus d'argent que "
+                               "ce qui circule actuellement sur le serveur.")
+            return
+        if nombre > 10:
+            await self.bot.say("**Impossible** | Vous ne pouvez pas faire plus de 10 codes à la fois.")
+            return
+        codes = self.gen_giftcode(nombre)
+        txt = ""
+        for code in codes:
+            self.sys[server.id]["GIFTCODES"][code] = somme
+            txt += "**{}**\n".format(code)
+        fileIO("data/finance/sys.json", "save", self.sys)
+        em = discord.Embed(title="Codes ─ {} {}".format(somme, self.credits_str(server, somme)), description=txt,
+                           color=0xa3e1ff)
+        em.set_footer(text="Aucune date d'expiration | Valables seulement sur ce serveur")
+        await self.bot.whisper(embed=em)
 
     @_modbanque.command(pass_context=True)
     async def monnaie(self, ctx, *form):
@@ -759,10 +863,12 @@ class Finance:
         fileIO("data/finance/sys.json", "save", self.sys)
         await self.bot.say("**Succès** | Toutes les données du serveur ont été reset")
 
+
 def check_folders():
     if not os.path.exists("data/finance"):
         print("Creation du fichier Finance ...")
         os.makedirs("data/finance")
+
 
 def check_files():
     if not os.path.isfile("data/finance/sys.json"):
@@ -771,6 +877,7 @@ def check_files():
     if not os.path.isfile("data/finance/eco.json"):
         print("Création de finance/eco.json ...")
         fileIO("data/finance/eco.json", "save", {})
+
 
 def setup(bot):
     check_folders()

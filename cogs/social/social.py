@@ -278,6 +278,7 @@ class Social:
         self.bot = bot
         self.api = SocialAPI(bot, "data/social/soc.json")  # SocialAPI-> UNIV
         self.sys = dataIO.load_json("data/social/sys.json")
+        self.finance = self.bot.get_cog('Finance').api
         self._save_instance = {"COUNT": 0, "NEED": 100, "SAVETIME": time.time() + 300, "FIRST": False}
         self.quit_msg = ["Au revoir {} !", "Bye bye {}.", "{} s'est trompé de bouton.",
                          "{} a été suicidé de deux bans dans le dos.", "{} a ragequit le serveur.",
