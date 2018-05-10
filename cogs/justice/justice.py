@@ -281,7 +281,7 @@ class Justice:
         if temps.startswith("+") or temps.startswith("-"):  # Ajouter ou retirer du temps de prison
             val = temps.replace(form, "")
             val = int(val.replace(temps[0], ""))
-            if user in self.reg[server.id]:
+            if user.id in self.reg[server.id]:
                 if role in [r.name for r in user.roles]:
                     modif = self.convert_sec(form, val)
                     if temps[0] == "+":
