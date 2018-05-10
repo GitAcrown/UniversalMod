@@ -154,12 +154,12 @@ class Justice:
     def add_event(self, user: discord.Member, type: str, temps: str = None):
         """Ajoute un event de la prison au serveur"""
         server = user.server
-        if server.id not in self.reg:
-            self.reg[server.id] = self.base_sys
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
         jour = time.strftime("%d/%m/%Y", time.localtime())
         heure = time.strftime("%H:%M", time.localtime())
         if type in ["+", "-", ">", "<", "!<", "x<"]:  # Ajout, Réduction, Entrée, Sortie, Sortie forcée, Sortie erreur
-            self.reg[server.id]["HISTORIQUE"].append([jour, heure, type, temps, user.id])
+            self.sys[server.id]["HISTORIQUE"].append([jour, heure, type, temps, user.id])
             self.save()
             return True
         else:
@@ -259,9 +259,9 @@ class Justice:
             return
         if server.id not in self.reg:
             self.reg[server.id] = self.base_sys
-        role = self.reg[server.id]["PRISON_ROLE"]
-        prisonchan = self.bot.get_channel(self.reg[server.id]["PRISON_SALON"]).name if \
-            self.reg[server.id]["PRISON_SALON"] else False
+        role = self.sys[server.id]["PRISON_ROLE"]
+        prisonchan = self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]).name if \
+            self.sys[server.id]["PRISON_SALON"] else False
         try:
             apply = discord.utils.get(message.server.roles, name=role)  # Objet: Rôle
         except:
