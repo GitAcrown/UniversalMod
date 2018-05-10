@@ -159,7 +159,7 @@ class Justice:
             self.sys[server.id] = self.base_sys
         jour = time.strftime("%d/%m/%Y", time.localtime())
         heure = time.strftime("%H:%M", time.localtime())
-        if type in ["+", "-", ">", "<", "!<", "x<"]:  # Ajout, Réduction, Entrée, Sortie, Sortie forcée, Sortie erreur
+        if type in ["+", "-", ">", "<", "!<", "x<", "r>"]:  # Ajout, Réduction, Entrée, Sortie, Sortie forcée, Sortie erreur, Retour en prison
             self.sys[server.id]["HISTORIQUE"].append([jour, heure, type, temps, user.id])
             self.save()
             return True
@@ -226,6 +226,7 @@ class Justice:
 
         Types:
         > Entrée
+        r> Retour en prison
         < Sortie
         x< Erreur sortie
         !< Sortie par modérateur
@@ -266,9 +267,10 @@ class Justice:
             return
         txt = ""
         for u in self.reg[server.id]:
-            user = server.get_member(u)
-            estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
-            txt += "{} ─ Sortie à `{}`\n".format(user.mention, estim)
+            if self.reg[server.id][user.id]["TS_SORTIE"] >= time.time():
+                user = server.get_member(u)
+                estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+                txt += "{} ─ Sortie à `{}`\n".format(user.mention, estim)
         em = discord.Embed(title="Prisonniers", description=txt)
         em.set_footer(text="Sur le serveur {}".format(server.name))
         await self.bot.say(embed=em)
@@ -411,6 +413,9 @@ class Justice:
                         self.reg[server.id][user.id]["TS_ENTREE"] = self.reg[server.id][user.id]["TS_SORTIE"] = 0
                         self.add_event(user, "<")
                         await self.bot.remove_roles(user, apply)
+                        em = discord.Embed(description="**Peine de prison** ─ Vous êtes désormais libre",
+                                           color=apply.color)
+                        await self.bot.send_message(user, embed=em)
                         rand = random.choice(["est désormais libre", "regagne sa liberté", "est sorti de prison",
                                               "profite à nouveau de l'air frais"])
                         em = discord.Embed(description="{} {}".format(user.mention, rand), color=apply.color)
@@ -437,6 +442,49 @@ class Justice:
                 await asyncio.sleep(7)
                 await self.bot.delete_message(notif)
 
+    async def renew(self, user):
+        server = user.server
+        chanp = self.sys[server.id]["PRISON_SALON"]
+        role = self.sys[server.id]["PRISON_ROLE"]
+        save = user.name
+        apply = discord.utils.get(server.roles, name=role)
+        if user.id in self.reg[server.id]:
+            if role not in [r.name for r in user.roles]:
+                if self.reg[server.id][user.id]["TS_SORTIE"] > time.time():
+                    await self.bot.add_roles(user, apply)
+                    estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+                    if chanp:
+                        em = discord.Embed(description="**Retour automatique en prison** ─ "
+                                                       "{} n'a pas terminé sa peine.".format(user.mention))
+                        em.set_footer(text="Sortie estimée à {}".format(estim))
+                        await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
+                    em = discord.Embed(description="**Retour en prison** ─ Vous n'avez pas terminé votre peine")
+                    em.set_footer(text="Sortie estimée à {}".format(estim))
+                    await self.bot.send_message(user, embed=em)
+                    while time.time() < self.reg[server.id][user.id]["TS_SORTIE"]:
+                        await asyncio.sleep(1)
+                    if user in server.members:
+                        if role in [r.name for r in user.roles]:
+                            self.reg[server.id][user.id]["TS_ENTREE"] = self.reg[server.id][user.id]["TS_SORTIE"] = 0
+                            await self.bot.remove_roles(user, apply)
+                            em = discord.Embed(description="**Peine de prison** ─ Vous êtes désormais libre",
+                                               color=apply.color)
+                            await self.bot.send_message(user, embed=em)
+                            if chanp:
+                                rand = random.choice(
+                                    ["est désormais libre", "regagne sa liberté", "est sorti de prison",
+                                     "profite à nouveau de l'air frais"])
+                                em = discord.Embed(description="{} {}".format(user.mention, rand), color=apply.color)
+                                await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
+                            self.save()
+                        else:
+                            return
+                    else:
+                        if chanp:
+                            em = discord.Embed(description="**Sortie de** <@{}> | Il n'est plus sur le serveur.")
+                            self.add_event(user, "x<")
+                            notif = await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
+
 
 def check_folders():
     folders = ("data", "data/justice/")
@@ -457,4 +505,5 @@ def setup(bot):
     check_folders()
     check_files()
     n = Justice(bot)
+    bot.add_listener(n.renew, "on_member_join")
     bot.add_cog(n)
