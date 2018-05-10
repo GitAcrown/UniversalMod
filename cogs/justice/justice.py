@@ -488,6 +488,15 @@ class Justice:
                             self.add_event(user, "x<")
                             notif = await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
 
+    async def react(self, reaction, user):
+        message = reaction.message
+        server = message.channel.server
+        prefix = self.bot.settings.get_prefixes(server)[0]
+        if reaction.emoji == "‼":
+            if user.server_permissions.manage_roles:
+                new_message = deepcopy(message)
+                new_message.content = prefix + "p {}".format(user.mention)
+                await self.bot.process_commands(new_message)
 
 def check_folders():
     folders = ("data", "data/justice/")
@@ -509,4 +518,5 @@ def setup(bot):
     check_files()
     n = Justice(bot)
     bot.add_listener(n.renew, "on_member_join")
+    bot.add_listener(n.reactprison, "on_reaction_add")
     bot.add_cog(n)
