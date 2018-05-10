@@ -1,11 +1,14 @@
-import discord
-from discord.ext import commands
-from .utils import checks
 import asyncio
 import os
 import random
-from cogs.utils.dataIO import fileIO, dataIO
 import time
+
+import discord
+from cogs.utils.dataIO import fileIO, dataIO
+from discord.ext import commands
+
+from .utils import checks
+
 
 class Justice:
     """Module ajoutant des fonctionnalités avancées de modération"""
@@ -177,7 +180,11 @@ class Justice:
         if server.id not in self.reg:
             self.reg[server.id] = {}
         role = "Prison"  # FOR TEST PURPOSEEEEES (Bien sûr)
-        apply = discord.utils.get(message.server.roles, name=role)  # Objet: Rôle
+        try:
+            apply = discord.utils.get(message.server.roles, name=role)  # Objet: Rôle
+        except:
+            await self.bot.say("**Erreur** | Le rôle *Prison* n'est pas présent sur ce serveur.")
+            return
 
         if temps.startswith("+") or temps.startswith("-"):  # Ajouter ou retirer du temps de prison
             val = temps.replace(form, "")
