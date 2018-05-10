@@ -221,7 +221,15 @@ class Justice:
 
     @commands.command(aliases=["pc"], pass_context=True)
     async def casier(self, ctx, nb: int = 10):
-        """Voir l'historique de la prison sur ce serveur"""
+        """Voir l'historique de la prison sur ce serveur
+
+        Types:
+        > Entrée
+        < Sortie
+        x< Erreur sortie
+        !< Sortie par modérateur
+        + Ajout de temps
+        - Réduction de temps"""
         server = ctx.message.server
         today = time.strftime("%d/%m/%Y", time.localtime())
         if server.id not in self.sys:
