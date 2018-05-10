@@ -325,8 +325,13 @@ class Justice:
                         await self.bot.say("**Symbole non reconnu** | `+` = Ajouter / `-` = Réduire")
                         return
                 else:
-                    await self.bot.say("**Erreur** | Le membre n'est pas en prison (Absence de rôle)")
-                    return
+                    if temps[0] == "+":
+                        new_message = deepcopy(message)
+                        new_message.content = ctx.prefix + "{} {}".format(user.mention, temps.replace("+", ""))
+                        await self.bot.process_commands(new_message)
+                    else:
+                        await self.bot.say("**Erreur** | Le membre n'est pas en prison (Absence de rôle)")
+                        return
             else:
                 if temps[0] == "+":
                     new_message = deepcopy(message)
