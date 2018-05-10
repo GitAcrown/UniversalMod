@@ -237,7 +237,7 @@ class Justice:
             val = int(temps.replace(form, ""))
             sec = self.convert_sec(form, val)
             n = 0
-            if sec >= 60:
+            if sec < 60:
                 sec = 60 # Au moins une minute
             if sec > 86400:
                 notif = await self.bot.say("**Attention** | "
