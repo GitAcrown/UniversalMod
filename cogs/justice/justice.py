@@ -2,6 +2,7 @@ import asyncio
 import os
 import random
 import time
+from copy import deepcopy
 
 import discord
 from __main__ import send_cmd_help
@@ -262,7 +263,7 @@ class Justice:
         message = ctx.message
         server = message.server
         form = temps[-1:]  # C'est le format du temps (smhj)
-        if temps.isdigit() or form not in ["s", "m", "h", "j"]:
+        if form not in ["s", "m", "h", "j"]:
             await self.bot.whisper("**Unités** | `m` = Minutes, `h` = Heures, `j` = Jours\n"
                                    "Exemple: `{}p @membre 5h`".format(ctx.prefix))
             return
@@ -325,6 +326,14 @@ class Justice:
                         return
                 else:
                     await self.bot.say("**Erreur** | Le membre n'est pas en prison (Absence de rôle)")
+                    return
+            else:
+                if temps[0] == "+":
+                    new_message = deepcopy(message)
+                    new_message.content = ctx.prefix + "{} {}".format(user.mention, temps.replace("+", ""))
+                    await self.bot.process_commands(new_message)
+                else:
+                    await self.bot.say("**Erreur** | Le membre n'est pas en prison (Non-enregistré)")
                     return
         else:
             val = int(temps.replace(form, ""))
