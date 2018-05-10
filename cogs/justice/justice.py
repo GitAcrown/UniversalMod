@@ -327,7 +327,7 @@ class Justice:
                 else:
                     if temps[0] == "+":
                         new_message = deepcopy(message)
-                        new_message.content = ctx.prefix + "p{} {}".format(user.mention, temps.replace("+", ""))
+                        new_message.content = ctx.prefix + "p {} {}".format(user.mention, temps.replace("+", ""))
                         await self.bot.process_commands(new_message)
                     else:
                         await self.bot.say("**Erreur** | Le membre n'est pas en prison (Absence de rôle)")
@@ -335,7 +335,7 @@ class Justice:
             else:
                 if temps[0] == "+":
                     new_message = deepcopy(message)
-                    new_message.content = ctx.prefix + "p{} {}".format(user.mention, temps.replace("+", ""))
+                    new_message.content = ctx.prefix + "p {} {}".format(user.mention, temps.replace("+", ""))
                     await self.bot.process_commands(new_message)
                 else:
                     await self.bot.say("**Erreur** | Le membre n'est pas en prison (Non-enregistré)")
