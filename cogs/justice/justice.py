@@ -239,8 +239,9 @@ class Justice:
                     txt += "**{}** **{}** {}<@{}>\n".format(e[0], e[2], txt, user.id)
             em = discord.Embed(title="Historique de la Prison", description=txt)
             em.set_footer(text="Historique du serveur {}".format(server.name))
+            await self.bot.say(embed=em)
         else:
-            txt = "Aucune action"
+            await self.bot.say("**Vide** | La prison n'a enregistré aucune action sur ce serveur.")
 
     @commands.command(aliases=["p", "jail"], pass_context=True)
     @checks.admin_or_permissions(manage_roles=True)
