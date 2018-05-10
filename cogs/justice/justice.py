@@ -488,7 +488,7 @@ class Justice:
                             self.add_event(user, "x<")
                             notif = await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
 
-    async def react(self, reaction, user):
+    async def reactprison(self, reaction, user):
         message = reaction.message
         server = message.channel.server
         prefix = self.bot.settings.get_prefixes(server)[0]
