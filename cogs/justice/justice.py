@@ -201,7 +201,7 @@ class Justice:
                         em = discord.Embed(description=msg, color=apply.color)
                         em.set_footer(text=estim_txt)
                         notif = await self.bot.say(embed=em)
-                        await asyncio.sleep(5)
+                        await asyncio.sleep(7)
                         await self.bot.delete_message(notif)
 
                         em = discord.Embed(description="**Peine augmentée** ─ **+{}{}** par *{}*".format(
@@ -220,7 +220,7 @@ class Justice:
                         em = discord.Embed(description=msg, color=apply.color)
                         em.set_footer(text=estim_txt)
                         notif = await self.bot.say(embed=em)
-                        await asyncio.sleep(5)
+                        await asyncio.sleep(7)
                         await self.bot.delete_message(notif)
 
                         em = discord.Embed(description="**Peine réduite** ─ **-{}{}** par *{}*".format(
@@ -242,7 +242,7 @@ class Justice:
             if sec > 86400:
                 notif = await self.bot.say("**Attention** | "
                                            "Une telle durée peut causer une peine infinie à la moindre instabilité")
-                await asyncio.sleep(3)
+                await asyncio.sleep(5)
                 await self.bot.delete_message(notif)
             if user.id not in self.reg[server.id]:
                 self.reg[server.id][user.id] = {"TS_ENTREE": 0,
@@ -265,7 +265,7 @@ class Justice:
                 em = discord.Embed(description=msg, color=apply.color)
                 em.set_footer(text=estim_txt)
                 notif = await self.bot.say(embed=em)
-                await asyncio.sleep(5)
+                await asyncio.sleep(7)
                 await self.bot.delete_message(notif)
 
                 self.save()
@@ -281,14 +281,14 @@ class Justice:
                                               "profite à nouveau de l'air frais"])
                         em = discord.Embed(description="{} {}".format(user.mention, rand), color=apply.color)
                         notif = await self.bot.say(embed=em)
-                        await asyncio.sleep(5)
+                        await asyncio.sleep(7)
                         await self.bot.delete_message(notif)
                     else:
                         return
                 else:
                     em = discord.Embed(description="**Sortie de** <@{}> | Il n'est plus sur le serveur.")
                     notif = await self.bot.say(embed=em)
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(5)
                     await self.bot.delete_message(notif)
             else:
                 self.reg[user.id]["TS_ENTREE"] = self.reg[user.id]["TS_SORTIE"] = 0
@@ -300,7 +300,7 @@ class Justice:
                 em = discord.Embed(description="**Peine de prison** ─ Vous êtes désormais libre", color=apply.color)
                 await self.bot.send_message(user, embed=em)
 
-                await asyncio.sleep(5)
+                await asyncio.sleep(7)
                 await self.bot.delete_message(notif)
 
 
