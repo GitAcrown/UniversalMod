@@ -377,7 +377,7 @@ class Justice:
             if sec > 86400:
                 notif = await self.bot.say("**Attention** | "
                                            "Une telle durée peut causer une peine infinie à la moindre instabilité")
-                await asyncio.sleep(5)
+                await asyncio.sleep(3)
                 await self.bot.delete_message(notif)
             if user.id not in self.reg[server.id]:
                 self.reg[server.id][user.id] = {"TS_ENTREE": 0,
