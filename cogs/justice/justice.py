@@ -267,7 +267,7 @@ class Justice:
             return
         txt = ""
         for u in self.reg[server.id]:
-            if self.reg[server.id][user.id]["TS_SORTIE"] >= time.time():
+            if self.reg[server.id][u]["TS_SORTIE"] >= time.time():
                 user = server.get_member(u)
                 estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                 txt += "{} ─ Sortie à `{}`\n".format(user.mention, estim)
