@@ -231,7 +231,7 @@ class Justice:
             txt = ""
             b.reverse()
             for e in b:
-                temps = e[3] if e[3] else ""
+                temps = e[3] + " " if e[3] else ""
                 user = server.get_member(e[4])
                 if e[0] == today:
                     txt += "**{}** **{}** {}<@{}>\n".format(e[1], e[2], temps, user.id)
