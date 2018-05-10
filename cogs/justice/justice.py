@@ -220,8 +220,8 @@ class Justice:
         await self.bot.say("**Succès** | Le rôle de prisonnier est désormais *{}*\n"
                            "Vérifiez que les permissions sur les salons soient corrects".format(role.name))
 
-    @commands.command(aliases=["pc"], pass_context=True)
-    async def casier(self, ctx, nb: int = 10):
+    @commands.command(aliases=["ph"], pass_context=True)
+    async def historique(self, ctx, nb: int = 10):
         """Voir l'historique de la prison sur ce serveur
 
         Types:
@@ -252,6 +252,27 @@ class Justice:
         else:
             await self.bot.say("**Vide** | La prison n'a enregistré aucune action sur ce serveur.")
 
+    @commands.command(aliases=["pl"], pass_context=True)
+    @checks.admin_or_permissions(manage_roles=True)
+    async def prisonliste(self, ctx):
+        """Liste les membres en prison"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if server.id not in self.reg:
+            self.reg[server.id] = {}
+            await self.bot.say("**Vide** | Aucun membre n'est emprisonné en ce moment même.")
+            self.save()
+            return
+        txt = ""
+        for u in self.reg[server.id]:
+            user = server.get_member(u)
+            estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+            txt += "{} ─ Sortie à `{}`\n".format(user.mention, estim)
+        em = discord.Embed(title="Prisonniers", description=txt)
+        em.set_footer(text="Sur le serveur {}".format(server.name))
+        await self.bot.say(embed=em)
+
     @commands.command(aliases=["p", "jail"], pass_context=True)
     @checks.admin_or_permissions(manage_roles=True)
     async def prison(self, ctx, user: discord.Member, temps: str = "10m"):
@@ -267,8 +288,10 @@ class Justice:
             await self.bot.whisper("**Unités** | `m` = Minutes, `h` = Heures, `j` = Jours\n"
                                    "Exemple: `{}p @membre 5h`".format(ctx.prefix))
             return
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
         if server.id not in self.reg:
-            self.reg[server.id] = self.base_sys
+            self.reg[server.id] = {}
         role = self.sys[server.id]["PRISON_ROLE"]
         prisonchan = self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]).name if \
             self.sys[server.id]["PRISON_SALON"] else False
