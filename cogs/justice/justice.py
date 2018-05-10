@@ -271,6 +271,9 @@ class Justice:
                 user = server.get_member(u)
                 estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                 txt += "{} ─ Sortie à `{}`\n".format(user.mention, estim)
+        if txt == "":
+            await self.bot.say("**Vide** | Aucun membre n'est emprisonné en ce moment même.")
+            return
         em = discord.Embed(title="Prisonniers", description=txt)
         em.set_footer(text="Sur le serveur {}".format(server.name))
         await self.bot.say(embed=em)
