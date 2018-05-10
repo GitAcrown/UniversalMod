@@ -234,9 +234,9 @@ class Justice:
                 temps = e[3] if e[3] else ""
                 user = server.get_member(e[4])
                 if e[0] == today:
-                    txt += "**{}** **{}** {}<@{}>\n".format(e[1], e[2], txt, user.id)
+                    txt += "**{}** **{}** {}<@{}>\n".format(e[1], e[2], temps, user.id)
                 else:
-                    txt += "**{}** **{}** {}<@{}>\n".format(e[0], e[2], txt, user.id)
+                    txt += "**{}** **{}** {}<@{}>\n".format(e[0], e[2], temps, user.id)
             em = discord.Embed(title="Historique de la Prison", description=txt)
             em.set_footer(text="Historique du serveur {}".format(server.name))
             await self.bot.say(embed=em)
