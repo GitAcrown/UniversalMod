@@ -518,5 +518,5 @@ def setup(bot):
     check_files()
     n = Justice(bot)
     bot.add_listener(n.renew, "on_member_join")
-    bot.add_listener(n.reactprison, "on_reaction_add")
+    # bot.add_listener(n.reactprison, "on_reaction_add")
     bot.add_cog(n)
