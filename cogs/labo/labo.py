@@ -103,13 +103,13 @@ class Labo:
                 try:
                     recap = self.recap_url(url)
                 except:
-                    await self.bot.delete_message(notif)
                     await self.bot.send_message(user, "**Erreur** | Cette page ne me laisse pas lire le texte")
                     return
                 if recap:
-                    await self.bot.say(recap)
+                    await self.bot.send_message(recap)
+                    await self.bot.delete_message(notif)
                 else:
-                    await self.bot.say("Je n'ai pas réussi à faire un résumé de ce lien")
+                    await self.bot.send_message("Je n'ai pas réussi à faire un résumé de ce lien")
             else:
                 notif = await self.bot.send_message(user, "**Patientez...** | La durée"
                                    " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
