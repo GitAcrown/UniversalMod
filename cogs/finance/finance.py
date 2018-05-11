@@ -20,7 +20,6 @@ class FinanceAPI:
     def __init__(self, bot, path):
         self.bot = bot
         self.eco = dataIO.load_json(path)
-        self.f_sys = Finance(bot)
 
     def _save(self):
         """Sauvegarde l'API seulement"""
@@ -256,9 +255,6 @@ class FinanceAPI:
                 self._save()
                 return True
         return False
-
-    def get_credits_str(self, server: discord.Server, nombre=None, reduc: bool = False):
-        return self.f_sys.credits_str(server, nombre=nombre, reduc=reduc)
 
 class Finance:
     """Economie centralisée pour les divers jeux"""
