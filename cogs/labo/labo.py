@@ -10,6 +10,7 @@ from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.utils import get_stop_words
+import numpy
 
 from .utils.dataIO import fileIO, dataIO
 
