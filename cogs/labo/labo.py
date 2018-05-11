@@ -23,7 +23,7 @@ class Labo:
         for char in texte:
             if char in norm:
                 ind = norm.index(char)
-                fin_texte = fin_texte.replace(vapo[ind])
+                fin_texte = fin_texte.replace(char, vapo[ind])
         await self.bot.say("**Ｖａｐｏｒ** | {}".format(fin_texte))
 
 
