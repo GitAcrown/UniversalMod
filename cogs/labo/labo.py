@@ -42,11 +42,11 @@ class Labo:
 
         summarizer = Summarizer(stemmer)
         summarizer.stop_words = get_stop_words(langue)
-        output = ""
+        output = []
 
         for sentence in summarizer(parser.document, nb_phrases):
-            output += sentence + "\n"
-        return output
+            output.append(str(sentence) + "\n")
+        return "\n".join(output)
 
     def recap_txt(self, texte: str, langue:str = "french", nb_phrases:int = 7):
         parser = PlaintextParser.from_string(texte, Tokenizer(langue))
@@ -54,11 +54,11 @@ class Labo:
 
         summarizer = Summarizer(stemmer)
         summarizer.stop_words = get_stop_words(langue)
-        output = ""
+        output = []
 
         for sentence in summarizer(parser.document, nb_phrases):
-            output += str(sentence) + "\n"
-        return output
+            output.append(str(sentence) + "\n")
+        return "\n".join(output)
 
     @commands.command(pass_context=True)
     async def recap(self, ctx, url:str):
