@@ -2,7 +2,6 @@
 import asyncio
 import os
 
-import discord
 from discord.ext import commands
 from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
@@ -20,10 +19,6 @@ class Labo:
         self.bot = bot
         self.sys = dataIO.load_json("data/labo/sys.json")  # Pas très utile mais on le garde pour plus tard
         self.sys_def = {}
-        if os.path.exists("data/finance/sys.json"):
-            self.finance_sys = dataIO.load_json("data/finance/sys.json")
-        else:
-            self.finance_sys = None
 
     @commands.command(pass_context=True)
     async def vaporwave(self, ctx, *texte):
@@ -39,25 +34,12 @@ class Labo:
                 fin_texte = fin_texte.replace(char, vapo[ind])
         await self.bot.say("**Ｖａｐｏｒ** | {}".format(fin_texte))
 
-    def _credits_str(self, server: discord.Server, nombre=None, reduc: bool = False):
-        if reduc:
-            return self.finance_sys[server.id]["MONEY_SYMBOLE"]
-        if nombre:
-            if int(nombre) > 1:
-                return self.finance_sys[server.id]["MONEY_NAME_PLURIEL"]
-            return self.finance_sys[server.id]["MONEY_NAME"]
-        return self.finance_sys[server.id]["MONEY_NAME_PLURIEL"]  # par défaut le pluriel
-
     @commands.command(pass_context=True, hidden=True)
     async def balance(self, ctx):
         """Permet de voir l'argent possédée (HIDDEN_TEST)"""
         finance = self.bot.get_cog("Finance").api
-        f_sys = self.bot.get_cog("Finance").sys
-        if self.finance_sys:
-            solde = finance.get(ctx.message.author).solde
-            await self.bot.say("Vous avez {} {}".format(solde, f_sys.credits_str(ctx.message.server, solde)))
-        else:
-            await self.bot.say("Le module Finance n'est pas chargé")
+        solde = finance.get(ctx.message.author).solde
+        await self.bot.say("Vous avez {} {}".format(solde, finance.get_credits_str(ctx.message.server, solde)))
 
     def recap_url(self, url: str, langue:str = "french", nb_phrases:int = 7):
         parser = HtmlParser.from_url(url, Tokenizer(langue))
