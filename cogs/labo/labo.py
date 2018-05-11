@@ -8,6 +8,7 @@ from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lex_rank import LexRankSummarizer as Summarizer
 from sumy.utils import get_stop_words
+import numpy
 
 from .utils.dataIO import fileIO, dataIO
 
@@ -56,7 +57,7 @@ class Labo:
         output = ""
 
         for sentence in summarizer(parser.document, nb_phrases):
-            output += sentence + "\n"
+            output += str(sentence) + "\n"
         return output
 
     @commands.command(pass_context=True)
