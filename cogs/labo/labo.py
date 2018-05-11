@@ -46,7 +46,7 @@ class Labo:
 
         for sentence in summarizer(parser.document, nb_phrases):
             output.append(str(sentence) + "\n")
-        return output
+        return "".join(output)
 
     def recap_txt(self, texte: str, langue:str = "french", nb_phrases:int = 5):
         parser = PlaintextParser.from_string(texte, Tokenizer(langue))
@@ -58,7 +58,7 @@ class Labo:
 
         for sentence in summarizer(parser.document, nb_phrases):
             output.append(str(sentence) + "\n")
-        return output
+        return "".join(output)
 
     @commands.command(pass_context=True)
     async def recapurl(self, ctx, url:str, phrases:int=5):
