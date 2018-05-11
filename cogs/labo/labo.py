@@ -1,4 +1,5 @@
 
+import asyncio
 import os
 
 from discord.ext import commands
@@ -8,7 +9,6 @@ from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lex_rank import LexRankSummarizer as Summarizer
 from sumy.utils import get_stop_words
-import numpy
 
 from .utils.dataIO import fileIO, dataIO
 
@@ -61,9 +61,11 @@ class Labo:
         return output
 
     @commands.command(pass_context=True)
-    async def recap(self, ctx, *texte):
-        """Permet de faire un résumé d'un texte"""
-        texte = " ".join(texte)
+    async def recap(self, ctx, url:str):
+        """Permet de faire un résumé d'une URL"""
+        await self.bot.say("**Patientez...** | La durée"
+                           " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
+        await asyncio.sleep(1)
         await self.bot.say(self.recap_txt(texte))
 
 
