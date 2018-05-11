@@ -46,7 +46,7 @@ class Labo:
 
         for sentence in summarizer(parser.document, nb_phrases):
             output.append(str(sentence) + "\n")
-        return "\n".join(output)
+        return output
 
     def recap_txt(self, texte: str, langue:str = "french", nb_phrases:int = 5):
         parser = PlaintextParser.from_string(texte, Tokenizer(langue))
@@ -58,7 +58,7 @@ class Labo:
 
         for sentence in summarizer(parser.document, nb_phrases):
             output.append(str(sentence) + "\n")
-        return "\n".join(output)
+        return output
 
     @commands.command(pass_context=True)
     async def recapurl(self, ctx, url:str, phrases:int=5):
@@ -95,14 +95,31 @@ class Labo:
         server = message.channel.server
         texte = message.content
         if reaction.emoji == "✂":
-            await self.bot.send_message(user, "**Patientez...** | La durée"
-                               " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
-            await asyncio.sleep(1)
-            recap = self.recap_txt(texte)
-            if recap:
-                await self.bot.send_message(user, recap)
+            if message.content.startswith("http"):
+                url = message.content.split()[0]
+                notif = await self.bot.send_message(user, "**Patientez...** | La durée"
+                                   " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
+                await asyncio.sleep(1)
+                try:
+                    recap = self.recap_url(url)
+                except:
+                    await self.bot.delete_message(notif)
+                    await self.bot.send_message(user, "**Erreur** | Cette page ne me laisse pas lire le texte")
+                    return
+                if recap:
+                    await self.bot.say(recap)
+                else:
+                    await self.bot.say("Je n'ai pas réussi à faire un résumé de ce lien")
             else:
-                await self.bot.send_message(user, "**Erreur** | Impossible de faire un résumé de ça.")
+                notif = await self.bot.send_message(user, "**Patientez...** | La durée"
+                                   " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
+                await asyncio.sleep(1)
+                recap = self.recap_txt(texte)
+                if recap:
+                    await self.bot.delete_message(notif)
+                    await self.bot.send_message(user, recap)
+                else:
+                    await self.bot.send_message(user, "**Erreur** | Impossible de faire un résumé de ça.")
 
 
 def check_folders():
