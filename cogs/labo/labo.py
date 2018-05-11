@@ -8,7 +8,7 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
-from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.summarizers.edmundson import EdmundsonSummarizer as Summarizer
 from sumy.utils import get_stop_words
 
 from .utils.dataIO import fileIO, dataIO
@@ -36,7 +36,6 @@ class Labo:
         await self.bot.say("**Ｖａｐｏｒ** | {}".format(fin_texte))
 
     def recap_url(self, url: str, langue:str = "french", nb_phrases:int = 7):
-        url = "http://www.zsstritezuct.estranky.cz/clanky/predmety/cteni/jak-naucit-dite-spravne-cist.html"
         parser = HtmlParser.from_url(url, Tokenizer(langue))
         # or for plain text files
         # parser = PlaintextParser.from_file("document.txt", Tokenizer(LANGUAGE))
@@ -51,7 +50,6 @@ class Labo:
         return output
 
     def recap_txt(self, texte: str, langue:str = "french", nb_phrases:int = 7):
-        url = "http://www.zsstritezuct.estranky.cz/clanky/predmety/cteni/jak-naucit-dite-spravne-cist.html"
         parser = PlaintextParser.from_string(texte, Tokenizer(langue))
         stemmer = Stemmer(langue)
 
