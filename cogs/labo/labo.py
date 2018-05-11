@@ -52,9 +52,10 @@ class Labo:
     async def balance(self, ctx):
         """Permet de voir l'argent possédée (HIDDEN_TEST)"""
         finance = self.bot.get_cog("Finance").api
+        f_sys = self.bot.get_cog("Finance").sys
         if self.finance_sys:
             solde = finance.get(ctx.message.author).solde
-            await self.bot.say("Vous avez {} {}".format(solde, self._credits_str(ctx.message.server, solde)))
+            await self.bot.say("Vous avez {} {}".format(solde, f_sys.credits_str(ctx.message.server, solde)))
         else:
             await self.bot.say("Le module Finance n'est pas chargé")
 
