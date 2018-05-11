@@ -1,6 +1,15 @@
+from __future__ import absolute_import
+from __future__ import division, print_function, unicode_literals
+
 import os
 
 from discord.ext import commands
+from sumy.nlp.stemmers import Stemmer
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.parsers.html import HtmlParser
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.utils import get_stop_words
 
 from .utils.dataIO import fileIO, dataIO
 
@@ -25,6 +34,40 @@ class Labo:
                 ind = norm.index(char)
                 fin_texte = fin_texte.replace(char, vapo[ind])
         await self.bot.say("**Ｖａｐｏｒ** | {}".format(fin_texte))
+
+    def recap_url(self, url: str, langue:str = "french", nb_phrases:int = 7):
+        url = "http://www.zsstritezuct.estranky.cz/clanky/predmety/cteni/jak-naucit-dite-spravne-cist.html"
+        parser = HtmlParser.from_url(url, Tokenizer(langue))
+        # or for plain text files
+        # parser = PlaintextParser.from_file("document.txt", Tokenizer(LANGUAGE))
+        stemmer = Stemmer(langue)
+
+        summarizer = Summarizer(stemmer)
+        summarizer.stop_words = get_stop_words(langue)
+        output = ""
+
+        for sentence in summarizer(parser.document, nb_phrases):
+            output += sentence + "\n"
+        return output
+
+    def recap_txt(self, texte: str, langue:str = "french", nb_phrases:int = 7):
+        url = "http://www.zsstritezuct.estranky.cz/clanky/predmety/cteni/jak-naucit-dite-spravne-cist.html"
+        parser = PlaintextParser.from_string(texte, Tokenizer(langue))
+        stemmer = Stemmer(langue)
+
+        summarizer = Summarizer(stemmer)
+        summarizer.stop_words = get_stop_words(langue)
+        output = ""
+
+        for sentence in summarizer(parser.document, nb_phrases):
+            output += sentence + "\n"
+        return output
+
+    @commands.command(pass_context=True)
+    async def recap(self, ctx, *texte):
+        """Permet de faire un résumé d'un texte"""
+        texte = " ".join(texte)
+        await self.bot.say(self.recap_txt(texte))
 
 
 def check_folders():
