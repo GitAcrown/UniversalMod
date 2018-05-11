@@ -90,7 +90,7 @@ class Labo:
         else:
             await self.bot.say("**Erreur** | Impossible de faire un résumé de ça.")
 
-    async def reactprison(self, reaction, user):
+    async def reactrecap(self, reaction, user):
         message = reaction.message
         server = message.channel.server
         texte = message.content
