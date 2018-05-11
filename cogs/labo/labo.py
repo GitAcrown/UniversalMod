@@ -66,7 +66,7 @@ class Labo:
         await self.bot.say("**Patientez...** | La durée"
                            " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
         await asyncio.sleep(1)
-        await self.bot.say(self.recap_txt(texte))
+        await self.bot.say(self.recap_url(url))
 
 
 def check_folders():
