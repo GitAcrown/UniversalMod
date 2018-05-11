@@ -48,7 +48,7 @@ class Labo:
             output.append(str(sentence) + "\n")
         return "\n".join(output)
 
-    def recap_txt(self, texte: str, langue:str = "french", nb_phrases:int = 7):
+    def recap_txt(self, texte: str, langue:str = "french", nb_phrases:int = 5):
         parser = PlaintextParser.from_string(texte, Tokenizer(langue))
         stemmer = Stemmer(langue)
 
@@ -61,7 +61,7 @@ class Labo:
         return "\n".join(output)
 
     @commands.command(pass_context=True)
-    async def recap(self, ctx, url:str, phrases:int=5):
+    async def recapurl(self, ctx, url:str, phrases:int=5):
         """Permet de faire un résumé d'une URL
 
         Note: Les grands articles nécessite plus de phrases pour avoir un résumé pertinent"""
@@ -77,6 +77,18 @@ class Labo:
             await self.bot.say(recap)
         else:
             await self.bot.say("Je n'ai pas réussi à faire un résumé de ce lien")
+
+    @commands.command(pass_context=True)
+    async def recaptxt(self, ctx, *texte):
+        """Permet de faire un résumé d'un texte"""
+        await self.bot.say("**Patientez...** | La durée"
+                           " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
+        await asyncio.sleep(1)
+        recap = self.recap_txt(" ".join(texte))
+        if recap:
+            await self.bot.say(recap)
+        else:
+            await self.bot.say("**Erreur** | Impossible de faire un résumé de ça.")
 
 
 def check_folders():
