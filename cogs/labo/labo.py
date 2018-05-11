@@ -61,12 +61,14 @@ class Labo:
         return "\n".join(output)
 
     @commands.command(pass_context=True)
-    async def recap(self, ctx, url:str):
-        """Permet de faire un résumé d'une URL"""
+    async def recap(self, ctx, url:str, phrases:int=5):
+        """Permet de faire un résumé d'une URL
+
+        Note: Les grands articles nécessite plus de phrases pour avoir un résumé pertinent"""
         await self.bot.say("**Patientez...** | La durée"
                            " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
         await asyncio.sleep(1)
-        await self.bot.say(self.recap_url(url))
+        await self.bot.say(self.recap_url(url, nb_phrases=phrases))
 
 
 def check_folders():
