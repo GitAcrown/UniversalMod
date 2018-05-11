@@ -68,7 +68,15 @@ class Labo:
         await self.bot.say("**Patientez...** | La durée"
                            " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
         await asyncio.sleep(1)
-        await self.bot.say(self.recap_url(url, nb_phrases=phrases))
+        try:
+            recap = self.recap_url(url, nb_phrases=phrases)
+        except:
+            await self.bot.say("**Erreur** | Cette page ne me laisse pas lire le texte")
+            return
+        if recap:
+            await self.bot.say(recap)
+        else:
+            await self.bot.say("Je n'ai pas réussi à faire un résumé de ce lien")
 
 
 def check_folders():
