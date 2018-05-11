@@ -90,6 +90,20 @@ class Labo:
         else:
             await self.bot.say("**Erreur** | Impossible de faire un résumé de ça.")
 
+    async def reactprison(self, reaction, user):
+        message = reaction.message
+        server = message.channel.server
+        texte = message.content
+        if reaction.emoji == "✂":
+            await self.bot.send_message(user, "**Patientez...** | La durée"
+                               " peut être plus ou moins longue en fonction de la longueur du texte à résumer.")
+            await asyncio.sleep(1)
+            recap = self.recap_txt(texte)
+            if recap:
+                await self.bot.send_message(user, recap)
+            else:
+                await self.bot.send_message(user, "**Erreur** | Impossible de faire un résumé de ça.")
+
 
 def check_folders():
     if not os.path.exists("data/labo"):
@@ -107,4 +121,5 @@ def setup(bot):
     check_folders()
     check_files()
     n = Labo(bot)
+    bot.add_listener(n.reactrecap, "on_reaction_add")
     bot.add_cog(n)
