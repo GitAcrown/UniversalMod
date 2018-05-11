@@ -15,9 +15,9 @@ class Labo:
     @commands.command(pass_context=True)
     async def vaporwave(self, ctx, *texte):
         """Formatte un texte en ｖａｐｏｒｗａｖｅ"""
-        norm = [l for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 '"]
+        norm = [l for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 ',.&:;?!"]
         vapo = [l for l in "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ" \
-                           "１２３４５６７８９０　＇"]
+                           "１２３４５６７８９０　＇，．＆：；？！"]
         texte = " ".join(texte)
         fin_texte = texte
         for char in texte:
