@@ -511,6 +511,7 @@ class Social:
                                                                                              membre.display_name)
         pseudos, surnoms = self.api.namelist(membre)
         data = self.api.get(membre)
+        today = time.strftime("%d/%m/%Y", time.localtime())
         if data["SOC"]["DISPLAY"]:
             em = discord.Embed(color=self.api.color_disp(membre), description=data["SOC"]["BIO"])
             em.set_author(name=formatname, icon_url=data["SOC"]["DISPLAY"][1])
