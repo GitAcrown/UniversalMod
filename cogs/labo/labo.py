@@ -37,9 +37,10 @@ class Labo:
     @commands.command(pass_context=True, hidden=True)
     async def balance(self, ctx):
         """Permet de voir l'argent possédée (HIDDEN_TEST)"""
-        finance = self.bot.get_cog("Finance").api
-        solde = finance.get(ctx.message.author).solde
-        await self.bot.say("Vous avez {} {}".format(solde, finance.get_credits_str(ctx.message.server, solde)))
+        if os.path.exists("data/devfinance/eco.json")
+            finance = self.bot.get_cog("DevFinance").api
+            solde = finance.get_user(ctx.message.author).solde
+            await self.bot.say("Vous avez {} {}".format(solde, finance.get_credits_str(ctx.message.server, solde)))
 
     def recap_url(self, url: str, langue:str = "french", nb_phrases:int = 7):
         parser = HtmlParser.from_url(url, Tokenizer(langue))

@@ -23,6 +23,8 @@ class DevFinanceAPI:
         self.eco = dataIO.load_json(path)
         self.backup_eco = dataIO.load_json("data/finance/eco.json")
         self.backup_sys = dataIO.load_json("data/finance/sys.json")
+        self.sys_defaut = {"MONEY_NAME": "crédit", "MONEY_NAME_PLURIEL": "crédits", "MONEY_SYMBOLE": "cds",
+                           "MODDED": False, "COOLDOWN": {}, "GIFTCODES": {}}
 
     def backup(self):
         backup = {"USERS": self.backup_eco, "SYSTEM": self.backup_sys}
@@ -265,6 +267,18 @@ class DevFinanceAPI:
     def get_system(self):
         return self.eco["SYSTEM"]
 
+    def credits_str(self, server: discord.Server, nombre=None, reduc: bool = False):
+        if server.id not in self.eco["SYSTEM"]:
+            self.eco["SYSTEM"][server.id] = self.sys_defaut
+            fileIO("data/devfinance/sys.json", "save", self.eco)
+        if reduc:
+            return self.sys[server.id]["MONEY_SYMBOLE"]
+        if nombre:
+            if int(nombre) > 1:
+                return self.sys[server.id]["MONEY_NAME_PLURIEL"]
+            return self.sys[server.id]["MONEY_NAME"]
+        return self.sys[server.id]["MONEY_NAME_PLURIEL"]  # par défaut le pluriel
+
 class DevFinance:
     """DEV - Economie centralisée pour les divers jeux"""
     def __init__(self, bot):
@@ -277,7 +291,7 @@ class DevFinance:
     def credits_str(self, server: discord.Server, nombre=None, reduc: bool = False):
         if server.id not in self.sys:
             self.sys[server.id] = self.sys_defaut
-            fileIO("data/devfinance/sys.json", "save", self.sys)
+            self.api._save()
         if reduc:
             return self.sys[server.id]["MONEY_SYMBOLE"]
         if nombre:
