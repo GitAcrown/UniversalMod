@@ -510,7 +510,6 @@ class Social:
         formatname = membre.name if membre.display_name == membre.name else "{} «{}»".format(membre.name,
                                                                                              membre.display_name)
         pseudos, surnoms = self.api.namelist(membre)
-        jours
         data = self.api.get(membre)
         if data["SOC"]["DISPLAY"]:
             em = discord.Embed(color=self.api.color_disp(membre), description=data["SOC"]["BIO"])
