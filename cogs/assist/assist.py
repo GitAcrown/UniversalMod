@@ -421,9 +421,7 @@ class Assist:
                 if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
                     return  # Propose une aide sur la commande
                 if self.justice_on:
-                    if await self.execute(message, "p {}",
-                                          r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) "
-                                          r"<@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?"):
+                    if await self.execute(message, "p {}", r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) <@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?"):
                         return  # Met quelqu'un en prison ou le sort
 
     async def react(self, reaction, user):
