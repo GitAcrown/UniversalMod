@@ -416,9 +416,7 @@ class Assist:
                     return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
                 if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
                     return  # Propose une aide sur la commande
-                output = re.compile(
-                    r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) <@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?",
-                    re.IGNORECASE | re.DOTALL).findall(message)
+                output = re.compile(r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) <@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?", re.IGNORECASE | re.DOTALL).findall(message.content)
                 if output:
                     u = output[0]
                     plus = " {}".format(u[1]) if u[1] else ""
