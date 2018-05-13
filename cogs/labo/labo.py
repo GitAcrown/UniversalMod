@@ -93,17 +93,19 @@ class Labo:
     async def read(self, message):
         splitted = message.content.split(" ")
         server = message.channel.server
-        for e in splitted:
-            if e.startswith("http"):
-                if server.id not in self.sys:
-                    self.sys[server.id] = self.sys_def
-                    fileIO("data/labo/sys.json", "save", self.sys)
-                if e.lower() in self.sys[server.id]["REPOST"]:
-                    await self.bot.add_reaction(message, "®")
-                    self.sys[server.id]["REPOST"].append(e.lower())
-                    if len(self.sys[server.id]["REPOST"]) > 100:
-                        self.sys[server.id]["REPOST"].remove(self.sys[server.id]["REPOST"][0])
-                    fileIO("data/labo/sys.json", "save", self.sys)
+        if "http" in message.content:
+            for e in splitted:
+                if e.startswith("http"):
+                    if server.id not in self.sys:
+                        self.sys[server.id] = self.sys_def
+                        fileIO("data/labo/sys.json", "save", self.sys)
+                    if e.lower() in self.sys[server.id]["REPOST"]:
+                        await self.bot.add_reaction(message, "®")
+                    else:
+                        self.sys[server.id]["REPOST"].append(e.lower())
+                        if len(self.sys[server.id]["REPOST"]) > 100:
+                            self.sys[server.id]["REPOST"].remove(self.sys[server.id]["REPOST"][0])
+                        fileIO("data/labo/sys.json", "save", self.sys)
 
     async def reactrecap(self, reaction, user):
         message = reaction.message
