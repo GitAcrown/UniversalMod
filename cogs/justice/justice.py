@@ -317,7 +317,7 @@ class Justice:
                         estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                         msg = "{} ─ Ajout de **{}{}** de peine".format(user.mention, val, form)
                         estim_txt = "Sortie estimée à {}".format(estim)
-                        self.add_event(user, "+", "{}{}".format(val, form))
+                        self.add_event(user, "+", "{}{}".format(val, form), author=ctx.message.author)
 
                         em = discord.Embed(description=msg, color=apply.color)
                         em.set_footer(text=estim_txt)
@@ -337,7 +337,7 @@ class Justice:
                             estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                         msg = "{} ─ Réduction de **{}{}** de peine".format(user.mention, val, form)
                         estim_txt = "Sortie estimée à {}".format(estim)
-                        self.add_event(user, "-", "{}{}".format(val, form))
+                        self.add_event(user, "-", "{}{}".format(val, form), author=ctx.message.author)
 
                         em = discord.Embed(description=msg, color=apply.color)
                         em.set_footer(text=estim_txt)
@@ -391,7 +391,7 @@ class Justice:
                 await self.bot.add_roles(user, apply)
                 msg = "{} ─ Mise en prison pour **{}{}**".format(user.mention, val, form)
                 estim_txt = "Sortie estimée à {}".format(estim)
-                self.add_event(user, ">", "{}{}".format(val, form))
+                self.add_event(user, ">", "{}{}".format(val, form), author=ctx.message.author)
                 if prisonchan:
                     txt = "\nVous avez accès au salon *{}* pour toute réclamation".format(prisonchan)
                 else:
@@ -436,7 +436,7 @@ class Justice:
             else:
                 self.reg[server.id][user.id]["TS_ENTREE"] = self.reg[server.id][user.id]["TS_SORTIE"] = 0
                 await self.bot.remove_roles(user, apply)
-                self.add_event(user, "!<")
+                self.add_event(user, "!<", author=ctx.message.author)
                 em = discord.Embed(description="{} a été libéré par {}".format(
                     user.mention, ctx.message.author.mention), color=apply.color)
                 notif = await self.bot.say(embed=em)
