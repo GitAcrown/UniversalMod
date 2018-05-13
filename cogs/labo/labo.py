@@ -100,7 +100,7 @@ class Labo:
                         self.sys[server.id] = self.sys_def
                         fileIO("data/labo/sys.json", "save", self.sys)
                     if e.lower() in self.sys[server.id]["REPOST"]:
-                        await self.bot.add_reaction(message, "®")
+                        await self.bot.add_reaction(message, "♻")
                     else:
                         self.sys[server.id]["REPOST"].append(e.lower())
                         if len(self.sys[server.id]["REPOST"]) > 100:
