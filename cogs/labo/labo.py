@@ -18,7 +18,7 @@ class Labo:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/labo/sys.json")  # Pas très utile mais on le garde pour plus tard
-        self.sys_def = {}
+        self.sys_def = {"REPOST": []}
 
     @commands.command(pass_context=True)
     async def vaporwave(self, ctx, *texte):
@@ -33,14 +33,6 @@ class Labo:
                 ind = norm.index(char)
                 fin_texte = fin_texte.replace(char, vapo[ind])
         await self.bot.say("**Ｖａｐｏｒ** | {}".format(fin_texte))
-
-    @commands.command(pass_context=True, hidden=True)
-    async def balance(self, ctx):
-        """Permet de voir l'argent possédée (HIDDEN_TEST)"""
-        if os.path.exists("data/devfinance/eco.json")
-            finance = self.bot.get_cog("DevFinance").api
-            solde = finance.get_user(ctx.message.author).solde
-            await self.bot.say("Vous avez {} {}".format(solde, finance.get_credits_str(ctx.message.server, solde)))
 
     def recap_url(self, url: str, langue:str = "french", nb_phrases:int = 7):
         parser = HtmlParser.from_url(url, Tokenizer(langue))
@@ -98,6 +90,21 @@ class Labo:
         else:
             await self.bot.say("**Erreur** | Impossible de faire un résumé de ça.")
 
+    async def read(self, message):
+        splitted = message.content.split(" ")
+        server = message.channel.server
+        for e in splitted:
+            if e.startswith("http"):
+                if server.id not in self.sys:
+                    self.sys[server.id] = self.sys_def
+                    fileIO("data/labo/sys.json", "save", self.sys)
+                if e.lower() in self.sys[server.id]["REPOST"]:
+                    await self.bot.add_reaction(message, "®")
+                    self.sys[server.id]["REPOST"].append(e.lower())
+                    if len(self.sys[server.id]["REPOST"]) > 100:
+                        self.sys[server.id]["REPOST"].remove(self.sys[server.id]["REPOST"][0])
+                    fileIO("data/labo/sys.json", "save", self.sys)
+
     async def reactrecap(self, reaction, user):
         message = reaction.message
         server = message.channel.server
@@ -146,5 +153,6 @@ def setup(bot):
     check_folders()
     check_files()
     n = Labo(bot)
+    bot.add_listener(n.read, "on_message")
     bot.add_listener(n.reactrecap, "on_reaction_add")
     bot.add_cog(n)
