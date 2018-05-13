@@ -23,6 +23,10 @@ class Assist:
         self.sys = dataIO.load_json("data/assist/sys.json")
         self.def_sys = {"ASSIST": True, "ANTI-SPOIL": True, "ASSIST_BALISE": False, "AFK": [], "SPOILS": {}}
         self.session = aiohttp.ClientSession()
+        if os.path.exists("data/just"):
+            self.justice_on = True
+        else:
+            self.justice_on = False
 
     def __unload(self):
         self.session.close()
@@ -416,6 +420,11 @@ class Assist:
                     return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
                 if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
                     return  # Propose une aide sur la commande
+                if self.justice_on:
+                    if await self.execute(message, "p {}",
+                                          r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) "
+                                          r"<@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?"):
+                        return  # Met quelqu'un en prison ou le sort
 
     async def react(self, reaction, user):
         message = reaction.message
