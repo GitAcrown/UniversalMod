@@ -16,13 +16,13 @@ class Justice:
     """Module ajoutant des fonctionnalités avancées de modération"""
     def __init__(self, bot):
         self.bot = bot
-        self.sys = dataIO.load_json("data/just/sys.json")
+        self.sys = dataIO.load_json("data/justice/sys.json")
         self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE" : []}
-        self.reg = dataIO.load_json("data/just/reg.json")
+        self.reg = dataIO.load_json("data/justice/reg.json")
 
     def save(self):
-        fileIO("data/just/sys.json", "save", self.sys)
-        fileIO("data/just/reg.json", "save", self.reg)
+        fileIO("data/justice/sys.json", "save", self.sys)
+        fileIO("data/justice/reg.json", "save", self.reg)
         return True
 
     """@commands.command(aliases=["p", "jail"], pass_context=True)
@@ -152,7 +152,7 @@ class Justice:
         else:
             return val  # On considère alors que c'est déjà en secondes
 
-    def add_event(self, user: discord.Member, type: str, temps: str = None):
+    def add_event(self, user: discord.Member, type: str, temps: str = None, author: discord.Member = None):
         """Ajoute un event de la prison au serveur"""
         server = user.server
         if server.id not in self.sys:
@@ -160,7 +160,7 @@ class Justice:
         jour = time.strftime("%d/%m/%Y", time.localtime())
         heure = time.strftime("%H:%M", time.localtime())
         if type in ["+", "-", ">", "<", "!<", "x<", "r>"]:  # Ajout, Réduction, Entrée, Sortie, Sortie forcée, Sortie erreur, Retour en prison
-            self.sys[server.id]["HISTORIQUE"].append([jour, heure, type, temps, user.id])
+            self.sys[server.id]["HISTORIQUE"].append([jour, heure, type, temps, user.id, author.id if author else None])
             self.save()
             return True
         else:
@@ -242,11 +242,12 @@ class Justice:
             b.reverse()
             for e in b:
                 temps = e[3] + " " if e[3] else ""
+                auteur = " (par <@{}>)".format(e[5]) if e[5] else ""
                 user = server.get_member(e[4])
                 if e[0] == today:
-                    txt += "**{}** **{}** {}<@{}>\n".format(e[1], e[2], temps, user.id)
+                    txt += "**{}** **{}** {}<@{}>{}\n".format(e[1], e[2], temps, user.id, auteur)
                 else:
-                    txt += "**{}** **{}** {}<@{}>\n".format(e[0], e[2], temps, user.id)
+                    txt += "**{}** **{}** {}<@{}>{}\n".format(e[0], e[2], temps, user.id, auteur)
             em = discord.Embed(title="Historique de la Prison", description=txt)
             em.set_footer(text="Historique du serveur {}".format(server.name))
             await self.bot.say(embed=em)

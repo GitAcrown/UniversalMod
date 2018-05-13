@@ -23,7 +23,7 @@ class Assist:
         self.sys = dataIO.load_json("data/assist/sys.json")
         self.def_sys = {"ASSIST": True, "ANTI-SPOIL": True, "ASSIST_BALISE": False, "AFK": [], "SPOILS": {}}
         self.session = aiohttp.ClientSession()
-        if os.path.exists("data/just"):
+        if os.path.exists("data/justice"):
             self.justice_on = True
         else:
             self.justice_on = False
