@@ -81,10 +81,12 @@ class CapitalAPI:
             for serv in self.data:
                 server = self.bot.get_server(serv)
                 for member in server.members:
-                    liste.append(self.get_account(member))
+                    if self.get_account(member):
+                        liste.append(self.get_account(member))
         else:
             for member in server.members:
-                liste.append(self.get_account(member))
+                if self.get_account(member):
+                    liste.append(self.get_account(member))
         return liste
 
 # Snips TRANSACTION
