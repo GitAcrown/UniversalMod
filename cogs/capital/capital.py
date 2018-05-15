@@ -20,6 +20,8 @@ class CapitalAPI:
     def __init__(self, bot, path):
         self.bot = bot
         self.data = dataIO.load_json(path)
+        self.backup_eco = dataIO.load_json("data/finance/eco.json")
+        self.backup_sys = dataIO.load_json("data/finance/sys.json")
         self.sys_defaut = {"MONNAIE": {"SINGULIER": "crédit", "PLURIEL": "crédits", "SYMBOLE": "cds"},
                            "ONLINE": True,
                            "GIFTCODES": {}}
@@ -38,8 +40,23 @@ class CapitalAPI:
             self._save()
         return self.data[server.id]
 
-    def _backup_finance(self):
-        # TODO : Faire le système de Backup du module Finance (BETA)
+    def backup_finance(self, server: discord.Server):
+        if server.id in self.backup_eco:
+            users_backup = self.backup_eco[server.id]
+        else:
+            users_backup = {}
+        if server.id in self.backup_sys:
+            sys_backup = self.sys_defaut
+            sys_backup["MONNAIE"] = {"SINGULIER": self.backup_sys[server.id]["MONEY_NAME"],
+                                     "PLURIEL": self.backup_sys[server.id]["MONEY_NAME_PLURIEL"],
+                                     "SYMBOLE": self.backup_sys[server.id]["MONEY_SYMBOLE"]}
+            sys_backup["ONLINE"] = self.backup_sys[server.id]["MODDED"]
+            sys_backup["GIFTCODES"] = {}
+        else:
+            sys_backup = self.sys_defaut
+        backup = {"USERS": users_backup, "SYSTEM": sys_backup}
+        self.data[server.id] = backup
+        self._save()
         return True
 
 # Snips USER
@@ -49,9 +66,9 @@ class CapitalAPI:
         data = self._get_server_raw_data(server)["USERS"]
         if user.id not in data:
             data[user.id] = {"SOLDE": 100,
-                                        "TRSAC": [],
-                                        "EXTRA": {},
-                                        "CREE": datetime.datetime.now().strftime("%d/%m/%Y à %H:%M")}
+                             "TRSAC": [],
+                             "EXTRA": {},
+                             "CREE": datetime.datetime.now().strftime("%d/%m/%Y à %H:%M")}
             self._save()
             return True
         return False
@@ -929,6 +946,12 @@ class Capital:
         self.api.reset_server_data(ctx.message.server)
         await self.bot.say("**Succès** | Toutes les données du serveur ont été reset")
 
+    @_modbanque.command(pass_context=True, hidden=True)
+    async def backupfinance(self, ctx):
+        """Permet de backup les données du module Finance pour ce serveur"""
+        server = ctx.message.server
+        self.api.backup_finance(ctx.message.server)
+        await self.bot.say("**Succès** | Les données de Finance ont été importées")
 
 def check_folders():
     if not os.path.exists("data/capital"):
