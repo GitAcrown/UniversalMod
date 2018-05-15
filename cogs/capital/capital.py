@@ -323,6 +323,9 @@ class CapitalAPI:
     def is_cooldown_blocked(self, user: discord.Member, nom: str):  # Bloqué par le cooldown ?
         server = user.server
         now = time.time()
+        if server.id not in self.cooldown:
+            self.cooldown[server.id] = {}
+            return False
         if nom.lower() not in self.cooldown[server.id]:
             return False
         if user.id in self.cooldown[server.id][nom.lower()]:
