@@ -762,7 +762,7 @@ class Capital:
         codes = []
         for i in range(n):
             if nom.upper() in codes:
-                code = nom.upper() + "-{}".format(n + 1)
+                code = nom.upper() + "-{}".format(i + 1)
             else:
                 code = nom.upper()
             codes.append(code)
