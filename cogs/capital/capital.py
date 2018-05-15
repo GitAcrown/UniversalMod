@@ -48,14 +48,13 @@ class CapitalAPI:
         server = user.server
         data = self._get_server_raw_data(server)["USERS"]
         if user.id not in data:
-            data[server.id][user.id] = {"SOLDE": 100,
+            data[user.id] = {"SOLDE": 100,
                                         "TRSAC": [],
                                         "EXTRA": {},
                                         "CREE": datetime.datetime.now().strftime("%d/%m/%Y à %H:%M")}
             self._save()
             return True
-        else:
-            return False
+        return False
 
     def _account_obj(self, user: discord.Member):  # On change de Compte à Account pour dégager le franglish
         server = user.server
