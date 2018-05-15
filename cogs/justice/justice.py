@@ -228,11 +228,11 @@ class Justice:
             self.sys[server.id] = self.base_sys
         if self.sys[server.id]["PRISON_SALON"] and self.sys[server.id]["PRISON_ROLE"]:
             targets = ""
+            role = discord.utils.get(server.roles, name=self.sys[server.id]["PRISON_ROLE"])
             for channel in server.channels:
                 if channel.id != self.sys[server.id]["PRISON_SALON"]:
-                    role = discord.utils.get(server.roles, name=self.sys[server.id]["PRISON_ROLE"])
                     over = channel.overwrites_for(role)
-                    if over.send_messages is True:
+                    if over.send_messages is True or over.send_messages is None:
                         targets += "- {} 🔄\n".format(channel.mention)
                         newover = discord.PermissionOverwrite()
                         newover.send_messages = False
