@@ -761,7 +761,7 @@ class Capital:
     def gen_giftcode(self, nom, n: int = 1):
         codes = []
         for i in range(n):
-            if i in codes:
+            if nom.upper() in codes:
                 code = nom.upper() + "-{}".format(n + 1)
             else:
                 code = nom.upper()
