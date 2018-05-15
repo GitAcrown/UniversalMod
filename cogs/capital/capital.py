@@ -613,8 +613,11 @@ class Capital:
         if self.api.get_account(user).solde < 10000:
             if date != data["EXTRA"]["REVENU_JOURNALIER"]:
                 back = data["EXTRA"]["REVENU_JOURNALIER"]
-                delta = int((time.mktime(time.strptime(date, "%d/%m/%Y")) - time.mktime(time.strptime(
-                    back, "%d/%m/%Y"))) / 86400)
+                if back:
+                    delta = int((time.mktime(time.strptime(date, "%d/%m/%Y")) - time.mktime(time.strptime(
+                        back, "%d/%m/%Y"))) / 86400)
+                else:
+                    delta = 1
                 data["EXTRA"]["REVENU_JOURNALIER"] = date
                 rj = delta * 50
                 if delta > 1:
