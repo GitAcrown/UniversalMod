@@ -571,6 +571,10 @@ class Capital:
             raison = " ".join(raison)
         if somme <= 0:
             await self.bot.say("**Erreur** | La somme doit être positive")
+        if not self.api.get_account(ctx.message.author):
+            done = await self.api.inscription(ctx)
+            if not done:
+                return
         if self.api.get_account(user):
             if self.api.get_account(ctx.message.author):
                 if self.api.transfert_credits(user, ctx.message.author, somme, raison):
