@@ -593,7 +593,7 @@ class Capital:
 
 # JEUX & DIVERS
 
-    @commands.command(aliases=["r", "rj"], pass_context=True)
+    @commands.command(aliases=["rj"], pass_context=True)
     async def revenu(self, ctx):
         """Récupérer les revenus personnels"""
         user = ctx.message.author
@@ -750,7 +750,7 @@ class Capital:
     @commands.group(name="modbanque", aliases=["modbank", "mb"], pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
     async def _modbanque(self, ctx):
-        """Paramètres du module Finance et commandes de modération"""
+        """Paramètres du module Capital et commandes de modération"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
