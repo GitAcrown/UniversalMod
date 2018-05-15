@@ -220,6 +220,32 @@ class Justice:
         await self.bot.say("**Succès** | Le rôle de prisonnier est désormais *{}*\n"
                            "Vérifiez que les permissions sur les salons soient corrects".format(role.name))
 
+    @_modprison.command(pass_context=True)
+    async def verifperms(self, ctx):
+        """Vérifie les permissions des prisonniers et les corrige si besoin"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if self.sys[server.id]["PRISON_SALON"] and self.sys[server.id]["PRISON_ROLE"]:
+            targets = ""
+            for channel in server.channels:
+                if channel.id != self.sys[server.id]["PRISON_SALON"]:
+                    role = discord.utils.get(server.roles, name=self.sys[server.id]["PRISON_ROLE"])
+                    over = channel.overwrites_for(role)
+                    if over.send_messages is True:
+                        targets += "- {} 🔄\n".format(channel.mention)
+                        newover = discord.PermissionOverwrite()
+                        newover.send_messages = False
+                        await self.bot.edit_channel_permissions(channel, role, newover)
+                    else:
+                        targets += "- {} ✅\n".format(channel.mention)
+            em = discord.Embed(title="Channels vérifiés", description=targets)
+            em.set_footer(text="✅ = Permissions correctes | 🔄 = Permissions corrigées")
+            await self.bot.say(embed=em)
+        else:
+            await self.bot.say("**Impossible** | Vous devez d'abord régler le rôle"
+                               " `{0}mp role` et le channel de la prison `{0}mp salon`".format(ctx.prefix))
+
     @commands.command(aliases=["ph"], pass_context=True)
     async def historique(self, ctx, nb: int = 10):
         """Voir l'historique de la prison sur ce serveur
@@ -487,6 +513,8 @@ class Justice:
                             em = discord.Embed(description="**Sortie de** <@{}> | Il n'est plus sur le serveur.")
                             self.add_event(user, "x<")
                             notif = await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
+
+
 
 
 def check_folders():
