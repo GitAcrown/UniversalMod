@@ -253,7 +253,7 @@ class CapitalAPI:
         code = code.upper()
         if type(gift) == int:
             self.depot_credits(user, gift, "Code /{}/".format(code))
-            del self.data["SYSTEM"][user.server.id]["GIFTCODES"][code]
+            del self.data[user.server.id]["SYSTEM"]["GIFTCODES"][code]
             self._save()
             return True
         elif type(gift) == str:
