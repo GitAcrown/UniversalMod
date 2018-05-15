@@ -60,7 +60,7 @@ class CapitalAPI:
         server = user.server
         data = self._get_server_raw_data(server)["USERS"][user.id]
         Account = namedtuple('Account', ['id', 'extra', 'solde', 'historique', 'transactions', 'timestamp'])
-        return Account(user.id, user["EXTRA"], user["SOLDE"], user["TRSAC"], user["TRSAC"], user["CREE"])
+        return Account(user.id, data["EXTRA"], data["SOLDE"], data["TRSAC"], data["TRSAC"], data["CREE"])
 
     def get_account(self, user: discord.Member, w: bool = False, m: bool = False):
         server = user.server
