@@ -134,10 +134,10 @@ class Russianroulette:
                 txt = "{} à lancé une partie de Roulette avec une offre de départ de **{} {}**.".format(user.mention, bet,
                                                                                                     money)
                 em = discord.Embed(title="Roulette russe", description=txt, color=0x6b554e)
-                em.set_footer(text="Le jeu commence dans 30 secondes ou si 5 autres joueurs y participe. "
+                em.set_footer(text="Le jeu commence dans 45 secondes ou si 5 autres joueurs y participe. "
                                    "({}rr <offre>)".format(ctx.prefix))
                 await self.bot.say(embed=em)
-                await asyncio.sleep(30)
+                await asyncio.sleep(45)
                 if len(settings["Players"].keys()) == 1:
                     seultxt = ["Désolé mais je ne vais pas vous laisser tirer une "
                                "balle dans la tête sans personne pour y assister.",
