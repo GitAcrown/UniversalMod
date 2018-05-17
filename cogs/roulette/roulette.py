@@ -166,7 +166,7 @@ class Russianroulette:
                         if i + 1 < len(settings["Players"].keys()):
                             balles = "•" * (i + 1)
                         else:
-                            balles = "•" * (len(settings["Players"].keys()) - 1)
+                            balles = "•" * (len(settings["Players"].keys()))
                         em = discord.Embed(title="Préparation de la Roulette".format(user.name), description=etapes[i],
                                            color=0x6b554e)
                         em.set_footer(text=balles)
@@ -215,6 +215,7 @@ class Russianroulette:
                 em = discord.Embed(title="Roulette russe ─ Gagnant", description=txt, color=0x6b554e)
                 em.set_footer(text="{} {} ont été déposés sur le compte de {}".format(
                     pot, cap.get_money(server, pot), winner.name))
+                await self.bot.say(embed=em)
                 cap.depot_credits(winner, pot, "Gain Roulette")
                 break
 
@@ -239,7 +240,7 @@ class Russianroulette:
                 player.name))
             if chance == 1:
                 await asyncio.sleep(4)
-                msg = "**BANG**\n```{} est {}.```".format(player.name, random.choice(["mort", "décédé", "kaputt",
+                msg = "**BANG** ─ **{}** est {}.".format(player.name, random.choice(["mort", "décédé", "kaputt",
                                                                                       "inanimé"]))
                 await self.bot.say(msg)
                 msg2 = random.choice(kill_message)
@@ -249,11 +250,11 @@ class Russianroulette:
                 death_time = strftime("%H:%M:%S", gmtime())
                 await asyncio.sleep(3)
                 await self.bot.say(msg2.format(player.name, player2.name, death_time))
-                await asyncio.sleep(5)
+                await asyncio.sleep(3)
                 break
             else:
                 await asyncio.sleep(3)
-                await self.bot.say("**CLIC**\n```{} a survécu.```".format(player.name))
+                await self.bot.say("**CLIC** ─ **{}** a survécu.".format(player.name))
                 await asyncio.sleep(3)
                 roulette_circle.remove(player)
                 chamber -= 1
