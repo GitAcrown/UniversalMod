@@ -141,15 +141,15 @@ class Russianroulette:
                 if len(settings["Players"].keys()) == 1:
                     seultxt = ["Désolé mais je ne vais pas vous laisser tirer une "
                                "balle dans la tête sans personne pour y assister.",
-                               "La Roulette russe c'est plus fun à plusierus, là vous êtes seul.",
+                               "La Roulette russe c'est plus fun à plusierus, là vous êtes seul·e.",
                                "Non, je ne vais pas vous laisser vous suicider...",
-                               "Je suis sadique, mais pas au point de vous laisser mourir seul et sans amis.",
+                               "Je suis sadique, mais pas au point de vous laisser mourir seul·e et sans amis.",
                                "Personne ne vous a rejoint, on dirait qu'ils ne sont pas aussi fous que vous.",
                                "Vous avez de la chance, on dirait que vous ne pouvez "
-                               "pas participer vu que vous êtes seul.",
-                               "Dommage que vous soyez seul, plus on est de fous plus on rit.",
-                               "J'étais pret mais apparemment vous êtes seul... inutile."]
-                    await self.bot.say("**Seul...** | {}".format(random.choice(seultxt)))
+                               "pas participer vu que vous êtes seul·e.",
+                               "Dommage que vous soyez seul·e, plus on est de fous plus on rit.",
+                               "J'étais pret mais apparemment vous êtes seul·e... inutile."]
+                    await self.bot.say("**Seul·e...** | {}".format(random.choice(seultxt)))
                     player = list(settings["Players"].keys())[0]
                     mobj = server.get_member(player)
                     initial_bet = settings["Players"][player]["Bet"]
@@ -242,8 +242,8 @@ class Russianroulette:
                 player.name))
             if chance == 1:
                 await asyncio.sleep(4)
-                msg = "**BANG** ─ **{}** est {}.".format(player.name, random.choice(["mort", "décédé", "kaputt",
-                                                                                      "inanimé"]))
+                msg = "**BANG** ─ **{}** est {}.".format(player.name, random.choice(["mort·e", "décédé·e", "kaputt",
+                                                                                      "inanimé·e"]))
                 await self.bot.say(msg)
                 msg2 = random.choice(kill_message)
                 settings["Players"].pop(player.id)
@@ -256,7 +256,7 @@ class Russianroulette:
                 break
             else:
                 await asyncio.sleep(3)
-                await self.bot.say("**CLIC** ─ **{}** a survécu.".format(player.name))
+                await self.bot.say("**CLIC** ─ **{}** a survécu·e.".format(player.name))
                 await asyncio.sleep(3)
                 roulette_circle.remove(player)
                 chamber -= 1
