@@ -98,7 +98,9 @@ class Russianroulette:
 
     @commands.command(pass_context=True, no_pm=True, aliases=["rr", "roulette"])
     async def russian(self, ctx, offre: int):
-        """Lance une partie de Roulette russe"""
+        """Lance une partie de Roulette russe
+
+        Attention : Léger flood du salon du jeu"""
         bet = offre
         user = ctx.message.author
         server = ctx.message.server
@@ -132,8 +134,8 @@ class Russianroulette:
                 txt = "{} à lancé une partie de Roulette avec une offre de départ de **{} {}**.".format(user.mention, bet,
                                                                                                     money)
                 em = discord.Embed(title="Roulette russe", description=txt, color=0x6b554e)
-                em.set_footer(text="Le jeu commence dans 30 secondes ou si 5 autres joueurs viennent"
-                                   " se joindre à la partie.")
+                em.set_footer(text="Le jeu commence dans 30 secondes ou si 5 autres joueurs y participe. "
+                                   "({}rr <offre>)".format(ctx.prefix))
                 await self.bot.say(embed=em)
                 await asyncio.sleep(30)
                 if len(settings["Players"].keys()) == 1:
