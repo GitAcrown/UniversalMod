@@ -104,6 +104,10 @@ class Russianroulette:
         server = ctx.message.server
         settings = self.check_server_settings(server)
         cap = self.bot.get_cog("Capital").api
+        if not cap.get_account:
+            done = await cap.inscription(ctx)
+            if not done:
+                return
         if await self.logic_checks(settings, user, bet, ctx):
             if settings["System"]["Roulette Initial"]:
                 if user.id in settings["Players"]:
@@ -177,8 +181,6 @@ class Russianroulette:
 
     async def logic_checks(self, settings, user, bet, ctx):
         cap = self.bot.get_cog("Capital").api
-        if not cap.get_account:
-            await cap.inscription(ctx)
         if settings["System"]["Active"]:
             await self.bot.say("**En cours** | Attendez que la partie se termine avant d'en démarrer une autre.")
             return False
@@ -190,7 +192,7 @@ class Russianroulette:
             await self.bot.say("**Maximum de joueurs** | Trop de joueurs jouent actuellement.")
             return False
         elif not self.enough_credits(user, bet):
-            await self.bot.say("**Banque** | Vous n'avez pas assez de crédit.")
+            await self.bot.say("**Banque** | Vous n'avez pas assez de crédit ou vous n'avez pas de compte.")
             return False
         else:
             return True
