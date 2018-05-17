@@ -172,7 +172,7 @@ class CapitalAPI:
             return False
         return sum([u.solde for u in self.get_all_accounts(server)])
 
-    def enough_credits(self, user:discord.Member, need: int):
+    def enough_credits(self, user: discord.Member, need: int):
         data = self.get_account(user)
         if data:
             if data.solde - need >= 0:
