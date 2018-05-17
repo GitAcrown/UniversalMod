@@ -96,8 +96,10 @@ class Russianroulette:
         self.reset_game(settings)
         await self.bot.say("**Reset** | Le jeu a été reset avec succès.")
 
-    @commands.command(pass_context=True, no_pm=True, aliases=["rr"])
-    async def russian(self, ctx, bet: int):
+    @commands.command(pass_context=True, no_pm=True, aliases=["rr", "roulette"])
+    async def russian(self, ctx, offre: int):
+        """Lance une partie de Roulette russe"""
+        bet = offre
         user = ctx.message.author
         server = ctx.message.server
         settings = self.check_server_settings(server)
