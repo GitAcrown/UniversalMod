@@ -46,7 +46,7 @@ kill_message = ["Finalement {0} en avait dans la cervelle !",
                 "{0} disait qu'il voulait avoir une mort digne. Loupé.",
                 "Tun tun tun, *another one bites the dust*",
                 "Bon arrête de pleurer {1}. {0} sait parfaitement ce qu'il fait c'est un PROFESSIONNEL.",
-                "Donc c'est à ça vous ressembler à l'intérieur !",
+                "Donc c'est à ça vous ressemblez à l'intérieur !",
                 "Mes condoléances {1}. Je sais que tu étais *très* proche de {0}.",
                 "NON, DÎTES MOI QUE CE N'EST PAS VRAI ? OSEF.",
                 "Heure de mort {2}. Origine : la stupidité.",
@@ -54,7 +54,7 @@ kill_message = ["Finalement {0} en avait dans la cervelle !",
                 "Ne fais pas genre, tu as adoré {1} !",
                 "MAIEUH, je voulais que ce soit {1} !",
                 "Oh GE-NI-AL, {0} crève et on se retrouve avec {1}. Vraiment. Génial.",
-                "Est-ce que tu manges ? T'as aucun respect {1}! {0} vient de creuver !"]
+                "Est-ce que tu manges ? T'as aucun respect {1} ! {0} vient de creuver !"]
 
 
 class Russianroulette:
@@ -238,7 +238,7 @@ class Russianroulette:
                 roulette_circle = players[:]
             chance = random.randint(1, chamber)
             player = random.choice(roulette_circle)
-            await self.bot.say("{} presse le révolver à sa tampe et appuie doucement sur la détente...".format(
+            await self.bot.say("{} presse le révolver à sa tempe et appuie doucement sur la détente...".format(
                 player.name))
             if chance == 1:
                 await asyncio.sleep(4)
