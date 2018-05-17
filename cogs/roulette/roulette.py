@@ -157,7 +157,7 @@ class Russianroulette:
                     settings["System"]["Active"] = True
                     m = None
                     etapes = ["Le jeu va pouvoir démarrer !",
-                              "Je vais mettre des balles dans ce **revolver**...",
+                              "Je vais mettre une balle dans ce **revolver**...",
                               "...puis **le faire tourner** un coup...",
                               "...et vous allez **vous le passer l'un après l'autre**...",
                               "...jusqu'à que l'un de vous **s'explose la tête** !",
