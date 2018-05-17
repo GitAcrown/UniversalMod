@@ -275,7 +275,7 @@ class Russianroulette:
 
     def subtract_credits(self, settings, user, bet):
         cap = self.bot.get_cog("Capital").api
-        cap.perte_credits(user, bet, "Perte Roulette")
+        cap.perte_credits(user, bet, "Offre Roulette")
 
     def enough_credits(self, user, amount):
         cap = self.bot.get_cog("Capital").api
