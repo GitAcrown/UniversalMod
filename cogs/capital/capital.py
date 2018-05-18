@@ -652,7 +652,7 @@ class Capital:
                     rj = delta * 50
                     self.api.depot_credits(user, rj, "Revenus journaliers")
                 em = discord.Embed(title="Revenu{}".format("s" if delta > 1 else ""),
-                                   description="**+{} {}**{}".format(rj, self.api.get_money(server, rj), mult),
+                                   description="Voici votre revenu: **+{} {}**{}".format(rj, self.api.get_money(server, rj), mult),
                                    color=ctx.message.author.color)
                 await self.bot.say(embed=em)
             else:

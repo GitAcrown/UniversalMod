@@ -3,7 +3,7 @@
 import asyncio
 import os
 import random
-from time import gmtime, strftime
+from time import strftime, localtime
 
 import discord
 from __main__ import send_cmd_help
@@ -249,7 +249,7 @@ class Russianroulette:
                 settings["Players"].pop(player.id)
                 remaining = [server.get_member(x) for x in list(settings["Players"].keys())]
                 player2 = random.choice(remaining)
-                death_time = strftime("%H:%M:%S", gmtime())
+                death_time = strftime("%H:%M:%S", localtime())
                 await asyncio.sleep(3)
                 await self.bot.say(msg2.format(player.name, player2.name, death_time))
                 await asyncio.sleep(3)
