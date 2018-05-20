@@ -292,11 +292,17 @@ class Justice:
             self.save()
             return
         txt = ""
+        al = []
         for u in self.reg[server.id]:
             if self.reg[server.id][u]["TS_SORTIE"] >= time.time():
+                al.append(u)
                 user = server.get_member(u)
                 estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                 txt += "{} ─ Sortie à `{}`\n".format(user.mention, estim)
+        for member in server.members:
+            if self.sys[server.id]["PRISON_ROLE"] in [r.name for r in member.roles]:
+                if member.id not in al:
+                    txt += "{} ─ Heure de sortie inconnue\n".format(member.mention)
         if txt == "":
             await self.bot.say("**Vide** | Aucun membre n'est emprisonné en ce moment même.")
             return
@@ -475,7 +481,6 @@ class Justice:
         server = user.server
         chanp = self.sys[server.id]["PRISON_SALON"]
         role = self.sys[server.id]["PRISON_ROLE"]
-        save = user.name
         apply = discord.utils.get(server.roles, name=role)
         if user.id in self.reg[server.id]:
             if role not in [r.name for r in user.roles]:
@@ -513,8 +518,8 @@ class Justice:
                             em = discord.Embed(description="**Sortie de** <@{}> | Il n'est plus sur le serveur.")
                             self.add_event(user, "x<")
                             notif = await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
-
-
+                        else:
+                            pass
 
 
 def check_folders():
