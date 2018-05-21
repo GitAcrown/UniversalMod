@@ -59,7 +59,8 @@ class Labo:
         self.clean_chronos(user)
         if not identifiant:
             txt = ""
-            for e in self.msg[user.id]:
+            hist = [e for e in self.msg[user.id]]
+            for e in hist:
                 txt += "**{}** ─ {}: `{}`\n".format(e[1], e[2], e[3])
             em = discord.Embed(title="Historique CHRONOS", description=txt, color=user.color)
             em.set_footer(text="Entrez l'identifiant du message pour voir l'historique")
@@ -88,7 +89,7 @@ class Labo:
         else:
             txt = "*{}*\n─ {}".format(ch.message_before, ch.heure)
             em = discord.Embed(title="Message avant suppression", description=txt, color=user.color)
-            em.set_footer(text="Auteur ─ {} | L'action expirera à minuit")
+            em.set_footer(text="Auteur ─ {} | L'action expirera à minuit".format(user.name))
             await self.bot.say(embed=em)
 
     @commands.command(pass_context=True)
