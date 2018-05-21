@@ -914,8 +914,8 @@ class Echo:
                         if heure not in self.cooldown:
                             self.cooldown = {heure: []}
                         self.cooldown[heure].append(author.id)
-                        if self.cooldown[heure].count(author.id) > 3:
-                            await self.bot.send_message(author.id, "**Cooldown** | Patientez quelques secondes avant de"
+                        if self.cooldown[heure].count(author.id) > self.sys[server.id]["COOLDOWN"]:
+                            await self.bot.send_message(author, "**Cooldown** | Patientez quelques secondes avant de"
                                                                    " poster d'autres stickers...")
                             return
 
