@@ -73,12 +73,12 @@ class Echo:
 
     def get_sticker(self, server: discord.Server, nom: str, w: bool = False):
         self._set_server(server)
-        stk = self._obj_sticker(server, nom)
-        if stk:
-            if self.data[server.id][stk.id]["APPROB"]:
-                if w:
-                    return self.data[server.id][stk.id]
-                return stk
+        for stk in self.data[server.id]:
+            if nom == self.data[server.id][stk]["NOM"]:
+                if self.data[server.id][stk]["APPROB"]:
+                    if w:
+                        return self.data[server.id][stk.id]
+                    return self._obj_sticker(server, nom)
         else:
             return False
 
@@ -426,12 +426,12 @@ class Echo:
                     if file in os.listdir(splitted):
                         try:
                             os.remove(stk.path)
-                            txt = "─ Fichier local supprimé\n"
+                            txt += "─ Fichier local supprimé\n"
                         except:
                             pass
                 del self.data[server.id][stk.id]
                 self.save()
-                txt = "─ Données supprimées"
+                txt += "─ Données supprimées"
                 em = discord.Embed(title="Suppression de {}".format(nom), description=txt)
                 em.set_footer(text="Sticker supprimé avec succès")
                 await self.bot.say(embed=em)
@@ -460,7 +460,7 @@ class Echo:
                 while True:
                     infos = self.get_sticker(server, nom)
                     if infos.path:
-                        poids = int(os.path.getsize(infos.path)) / 100
+                        poids = int(os.path.getsize(infos.path)) / 1000
                     txt = "\🇦 ─ Nom: `{}`\n".format(infos.nom)
                     txt += "\🇧 ─ URL: `{}`\n".format(infos.url)
                     txt += "\🇨 ─ Affichage: `{}`\n".format(infos.display)
@@ -831,7 +831,7 @@ class Echo:
         Taille maximale allouée"""
         result = self.get_size("data/echo/img/{}/".format(ctx.message.server.id))
         await self.bot.say("**Taille du fichier** ─ {} MB\n"
-                           "**Taille maximale autorisée** ─ 500 MB\n".format(result / 100000))
+                           "**Taille maximale autorisée** ─ 500 MB\n".format(result / 1000000))
 
     @_stkmod.command(pass_context=True)
     async def reset(self, ctx):
