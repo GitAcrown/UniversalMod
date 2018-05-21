@@ -482,7 +482,7 @@ class Echo:
                     txt += "\🇩 ─ Téléchargé: `{}`{}\n".format(
                         True if infos.path else False, "" if not infos.path else " ({} KB)".format(poids))
                     if infos.type != "IMAGE":
-                        txt += "\n\n[**Fichier multimédia**]({})".format(stk.url)
+                        txt += "\n\n[**Fichier multimédia**]({})".format(infos.url)
                     em = discord.Embed(title="Modifier {}".format(infos.id), description=txt, color=author.color)
                     if infos.type == "IMAGE":
                         em.set_image(url=infos.url)
