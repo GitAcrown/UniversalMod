@@ -281,6 +281,7 @@ class Echo:
         nb = output[1]
         poids = self.get_size(storage)
         replace = False
+        self._set_server(server)
         if self.get_sticker(server, nom):
             if nom == racine:
                 prefix = self.bot.settings.get_prefixes(server)[0]
@@ -424,6 +425,7 @@ class Echo:
         """Supprimer un sticker"""
         author = ctx.message.author
         server = ctx.message.server
+        self._set_server(server)
         if self.get_perms(author, "SUPPRIMER"):
             stk = self.get_sticker(server, nom)
             if stk:
@@ -461,6 +463,7 @@ class Echo:
         author = ctx.message.author
         server = ctx.message.server
         storage = "data/echo/img/{}/".format(server.id)
+        self._set_server(server)
         if self.get_perms(author, "EDITER"):
             stk = self.get_sticker(server, nom, w=True)
             if stk:
@@ -638,6 +641,7 @@ class Echo:
         """Approuver un sticker proposé par un membre du serveur"""
         author = ctx.message.author
         server = ctx.message.server
+        self._set_server(server)
         if nom:
             if self.get_perms(author, "AJOUTER"):
                 stk = self.get_sticker(server, nom, w=True)
