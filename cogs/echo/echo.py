@@ -869,7 +869,7 @@ class Echo:
                         if self.cooldown[heure].count(author.id) > 3:
                             return
 
-                        if e[1] not in self.get_all_stickers(server):
+                        if e[1] not in [n.nom for n in self.get_all_stickers(server)]:
                             if self.sys[server.id]["CORRECT"]:
                                 liste = []
                                 for s in self.get_all_stickers(server):
@@ -880,7 +880,7 @@ class Echo:
                                 e = [e[0], self.get_sticker(server, racine).nom]
                                 # On préfère la racine pour éviter d'envoyer des stickers random
 
-                        if e[1] in self.get_all_stickers(server):
+                        if e[1] in [n.nom for n in self.get_all_stickers(server)]:
                             stk = self.get_sticker(server, e[1])
                             affichage = stk.display
 
