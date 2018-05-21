@@ -284,9 +284,9 @@ class Echo:
                 return
             else:
                 em = discord.Embed(description="**{}** existe déjà. Que voulez-vous faire ?\n\n"
-                                               "❎ ─ Annuler\n"
-                                               "♻ ─ Remplacer le sticker existant\n"
-                                               "❇ ─ Intégrer à la collection `{}`".format(nom, racine))
+                                               "\❎ ─ Annuler\n"
+                                               "\♻ ─ Remplacer le sticker existant\n"
+                                               "\❇ ─ Intégrer à la collection `{}`".format(nom, racine))
                 em.set_footer(text="Choisissez l'action à réaliser avec les réactions ci-dessous")
                 msg = await self.bot.say(embed=em)
                 await self.bot.add_reaction(msg, "❎")
