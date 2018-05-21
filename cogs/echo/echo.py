@@ -683,7 +683,10 @@ class Echo:
             else:
                 await self.bot.say("**Impossible** | Vous n'avez pas la permission de réaliser cette action")
         else:
-            txt = "\n".join([s.nom for s in self.get_all_stickers(server, True) if s.approb is False])
+            txt = ""
+            for s in self.get_all_stickers(server, True):
+                if s.approb is False:
+                    txt = "`{}`\n".format(s.nom)
             em = discord.Embed(title="Sticker en attente d'approbation", description=txt, color=author.color)
             em.set_footer(text="Approuvez un sticker avec {}stk approb <nom>".format(ctx.prefix))
             await self.bot.say(embed=em)
