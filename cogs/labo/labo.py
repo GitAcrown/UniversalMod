@@ -185,7 +185,7 @@ class Labo:
             self.msg[user.id] = []
         jour = time.strftime("%d/%m/%Y", time.localtime())
         heure = time.strftime("%H:%M", time.localtime())
-        messageid = before.id if not self.get_chronos_obj(user, before.id) else "{}-{}".format(
+        messageid = before.id if not self.get_chronos_obj(user, before.id) else "{}{}".format(
             before.id, time.strftime("%H%M%S", time.localtime()))
         self.msg[user.id].append([jour, heure, "EDIT", messageid, before.content, after.content])
 
@@ -195,7 +195,7 @@ class Labo:
             self.msg[user.id] = []
         jour = time.strftime("%d/%m/%Y", time.localtime())
         heure = time.strftime("%H:%M", time.localtime())
-        messageid = message.id if not self.get_chronos_obj(user, message.id) else "{}-{}".format(
+        messageid = message.id if not self.get_chronos_obj(user, message.id) else "{}{}".format(
             message.id, time.strftime("%H%M%S", time.localtime()))
         self.msg[user.id].append([jour, heure, "SUPPR", messageid, message.content, None])
 
