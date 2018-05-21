@@ -55,7 +55,7 @@ class Echo:
         """Renvoie l'objet Sticker() contenant toutes ses données"""
         self._set_server(server)
         for stk in self.data[server.id]:
-            if nom is self.data[server.id][stk]["NOM"]:
+            if nom == self.data[server.id][stk]["NOM"]:
                 data = self.data[server.id][stk]
                 output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(nom)[0]
                 racine = output[0]
@@ -75,10 +75,12 @@ class Echo:
         self._set_server(server)
         stk = self._obj_sticker(server, nom)
         if stk:
-            if stk.approb:
-                return stk if not w else self.data[server.id][stk.id]
+            if self.data[server.id][stk.id]["APPROB"]:
+                if w:
+                    return self.data[server.id][stk.id]
+                return stk
         else:
-            return False  # TODO : Utiliser levenstein pour retrouver le sticker
+            return False
 
     def get_all_stickers(self, server: discord.Server):
         self._set_server(server)
@@ -128,18 +130,6 @@ class Echo:
                                           "APPROB": self.get_perms(author, "AJOUTER")}
             self.save()
             return True if self.get_perms(author, "EDITER") else False
-        return False
-
-    def approb_sticker(self, user: discord.Member, identifiant: int):
-        """Approuver un sticker en attente"""
-        server = user.server
-        self._set_server(server)
-        if identifiant in self.data[server.id]:
-            if not self.data[server.id][identifiant]["APPROB"]:
-                if self.get_perms(user, "AJOUTER"):
-                    self.data[server.id][identifiant]["APPROB"] = True
-                    self.save()
-                    return True
         return False
 
     def get_collection(self, server: discord.Server, racine: str):
@@ -645,8 +635,8 @@ class Echo:
         if nom:
             if self.get_perms(author, "AJOUTER"):
                 stk = self.get_sticker(server, nom, w=True)
-                sid = self.get_sticker(server, nom).id
                 if stk:
+                    sid = self.get_sticker(server, nom).id
                     em = discord.Embed(title="{}, proposé par {}".format(
                         stk["NOM"], server.get_member(stk["AUTHOR"]).name),
                         color=server.get_member(stk["AUTHOR"]).color)
@@ -843,12 +833,24 @@ class Echo:
         await self.bot.say("**Taille du fichier** ─ {} MB\n"
                            "**Taille maximale autorisée** ─ 500 MB\n".format(result / 100000))
 
+    @_stkmod.command(pass_context=True)
+    async def reset(self, ctx):
+        """Reset tous les stickers du serveur et les paramètres"""
+        server = ctx.message.server
+        del self.sys[server.id]
+        del self.data[server.id]
+        self.save()
+        self._set_server(server)
+        await self.bot.say("**Succès** | Les stickers et paramètres du serveur ont été supprimés")
+
 # ---------- ASYNC -------------
 
     async def read(self, message):
         author = message.author
         content = message.content
         server = message.server
+        if not server:
+            return
         channel = message.channel
         self._set_server(server)
         if author.id not in self.sys[server.id]["BLACKLIST"]:
