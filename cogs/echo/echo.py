@@ -274,7 +274,7 @@ class Echo:
 
         <nom> = Nom du sticker à ajouter
         [url] = Facultatif, URL du fichier si provenant d'Internet
-        -- Il est possible de directement importer l'image à ajouter sur Discord"""
+        -- Il est possible de directement importer un fichier à ajouter sur Discord"""
         author = ctx.message.author
         server = ctx.message.server
         storage = "data/echo/img/{}/".format(server.id)
@@ -785,7 +785,8 @@ class Echo:
                     return
                 self.sys[server.id]["DISPLAY_STK"][categorie.upper()] = valeur.lower()
                 self.save()
-                await self.bot.say("**Succès** | Les fichiers {} s'afficheront par défaut en format `{}`".format(
+                await self.bot.say("**Succès** | Les fichiers {} s'afficheront par défaut en format `{}`\n"
+                                   "*Ce changement n'affectera que les futurs stickers ajoutés*".format(
                     categorie.lower(), valeur.lower()))
             else:
                 await self.bot.say("**__Valeurs disponibles__**\n"
