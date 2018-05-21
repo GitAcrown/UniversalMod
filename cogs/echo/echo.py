@@ -47,6 +47,8 @@ class Echo:
             self.sys[server.id] = {"PERMISSIONS_STK": perms, "DISPLAY_STK": disp, "DOWNLOAD_STK": dl,
                                    "BLACKLIST": [], "CORRECT": None}
             self.save()
+        if not os.path.exists("data/echo/img/{}".format(server.id)):
+            os.makedirs("data/echo/img")
         return True
 
     def _obj_sticker(self, server: discord.Server, nom: str):
@@ -273,9 +275,6 @@ class Echo:
         -- Il est possible de directement importer l'image à ajouter sur Discord"""
         author = ctx.message.author
         server = ctx.message.server
-        if not os.path.exists("data/echo/img/{}".format(server.id)):
-            await self.bot.say("**Patientez** | Je suis en train de créer un nouvel emplacement pour vos stickers...")
-            os.makedirs("data/echo/img")
         storage = "data/echo/img/{}/".format(server.id)
         output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(nom)[0]
         racine = output[0]
