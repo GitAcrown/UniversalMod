@@ -67,7 +67,8 @@ class Echo:
                 stats = Stats(data["STATS"]["COMPTE"], data["STATS"]["LIKE"], data["STATS"]["DISLIKE"])
                 Sticker = namedtuple('Sticker', ['id', 'nom', 'path', 'author', 'url', 'creation', 'stats', 'display',
                                                  'racine', 'place', 'type', 'approb'])
-                return Sticker(stk, data["NOM"], data["PATH"], data["AUTHOR"], data["URL"], data["CREATION"],
+                return Sticker(stk, data["NOM"], data["PATH"] if data["PATH"] else False,
+                               data["AUTHOR"], data["URL"], data["CREATION"],
                                stats, data["DISPLAY"], racine, nb, typex, data["APPROB"])
         return False
 
@@ -95,7 +96,7 @@ class Echo:
         server = author.server
         self._set_server(server)
         if not self._obj_sticker(server, nom):
-            clef = random.randint(100000, 999999)
+            clef = str(random.randint(100000, 999999))
             if clef in self.data[server.id]:
                 return self.add_sticker(nom, author, url, chemin)
             stats = {"COMPTE": 0,
