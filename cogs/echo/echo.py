@@ -502,6 +502,7 @@ class Echo:
                                 return
                             elif not self.get_sticker(server, rep.content):
                                 self.data[server.id][infos.id]["NOM"] = rep.content
+                                nom = rep.content
                                 self.save()
                                 await self.bot.say("**Succès** | Le nom du sticker a été modifié.")
                                 valid = True
