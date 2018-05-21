@@ -48,7 +48,7 @@ class Echo:
                                    "BLACKLIST": [], "CORRECT": None}
             self.save()
         if not os.path.exists("data/echo/img/{}".format(server.id)):
-            os.makedirs("data/echo/img")
+            os.makedirs("data/echo/img/{}".format(server.id))
         return True
 
     def _obj_sticker(self, server: discord.Server, nom: str):
