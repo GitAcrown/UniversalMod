@@ -26,21 +26,19 @@ class Assist:
     def __unload(self):
         self.session.close()
 
-    @commands.group(name="mkr", pass_context=True, no_pm=True)
+    """@commands.group(name="mkr", pass_context=True, no_pm=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def _maker(self, ctx):
-        """Commandes de l'extension Mkr - Permet de créer ses propres commandes"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
     @_maker.command(pass_context=True)
     async def new(self, ctx, nom: str):
-        """Interface permettant la création d'une commande Mkr"""
         server = ctx.message.server
         if server.id not in self.mkr:
             self.mkr[server.id] = {}
             fileIO("data/assist/mkr.json", "save", self.mkr)
-        if nom not in self.mkr[server.id]:
+        if nom not in self.mkr[server.id]:"""
 
 
 
