@@ -72,11 +72,11 @@ class Echo:
                                stats, data["DISPLAY"], racine, nb, typex, data["APPROB"])
         return False
 
-    def get_sticker(self, server: discord.Server, nom: str, w: bool = False):
+    def get_sticker(self, server: discord.Server, nom: str, w: bool = False, pass_approb: bool = False):
         self._set_server(server)
         for stk in self.data[server.id]:
             if nom == self.data[server.id][stk]["NOM"]:
-                if self.data[server.id][stk]["APPROB"]:
+                if self.data[server.id][stk]["APPROB"] or pass_approb:
                     if w:
                         return self.data[server.id][stk]
                     return self._obj_sticker(server, nom)
@@ -653,9 +653,9 @@ class Echo:
         self._set_server(server)
         if nom:
             if self.get_perms(author, "AJOUTER"):
-                stk = self.get_sticker(server, nom, w=True)
+                stk = self.get_sticker(server, nom, w=True, pass_approb=True)
                 if stk:
-                    sid = self.get_sticker(server, nom).id
+                    sid = self.get_sticker(server, nom, pass_approb=True).id
                     em = discord.Embed(title="{}, proposé par {}".format(
                         stk["NOM"], server.get_member(stk["AUTHOR"]).name),
                         color=server.get_member(stk["AUTHOR"]).color)
