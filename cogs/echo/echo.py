@@ -77,7 +77,7 @@ class Echo:
             if nom == self.data[server.id][stk]["NOM"]:
                 if self.data[server.id][stk]["APPROB"]:
                     if w:
-                        return self.data[server.id][stk.id]
+                        return self.data[server.id][stk]
                     return self._obj_sticker(server, nom)
         else:
             return False
@@ -145,7 +145,7 @@ class Echo:
         """Trouve un nom disponible dans une Collection"""
         coll = self.get_collection(server, racine)
         if coll:
-            n = 1
+            n = 2
             f = lambda n: racine + str(n)
             nom = f(n)
             while nom in [stk.nom for stk in coll]:
