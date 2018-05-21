@@ -83,11 +83,14 @@ class Echo:
         else:
             return False
 
-    def get_all_stickers(self, server: discord.Server):
+    def get_all_stickers(self, server: discord.Server, approuved: bool = False):
         self._set_server(server)
         all = []
         for s in self.data[server.id]:
-            if self.data[server.id][s]["APPROB"]:
+            if approuved:
+                if self.data[server.id][s]["APPROB"]:
+                    all.append(self._obj_sticker(server, self.data[server.id][s]["NOM"]))
+            else:
                 all.append(self._obj_sticker(server, self.data[server.id][s]["NOM"]))
         return all
 
@@ -301,7 +304,7 @@ class Echo:
                                                        check=check, user=ctx.message.author)
                 if rep is None or rep.reaction.emoji == "✖":
                     await self.bot.say(
-                        "**Annulé** ─ Vous pourrez toujours l'ajouter un plus tard avec `{}stk add` ".format(
+                        "**Annulé** ─ Vous pourrez toujours l'ajouter plus tard avec `{}stk add` ".format(
                             ctx.prefix))
                     await self.bot.delete_message(msg)
                     return False
@@ -680,7 +683,7 @@ class Echo:
             else:
                 await self.bot.say("**Impossible** | Vous n'avez pas la permission de réaliser cette action")
         else:
-            txt = "\n".join([s.nom for s in self.get_all_stickers(server) if s.approb is False])
+            txt = "\n".join([s.nom for s in self.get_all_stickers(server, True) if s.approb is False])
             em = discord.Embed(title="Sticker en attente d'approbation", description=txt, color=author.color)
             em.set_footer(text="Approuvez un sticker avec {}stk approb <nom>".format(ctx.prefix))
             await self.bot.say(embed=em)
