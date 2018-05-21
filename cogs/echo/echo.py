@@ -283,15 +283,15 @@ class Echo:
                 await self.bot.process_commands(new_message)
                 return
             else:
-                em = discord.Embed(description="**{}** existe déjà. Que voulez-vous faire ?\n\n"
-                                               "\❎ ─ Annuler\n"
-                                               "\♻ ─ Remplacer le sticker existant\n"
-                                               "\❇ ─ Intégrer à la collection `{}`".format(nom, racine))
+                em = discord.Embed(description="`{}` **existe déjà.** Que voulez-vous faire ?\n\n"
+                                               "\✖ ─ Annuler\n"
+                                               "\✔ ─ Remplacer le sticker existant\n"
+                                               "\➕ ─ Intégrer à la collection `{}`".format(nom, racine))
                 em.set_footer(text="Choisissez l'action à réaliser avec les réactions ci-dessous")
                 msg = await self.bot.say(embed=em)
-                await self.bot.add_reaction(msg, "❎")
-                await self.bot.add_reaction(msg, "♻")
-                await self.bot.add_reaction(msg, "❇")
+                await self.bot.add_reaction(msg, "✖")
+                await self.bot.add_reaction(msg, "✔")
+                await self.bot.add_reaction(msg, "➕")
                 await asyncio.sleep(0.25)
 
                 def check(reaction, user):
