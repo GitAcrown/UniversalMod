@@ -971,7 +971,7 @@ class Echo:
                                     except Exception as e:
                                         print("Impossible d'afficher {} en upload : {}".format(stk.nom, e))
                             try:
-                                await self.bot.send_message(channel, stk.urk)
+                                await self.bot.send_message(channel, stk.url)
                             except Exception as e:
                                 print("Impossible d'afficher {} en URL : {}".format(stk.nom, e))
 
