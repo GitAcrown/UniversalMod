@@ -273,6 +273,9 @@ class Echo:
         -- Il est possible de directement importer l'image à ajouter sur Discord"""
         author = ctx.message.author
         server = ctx.message.server
+        if not os.path.exists("data/echo/img/{}".format(server.id)):
+            await self.bot.say("**Patientez** | Je suis en train de créer un nouvel emplacement pour vos stickers...")
+            os.makedirs("data/echo/img")
         storage = "data/echo/img/{}/".format(server.id)
         output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(nom)[0]
         racine = output[0]
