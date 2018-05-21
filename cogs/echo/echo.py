@@ -686,7 +686,7 @@ class Echo:
             txt = ""
             for s in self.get_all_stickers(server, True):
                 if s.approb is False:
-                    txt = "`{}`\n".format(s.nom)
+                    txt += "`{}`\n".format(s.nom)
             em = discord.Embed(title="Sticker en attente d'approbation", description=txt, color=author.color)
             em.set_footer(text="Approuvez un sticker avec {}stk approb <nom>".format(ctx.prefix))
             await self.bot.say(embed=em)
