@@ -297,18 +297,18 @@ class Echo:
                 def check(reaction, user):
                     return not user.bot
 
-                rep = await self.bot.wait_for_reaction(["❎", "♻", "❇"], message=msg, timeout=30,
+                rep = await self.bot.wait_for_reaction(["✖", "✔", "➕"], message=msg, timeout=30,
                                                        check=check, user=ctx.message.author)
-                if rep is None or rep.reaction.emoji == "❎":
+                if rep is None or rep.reaction.emoji == "✖":
                     await self.bot.say(
                         "**Annulé** ─ Vous pourrez toujours l'ajouter un plus tard avec `{}stk add` ".format(
                             ctx.prefix))
                     await self.bot.delete_message(msg)
                     return False
-                elif rep.reaction.emoji == "♻":
+                elif rep.reaction.emoji == "✔":
                     replace = True
                     await self.bot.delete_message(msg)
-                elif rep.reaction.emoji == "❇":
+                elif rep.reaction.emoji == "➕":
                     await self.bot.delete_message(msg)
                     prefix = self.bot.settings.get_prefixes(server)[0]
                     new_message = deepcopy(ctx.message)
