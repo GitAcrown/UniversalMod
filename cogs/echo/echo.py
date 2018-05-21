@@ -584,6 +584,7 @@ class Echo:
                                 if infos.path:
                                     try:
                                         os.remove(infos.path)
+                                        self.data[server.id][infos.id]["PATH"] = False
                                         await self.bot.say("**Effacé** | Le fichier local du sticker à été supprimé")
                                     except:
                                         await self.bot.sat("**Erreur** | "
