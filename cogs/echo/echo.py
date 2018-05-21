@@ -83,6 +83,14 @@ class Echo:
         else:
             return False
 
+    def approb_list(self, server: discord.Server):
+        self._set_server(server)
+        liste = []
+        for stk in self.data[server.id]:
+            if self.data[server.id][stk]["APPROB"] is False:
+                liste.append(self._obj_sticker(server, self.data[server.id][stk]["NOM"]))
+        return liste
+
     def get_all_stickers(self, server: discord.Server, approuved: bool = False):
         self._set_server(server)
         all = []
@@ -276,6 +284,9 @@ class Echo:
         poids = self.get_size(storage)
         replace = False
         self._set_server(server)
+        if nom in [s.nom for s in self.approb_list(server)]:
+            await self.bot.say("**Impossible** | Un sticker avec ce nom est en attente d'approbation")
+            return
         if self.get_sticker(server, nom):
             if nom == racine:
                 prefix = self.bot.settings.get_prefixes(server)[0]
@@ -503,7 +514,8 @@ class Echo:
                             if rep is None:
                                 await self.bot.delete_message(m)
                                 return
-                            elif not self.get_sticker(server, rep.content):
+                            elif not self.get_sticker(server, rep.content) and rep.content not \
+                                    in [s.nom for s in self.approb_list(server)]:
                                 self.data[server.id][infos.id]["NOM"] = rep.content
                                 nom = rep.content
                                 self.save()
@@ -684,9 +696,8 @@ class Echo:
                 await self.bot.say("**Impossible** | Vous n'avez pas la permission de réaliser cette action")
         else:
             txt = ""
-            for s in self.get_all_stickers(server, True):
-                if s.approb is False:
-                    txt += "`{}`\n".format(s.nom)
+            for s in self.approb_list(server):
+                txt += "`{}`\n".format(s.nom)
             em = discord.Embed(title="Sticker en attente d'approbation", description=txt, color=author.color)
             em.set_footer(text="Approuvez un sticker avec {}stk approb <nom>".format(ctx.prefix))
             await self.bot.say(embed=em)
