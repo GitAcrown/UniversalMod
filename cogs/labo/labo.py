@@ -1,7 +1,10 @@
 
 import asyncio
 import os
+import time
+from collections import namedtuple
 
+import discord
 from discord.ext import commands
 from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
@@ -10,6 +13,7 @@ from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.utils import get_stop_words
 
+from .utils import checks
 from .utils.dataIO import fileIO, dataIO
 
 
@@ -19,6 +23,73 @@ class Labo:
         self.bot = bot
         self.sys = dataIO.load_json("data/labo/sys.json")  # Pas très utile mais on le garde pour plus tard
         self.sys_def = {"REPOST": []}
+        self.msg = dataIO.load_json("data/labo/msg.json")
+        # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
+
+    def clean_chronos(self, user: discord.Member):
+        jour = time.strftime("%d/%m/%Y", time.localtime())
+        if user.id in self.msg:
+            for e in self.msg[user.id]:
+                if e[0] != jour:
+                    del self.msg[user.id][e]
+            fileIO("data/labo/msg.json", "save", self.msg)
+            return True
+        return False
+
+    def get_chronos_obj(self, user: discord.Member, identifiant: str):
+        if user.id in self.msg:
+            for e in self.msg[user.id]:
+                if e[3] == identifiant:
+                    Chronos = namedtuple('Chronos', ['id', 'jour', 'heure', 'type', 'message_before', 'message_after'])
+                    return Chronos(e[3], e[0], e[1], e[2], e[4], e[5])
+        return False
+
+    def check(self, reaction, user):
+        return not user.bot
+
+    @commands.command(aliases=["hp"], pass_context=True)
+    @checks.admin_or_permissions(manage_messages=True)
+    async def chronos(self, ctx, user: discord.Member, identifiant: str = None):
+        """Système CHRONOS - Permet de remonter le temps (au niveau des messages)..."""
+        if user.id not in self.msg:
+            self.msg[user.id] = []
+            fileIO("data/labo/msg.json", "save", self.msg)
+            await self.bot.say("**Vide** | Cet utilisateur n'a aucun historique")
+            return
+        self.clean_chronos(user)
+        if not identifiant:
+            txt = ""
+            for e in self.msg[user.id]:
+                txt += "**{}** ─ {}: `{}`\n".format(e[1], e[2], e[3])
+            em = discord.Embed(title="Historique CHRONOS", description=txt, color=user.color)
+            em.set_footer(text="Entrez l'identifiant du message pour voir l'historique")
+            msg = await self.bot.say(embed=em)
+            await asyncio.sleep(0.25)
+            rep = await self.bot.wait_for_message(author=ctx.message.author, channel=ctx.message.channel, timeout=60)
+            if rep is None:
+                em.set_footer(text="── Session expirée ──")
+                await self.bot.edit_message(msg, embed=em)
+                return
+            elif rep.content.isdigit():
+                identifiant = rep.content
+            else:
+                em.set_footer(text="Cet identifiant n'est pas valable")
+                await self.bot.edit_message(msg, embed=em)
+                return
+        ch = self.get_chronos_obj(user, identifiant)
+        if ch.type == "EDIT":
+            txt_before = "*{}*".format(ch.message_before)
+            txt_after = "*{}*\n─ {}".format(ch.message_after, ch.heure)
+            em = discord.Embed(color=user.color)
+            em.add_field(name="Avant édition", value=txt_before)
+            em.add_field(name="Après édition", value=txt_after)
+            em.set_footer(text="Auteur ─ {} | L'action expirera à minuit".format(user.name))
+            await self.bot.say(embed=em)
+        else:
+            txt = "*{}*\n─ {}".format(ch.message_before, ch.heure)
+            em = discord.Embed(title="Message avant suppression", description=txt, color=user.color)
+            em.set_footer(text="Auteur ─ {} | L'action expirera à minuit")
+            await self.bot.say(embed=em)
 
     @commands.command(pass_context=True)
     async def vaporwave(self, ctx, *texte):
@@ -107,6 +178,22 @@ class Labo:
                             self.sys[server.id]["REPOST"].remove(self.sys[server.id]["REPOST"][0])
                         fileIO("data/labo/sys.json", "save", self.sys)
 
+    async def read_edit(self, before, after):
+        user = before.author
+        if user.id not in self.msg:
+            self.msg[user.id] = []
+        jour = time.strftime("%d/%m/%Y", time.localtime())
+        heure = time.strftime("%H:%M", time.localtime())
+        self.msg[user.id].append([jour, heure, "EDIT", before.id, before.content, after.content])
+
+    async def read_suppr(self, message):
+        user = message.author
+        if user.id not in self.msg:
+            self.msg[user.id] = []
+        jour = time.strftime("%d/%m/%Y", time.localtime())
+        heure = time.strftime("%H:%M", time.localtime())
+        self.msg[user.id].append([jour, heure, "SUPPR", message.id, message.content, None])
+
     async def reactrecap(self, reaction, user):
         message = reaction.message
         server = message.channel.server
@@ -149,6 +236,9 @@ def check_files():
     if not os.path.isfile("data/labo/sys.json"):
         print("Création de labo/sys.json ...")
         fileIO("data/labo/sys.json", "save", {})
+    if not os.path.isfile("data/labo/msg.json"):
+        print("Création de labo/msg.json ...")
+        fileIO("data/labo/msg.json", "save", {})
 
 
 def setup(bot):
@@ -156,5 +246,7 @@ def setup(bot):
     check_files()
     n = Labo(bot)
     bot.add_listener(n.read, "on_message")
+    bot.add_listener(n.read_suppr, "on_message_delete")
+    bot.add_listener(n.read_edit, "on_message_edit")
     bot.add_listener(n.reactrecap, "on_reaction_add")
     bot.add_cog(n)
