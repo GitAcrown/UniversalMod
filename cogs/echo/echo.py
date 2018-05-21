@@ -888,10 +888,10 @@ class Echo:
                         if self.cooldown[heure].count(author.id) > 3:
                             return
 
-                        if e[1] not in [n.nom for n in self.get_all_stickers(server)]:
+                        if e[1] not in [n.nom for n in self.get_all_stickers(server, True)]:
                             if self.sys[server.id]["CORRECT"]:
                                 liste = []
-                                for s in self.get_all_stickers(server):
+                                for s in self.get_all_stickers(server, True):
                                     liste.append(s.nom)
                                 found = self.similarite(e[1], liste, self.sys[server.id]["CORRECT"])
                                 output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(found)[0]
@@ -899,7 +899,7 @@ class Echo:
                                 e = [e[0], self.get_sticker(server, racine).nom]
                                 # On préfère la racine pour éviter d'envoyer des stickers random
 
-                        if e[1] in [n.nom for n in self.get_all_stickers(server)]:
+                        if e[1] in [n.nom for n in self.get_all_stickers(server, True)]:
                             stk = self.get_sticker(server, e[1])
                             affichage = stk.display
 
@@ -995,7 +995,7 @@ class Echo:
                                 print("Impossible d'afficher {} en URL : {}".format(stk.nom, e))
 
                         elif e[1] in ["liste", "list"]:
-                            liste = [e.nom for e in self.get_all_stickers(server)]
+                            liste = [e.nom for e in self.get_all_stickers(server, True)]
                             txt = ""
                             liste.sort()
                             n = 1
