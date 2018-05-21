@@ -481,8 +481,11 @@ class Echo:
                     txt += "\🇨 ─ Affichage: `{}`\n".format(infos.display)
                     txt += "\🇩 ─ Téléchargé: `{}`{}\n".format(
                         True if infos.path else False, "" if not infos.path else " ({} KB)".format(poids))
+                    if infos.type != "IMAGE":
+                        txt += "\n\n[**Fichier multimédia**]({})".format(stk.url)
                     em = discord.Embed(title="Modifier {}".format(infos.id), description=txt, color=author.color)
-                    em.set_image(url=infos.url)
+                    if infos.type == "IMAGE":
+                        em.set_image(url=infos.url)
                     em.set_footer(text="Cliquez sur la réaction correspondante à l'action désirée | ❌ = Quitter")
                     msg = await self.bot.say(embed=em)
                     await self.bot.add_reaction(msg, "🇦")
@@ -614,6 +617,11 @@ class Echo:
                                     await self.bot.say("**Inutile** | Le sticker est déjà stocké en local.")
                                     valid = True
                                     continue
+                                if infos.type is not "IMAGE":
+                                    await self.bot.say("**Impossible** | Je ne suis pas capable de télécharger de "
+                                                       "l'audio depuis une URL.\n"
+                                                       "Vous devez supprimer puis rajouter ce sticker.")
+                                    return
                                 url = infos.url
                                 filename = url.split('/')[-1]
                                 await self.bot.say("**Téléchargement** | Le téléchargement du fichier est en cours...")
@@ -659,7 +667,13 @@ class Echo:
                     em = discord.Embed(title="{}, proposé par {}".format(
                         stk["NOM"], server.get_member(stk["AUTHOR"]).name),
                         color=server.get_member(stk["AUTHOR"]).color)
-                    em.set_image(url=stk["URL"])
+                    if stk.type is "IMAGE":
+                        em.set_image(url=stk["URL"])
+                    else:
+                        em = discord.Embed(title="{}, proposé par {}".format(
+                            stk["NOM"], server.get_member(stk["AUTHOR"]).name),
+                            color=server.get_member(stk["AUTHOR"]).color,
+                            description="[Fichier multimédia]({})".format(stk.url))
                     em.set_footer(text="✔ = Approuver | ✖ = Refuser")
                     msg = await self.bot.say(embed=em)
                     await self.bot.add_reaction(msg, "✔")
