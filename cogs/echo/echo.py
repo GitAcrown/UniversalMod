@@ -619,10 +619,11 @@ class Echo:
                                     valid = True
                                     continue
                                 if infos.type is not "IMAGE":
-                                    await self.bot.say("**Impossible** | Je ne suis pas capable de télécharger de "
-                                                       "l'audio depuis une URL.\n"
+                                    await self.bot.say("**Impossible** | Je ne suis encore pas capable de télécharger de "
+                                                       "l'audio ou des vidéos depuis une URL.\n"
                                                        "Vous devez supprimer puis rajouter ce sticker.")
-                                    return
+                                    valid = True
+                                    continue
                                 url = infos.url
                                 filename = url.split('/')[-1]
                                 await self.bot.say("**Téléchargement** | Le téléchargement du fichier est en cours...")
