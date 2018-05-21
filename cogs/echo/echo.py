@@ -45,7 +45,7 @@ class Echo:
                   "AUDIO": True,
                   "VIDEO": False}
             self.sys[server.id] = {"PERMISSIONS_STK": perms, "DISPLAY_STK": disp, "DOWNLOAD_STK": dl,
-                                   "BLACKLIST": [], "CORRECT": None}
+                                   "BLACKLIST": [], "CORRECT": None, "COOLDOWN": 3}
             self.save()
         if not os.path.exists("data/echo/img/{}".format(server.id)):
             os.makedirs("data/echo/img/{}".format(server.id))
@@ -863,6 +863,18 @@ class Echo:
                                "(Voir `{}help stkmod correct`)".format(ctx.prefix))
 
     @_stkmod.command(pass_context=True)
+    async def cooldown(self, ctx, nombre: int):
+        """Change le nombre de stickers qu'un membre peut poster par minute (Entre 1 et 10)"""
+        server = ctx.message.server
+        self._set_server(server)
+        if 1 <= nombre <= 10:
+            self.sys[server.id]["COOLDOWN"] = nombre
+            self.save()
+            await self.bot.say("**Succès** | Les membres ne pourront poster que {} stickers par minute".format(nombre))
+        else:
+            await self.bot.say("**Erreur** | La valeur doit être comprise entre 1 et 10")
+
+    @_stkmod.command(pass_context=True)
     async def taille(self, ctx):
         """Renvoie la taille du fichier de stockage des stickers de votre serveur en MB
 
@@ -903,6 +915,8 @@ class Echo:
                             self.cooldown = {heure: []}
                         self.cooldown[heure].append(author.id)
                         if self.cooldown[heure].count(author.id) > 3:
+                            await self.bot.send_message(author.id, "**Cooldown** | Patientez quelques secondes avant de"
+                                                                   " poster d'autres stickers...")
                             return
 
                         if e[1] not in [n.nom for n in self.get_all_stickers(server, True)]:
