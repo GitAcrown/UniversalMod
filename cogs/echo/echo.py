@@ -863,7 +863,7 @@ class Echo:
                                "(Voir `{}help stkmod correct`)".format(ctx.prefix))
 
     @_stkmod.command(pass_context=True)
-    async def cooldown(self, ctx, nombre: int):
+    async def cool(self, ctx, nombre: int):
         """Change le nombre de stickers qu'un membre peut poster par minute (Entre 1 et 10)"""
         server = ctx.message.server
         self._set_server(server)
