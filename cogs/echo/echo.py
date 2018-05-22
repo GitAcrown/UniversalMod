@@ -77,7 +77,7 @@ class Echo:
                     ext = "gif"
                 else:
                     fichnom = data["URL"].split("/")[-1]
-                    ext = fichnom.split(".")[1]
+                    ext = fichnom.split(".")[-1]
                 typex = self.get_sticker_type(ext)
                 Stats = namedtuple('Stats', ['compte', 'like', 'dislike'])
                 stats = Stats(data["STATS"]["COMPTE"], data["STATS"]["LIKE"], data["STATS"]["DISLIKE"])
@@ -130,7 +130,7 @@ class Echo:
                      "LIKE": [],
                      "DISLIKE": []}
             fichnom = url.split("/")[-1]
-            ext = fichnom.split(".")[1]
+            ext = fichnom.split(".")[-1]
             self.data[server.id][clef] = {"NOM": nom,
                                           "PATH": chemin,
                                           "AUTHOR": author.id,
@@ -147,7 +147,7 @@ class Echo:
                      "LIKE": [],
                      "DISLIKE": []}
             fichnom = url.split("/")[-1]
-            ext = fichnom.split(".")[1]
+            ext = fichnom.split(".")[-1]
             self.data[server.id][clef] = {"NOM": nom,
                                           "PATH": chemin,
                                           "AUTHOR": author.id,
@@ -364,7 +364,7 @@ class Echo:
                 await self.bot.say("**Erreur** | Ce fichier n'est pas pris en charge.")
                 return
             fichnom = url.split("/")[-1]
-            ext = fichnom.split(".")[1]
+            ext = fichnom.split(".")[-1]
             type = self.get_sticker_type(ext)
             dl = self.get_download_auth(server, type)
             if dl:
@@ -400,7 +400,7 @@ class Echo:
                 ext = "gif"
             else:
                 fichnom = url.split("/")[-1]
-                ext = fichnom.split(".")[1]
+                ext = fichnom.split(".")[-1]
             type = self.get_sticker_type(ext)
             dl = self.get_download_auth(server, type)
             if ext in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
@@ -479,7 +479,7 @@ class Echo:
             ext = "gif"
         else:
             fichnom = url.split("/")[-1]
-            ext = fichnom.split(".")[1]
+            ext = fichnom.split(".")[-1]
         if ext in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
             return True
         return False
