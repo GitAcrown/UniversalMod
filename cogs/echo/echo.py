@@ -1014,6 +1014,8 @@ class Echo:
                 stickers = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
                 if stickers:
                     for e in stickers:
+                        if e[1] in [e.name for e in server.emojis]:
+                            continue
 
                         if e[1] not in [n.nom for n in self.get_all_stickers(server, True)]:
                             if self.sys[server.id]["CORRECT"]:
