@@ -73,7 +73,7 @@ class Echo:
                 else:
                     racine = nom
                     nb = ""
-                if "giphy" in data["URL"]:
+                if "giphy" in data["URL"] or "imgur" in data["URL"]:
                     ext = "gif"
                 else:
                     fichnom = data["URL"].split("/")[-1]
@@ -185,7 +185,7 @@ class Echo:
     def get_sticker_type(self, extension: str):
         """Renvoie le type du sticker en fonction de son extension"""
         ext = extension.lower()
-        if ext.lower() in ["jpeg", "gif", "jpg", "png"]:
+        if ext.lower() in ["jpeg", "gif", "jpg", "png", "gifv"]:
             return "IMAGE"
         elif ext.lower() in ["wav", "mp3"]:
             return "AUDIO"
@@ -396,14 +396,14 @@ class Echo:
                 else:
                     await self.bot.say("**Ajouté** | Votre sticker est disponible avec `:{}:`".format(nom))
         else:
-            if "giphy" in url:
+            if "giphy" in url or "imgur" in url:
                 ext = "gif"
             else:
                 fichnom = url.split("/")[-1]
                 ext = fichnom.split(".")[-1]
             type = self.get_sticker_type(ext)
             dl = self.get_download_auth(server, type)
-            if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
+            if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm", "gifv"]:
                 if dl:
                     if poids > 500000000:
                         await self.bot.say("**+500 MB** | L'espace alloué à ce serveur est plein. "
@@ -475,12 +475,12 @@ class Echo:
             await self.bot.say("**Impossible** | Vous n'avez pas l'autorisation de faire cette action")
 
     def valid_url(self, url: str):
-        if "giphy" in url:
+        if "giphy" in url or "imgur" in url:
             ext = "gif"
         else:
             fichnom = url.split("/")[-1]
             ext = fichnom.split(".")[-1]
-        if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
+        if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm", "gifv"]:
             return True
         return False
 
