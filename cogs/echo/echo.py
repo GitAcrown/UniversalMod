@@ -496,15 +496,17 @@ class Echo:
             if stk:
                 while True:
                     infos = self.get_sticker(server, nom)
+                    poids = False
                     if infos.path:
-                        poids = int(os.path.getsize(infos.path)) / 1000
+                        if os.path.exists(infos.path):
+                            poids = int(os.path.getsize(infos.path)) / 1000
                     txt = "\🇦 ─ Nom: `{}`\n".format(infos.nom)
                     txt += "\🇧 ─ URL: `{}`\n".format(infos.url)
                     txt += "\🇨 ─ Affichage: `{}`\n".format(infos.display)
                     txt += "\🇩 ─ Téléchargé: `{}`{}\n".format(
-                        True if infos.path else False, "" if not infos.path else " ({} KB)".format(poids))
+                        True if poids else False, "" if not poids else " ({} KB)".format(poids))
                     if infos.type != "IMAGE":
-                        txt += "\n\n[**Fichier multimédia**]({})".format(infos.url)
+                        txt += "\n[**Fichier multimédia**]({})\n".format(infos.url)
                     em = discord.Embed(title="Modifier Sticker #{}".format(infos.id), description=txt,
                                        color=author.color)
                     if infos.type == "IMAGE":
@@ -743,7 +745,7 @@ class Echo:
 # ---------- OPTIONS ------------
 
     @commands.group(name="stkmod", pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(manage_messages=True)
+    @checks.admin_or_permissions(ban_members=True)
     async def _stkmod(self, ctx):
         """Paramètres serveur du module Stickers"""
         if ctx.invoked_subcommand is None:
@@ -1095,6 +1097,9 @@ class Echo:
                                 continue
                             if "n" in option:
                                 continue
+
+                            if not self.get_perms(author, "UTILISER"):
+                                return
 
                             # Système anti-flood
                             heure = time.strftime("%H:%M", time.localtime())
