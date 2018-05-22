@@ -918,8 +918,6 @@ class Echo:
             stickers = self.backup_ek["STK"]
             for stk in stickers:
                 clef = str(random.randint(100000, 999999))
-                fichnom = stickers[stk]["URL"].split("/")[-1]
-                ext = fichnom.split(".")[1]
                 stats = {"COMPTE": stickers[stk]["COMPTAGE"],
                          "LIKE": [],
                          "DISLIKE": []}
@@ -941,7 +939,7 @@ class Echo:
                                               "URL": stickers[stk]["URL"],
                                               "CREATION": stickers[stk]["TIMESTAMP"],
                                               "STATS": stats,
-                                              "DISPLAY": self.get_display(server, self.get_sticker_type(ext)),
+                                              "DISPLAY": self.get_display(server, "IMAGE"),
                                               "APPROB": True}
             if stickers:
                 await self.bot.say("**EK** | Stickers Entre Kheys importés avec succès")
@@ -951,8 +949,6 @@ class Echo:
                 stickers = self.backup_univ[server.id]["STK"]
                 for stk in stickers:
                     clef = str(random.randint(100000, 999999))
-                    fichnom = stickers[stk]["URL"].split("/")[-1]
-                    ext = fichnom.split(".")[1]
                     stats = {"COMPTE": stickers[stk]["COMPTAGE"],
                              "LIKE": [],
                              "DISLIKE": []}
@@ -974,7 +970,7 @@ class Echo:
                                                   "URL": stickers[stk]["URL"],
                                                   "CREATION": stickers[stk]["TIMESTAMP"],
                                                   "STATS": stats,
-                                                  "DISPLAY": self.get_display(server, self.get_sticker_type(ext)),
+                                                  "DISPLAY": self.get_display(server, "IMAGE"),
                                                   "APPROB": True}
                 if stickers:
                     await self.bot.say("**Kosmos** | Anciens stickers Kosmos importés avec succès")
