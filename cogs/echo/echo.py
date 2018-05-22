@@ -920,14 +920,17 @@ class Echo:
                          "LIKE": [],
                          "DISLIKE": []}
                 beforefile = stickers[stk]["CHEMIN"]
-                filename = stickers[stk]["CHEMIN"].split('/')[-1]
-                file = storage + filename
-                try:
-                    os.rename(beforefile, file)
-                    chemin = file
-                except:
-                    chemin = beforefile
-                    pass
+                if beforefile:
+                    filename = stickers[stk]["CHEMIN"].split('/')[-1]
+                    file = storage + filename
+                    try:
+                        os.rename(beforefile, file)
+                        chemin = file
+                    except:
+                        chemin = beforefile
+                        pass
+                else:
+                    chemin = False
                 self.data[server.id][clef] = {"NOM": stickers[stk]["NOM"],
                                               "PATH": chemin,
                                               "AUTHOR": stickers[stk]["AUTEUR"],
@@ -950,14 +953,17 @@ class Echo:
                              "LIKE": [],
                              "DISLIKE": []}
                     beforefile = stickers[stk]["CHEMIN"]
-                    filename = stickers[stk]["CHEMIN"].split('/')[-1]
-                    file = storage + filename
-                    try:
-                        os.rename(beforefile, file)
-                        chemin = file
-                    except:
-                        chemin = beforefile
-                        pass
+                    if beforefile:
+                        filename = stickers[stk]["CHEMIN"].split('/')[-1]
+                        file = storage + filename
+                        try:
+                            os.rename(beforefile, file)
+                            chemin = file
+                        except:
+                            chemin = beforefile
+                            pass
+                    else:
+                        chemin = False
                     self.data[server.id][clef] = {"NOM": stickers[stk]["NOM"],
                                                   "PATH": chemin,
                                                   "AUTHOR": stickers[stk]["AUTEUR"],
