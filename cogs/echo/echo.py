@@ -924,7 +924,7 @@ class Echo:
         for stk in self.data[server.id]:
             if not self.valid_url(self.data[server.id][stk]["URL"]):
                 txt += "`{}` ─ *{}*\n".format(self.data[server.id][stk]["NOM"], self.data[server.id][stk]["URL"])
-        await self.bot.whisper(txt)
+        await self.bot.whisper(txt if txt != "" else "Aucun")
 
     @_stkmod.command(pass_context=True)
     async def importer(self, ctx):
