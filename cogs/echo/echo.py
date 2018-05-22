@@ -921,19 +921,18 @@ class Echo:
                                 # On préfère la racine pour éviter d'envoyer des stickers random
 
                         if e[1] in [n.nom for n in self.get_all_stickers(server, True)]:
-
                             stk = self.get_sticker(server, e[1])
                             affichage = stk.display
 
                             # Gestion des options
-                            option = e[0] if e[0] else None
+                            option = e[0] if e[0] else ""
                             output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(stk.nom)[0]
                             racine = output[0]
                             if "r" in option:
                                 stk = self.get_sticker(server, racine)
                                 if not stk:
                                     continue
-                            elif "c" in option:
+                            if "c" in option:
                                 col = self.get_collection(server, racine)
                                 if not col:
                                     continue
@@ -947,7 +946,7 @@ class Echo:
                                 em.set_footer(text="Composée de {} stickers au total".format(len(liste)))
                                 await self.bot.send_message(author, embed=em)
                                 continue
-                            elif "?" in option:
+                            if "?" in option:
                                 col = self.get_collection(server, racine)
                                 if not col:
                                     continue
@@ -956,14 +955,14 @@ class Echo:
                                 stk = self.get_sticker(server, r)
                                 if not stk:
                                     continue
-                            elif "w" in option:
+                            if "w" in option:
                                 affichage = "web"
-                            elif "u" in option:
+                            if "u" in option:
                                 affichage = "upload"
-                            elif "i" in option:
+                            if "i" in option:
                                 if stk.type == "IMAGE":
                                     affichage = "integre"
-                            elif "d" in option:
+                            if "d" in option:
                                 txt = "**ID** ─ `{}`\n" \
                                       "**Type** ─ `{}`\n" \
                                       "**Affichage** ─ `{}`\n" \
@@ -974,24 +973,22 @@ class Echo:
                                 em.set_footer(text="Proposé par {}".format(server.get_member(stk.author).name))
                                 await self.bot.send_message(author, embed=em)
                                 continue
-                            elif "f" in option:
+                            if "f" in option:
                                 await self.bot.delete_message(message)
-                            elif "p" in option:
+                            if "p" in option:
                                 await self.bot.send_message(author, stk.url)
                                 continue
-                            elif "s" in option:
+                            if "s" in option:
                                 await self.bot.send_message(author, "**Coming soon**")
                                 continue
-                            elif "+" in option:
+                            if "+" in option:
                                 await self.bot.send_message(author, "**Bientôt supporté**")
                                 continue
-                            elif "-" in option:
+                            if "-" in option:
                                 await self.bot.send_message(author, "**Bientôt supporté**")
                                 continue
-                            elif "n" in option:
+                            if "n" in option:
                                 continue
-                            else:
-                                pass
 
                             # Système anti-flood
                             heure = time.strftime("%H:%M", time.localtime())
