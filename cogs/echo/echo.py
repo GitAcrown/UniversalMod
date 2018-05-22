@@ -915,6 +915,17 @@ class Echo:
         self._set_server(server)
         await self.bot.say("**Succès** | Les stickers et paramètres du serveur ont été supprimés")
 
+    @_stkmod.command(pass_context=True, hidden=True)
+    async def urlpb(self, ctx):
+        """Trouve les URL qui vont potentiellement poser problème"""
+        server = ctx.message.server
+        self._set_server(server)
+        txt = ""
+        for stk in self.data[server.id]:
+            if not self.valid_url(self.data[server.id][stk]["URL"]):
+                txt += "`{}` ─ *{}*\n".format(self.data[server.id][stk]["NOM"], self.data[server.id][stk]["URL"])
+        await self.bot.whisper(txt)
+
     @_stkmod.command(pass_context=True)
     async def importer(self, ctx):
         """Tente désespérément d'importer des données d'un ancien module...
