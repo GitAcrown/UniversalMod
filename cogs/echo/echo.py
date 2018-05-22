@@ -1031,72 +1031,73 @@ class Echo:
                             affichage = stk.display
 
                             # Gestion des options
-                            option = e[0] if e[0] else ""
-                            output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(stk.nom)[0]
-                            racine = output[0]
-                            if "r" in option:
-                                stk = self.get_sticker(server, racine)
-                                if not stk:
+                            option = e[0] if e[0] else False
+                            if option:
+                                output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(stk.nom)[0]
+                                racine = output[0]
+                                if "r" in option:
+                                    stk = self.get_sticker(server, racine)
+                                    if not stk:
+                                        continue
+                                if "c" in option:
+                                    col = self.get_collection(server, racine)
+                                    if not col:
+                                        continue
+                                    liste = [e.nom for e in col]
+                                    liste.sort()
+                                    txt = ""
+                                    for e in liste:
+                                        txt += "`{}`\n".format(e)
+                                    em = discord.Embed(title="Collection '{}'".format(racine), description=txt,
+                                                       color=author.color)
+                                    em.set_footer(text="Composée de {} stickers au total".format(len(liste)))
+                                    await self.bot.send_message(author, embed=em)
                                     continue
-                            if "c" in option:
-                                col = self.get_collection(server, racine)
-                                if not col:
+                                if "?" in option:
+                                    col = self.get_collection(server, racine)
+                                    if not col:
+                                        continue
+                                    liste = [e.nom for e in col]
+                                    r = random.choice(liste)
+                                    stk = self.get_sticker(server, r)
+                                    if not stk:
+                                        continue
+                                if "w" in option:
+                                    affichage = "web"
+                                if "u" in option:
+                                    affichage = "upload"
+                                if "i" in option:
+                                    if stk.type == "IMAGE":
+                                        affichage = "integre"
+                                if "d" in option:
+                                    txt = "**ID** ─ `{}`\n" \
+                                          "**Type** ─ `{}`\n" \
+                                          "**Affichage** ─ `{}`\n" \
+                                          "**URL** ─ `{}`\n" \
+                                          "**Emplacement** ─ `{}`\n".format(stk.id, stk.type, stk.display, stk.url,
+                                                                            stk.path)
+                                    em = discord.Embed(title="{}".format(stk.nom), description=txt, color= author.color)
+                                    if stk.type == "IMAGE":
+                                        em.set_image(url=stk.url)
+                                    em.set_footer(text="Proposé par {}".format(server.get_member(stk.author).name))
+                                    await self.bot.send_message(author, embed=em)
                                     continue
-                                liste = [e.nom for e in col]
-                                liste.sort()
-                                txt = ""
-                                for e in liste:
-                                    txt += "`{}`\n".format(e)
-                                em = discord.Embed(title="Collection '{}'".format(racine), description=txt,
-                                                   color=author.color)
-                                em.set_footer(text="Composée de {} stickers au total".format(len(liste)))
-                                await self.bot.send_message(author, embed=em)
-                                continue
-                            if "?" in option:
-                                col = self.get_collection(server, racine)
-                                if not col:
+                                if "f" in option:
+                                    await self.bot.delete_message(message)
+                                if "p" in option:
+                                    await self.bot.send_message(author, stk.url)
                                     continue
-                                liste = [e.nom for e in col]
-                                r = random.choice(liste)
-                                stk = self.get_sticker(server, r)
-                                if not stk:
+                                if "s" in option:
+                                    await self.bot.send_message(author, "**Coming soon**")
                                     continue
-                            if "w" in option:
-                                affichage = "web"
-                            if "u" in option:
-                                affichage = "upload"
-                            if "i" in option:
-                                if stk.type == "IMAGE":
-                                    affichage = "integre"
-                            if "d" in option:
-                                txt = "**ID** ─ `{}`\n" \
-                                      "**Type** ─ `{}`\n" \
-                                      "**Affichage** ─ `{}`\n" \
-                                      "**URL** ─ `{}`\n" \
-                                      "**Emplacement** ─ `{}`\n".format(stk.id, stk.type, stk.display, stk.url,
-                                                                        stk.path)
-                                em = discord.Embed(title="{}".format(stk.nom), description=txt, color= author.color)
-                                if stk.type == "IMAGE":
-                                    em.set_image(url=stk.url)
-                                em.set_footer(text="Proposé par {}".format(server.get_member(stk.author).name))
-                                await self.bot.send_message(author, embed=em)
-                                continue
-                            if "f" in option:
-                                await self.bot.delete_message(message)
-                            if "p" in option:
-                                await self.bot.send_message(author, stk.url)
-                                continue
-                            if "s" in option:
-                                await self.bot.send_message(author, "**Coming soon**")
-                                continue
-                            if "+" in option:
-                                await self.bot.send_message(author, "**Bientôt supporté**")
-                                continue
-                            if "-" in option:
-                                await self.bot.send_message(author, "**Bientôt supporté**")
-                                continue
-                            if "n" in option:
-                                continue
+                                if "+" in option:
+                                    await self.bot.send_message(author, "**Bientôt supporté**")
+                                    continue
+                                if "-" in option:
+                                    await self.bot.send_message(author, "**Bientôt supporté**")
+                                    continue
+                                if "n" in option:
+                                    continue
 
                             if not self.get_perms(author, "UTILISER"):
                                 return
