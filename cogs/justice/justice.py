@@ -247,7 +247,7 @@ class Justice:
             await self.bot.say("**Impossible** | Vous devez d'abord régler le rôle"
                                " `{0}mp role` et le channel de la prison `{0}mp salon`".format(ctx.prefix))
 
-    @commands.command(pass_context=True)
+    @commands.command(aliases=["s"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def slow(self, ctx, user: discord.Member, limite: int = 5):
         """Passe un member en mode Slow, limitant son nombre de messages par minutes."""
