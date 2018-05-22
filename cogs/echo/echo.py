@@ -185,11 +185,11 @@ class Echo:
     def get_sticker_type(self, extension: str):
         """Renvoie le type du sticker en fonction de son extension"""
         ext = extension.lower()
-        if ext in ["jpeg", "gif", "jpg", "png"]:
+        if ext.lower() in ["jpeg", "gif", "jpg", "png"]:
             return "IMAGE"
-        elif ext in ["wav", "mp3"]:
+        elif ext.lower() in ["wav", "mp3"]:
             return "AUDIO"
-        elif ext in ["mp4", "webm"]:
+        elif ext.lower() in ["mp4", "webm"]:
             return "VIDEO"
         else:
             return "INCONNU"
@@ -403,7 +403,7 @@ class Echo:
                 ext = fichnom.split(".")[-1]
             type = self.get_sticker_type(ext)
             dl = self.get_download_auth(server, type)
-            if ext in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
+            if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
                 if dl:
                     if poids > 500000000:
                         await self.bot.say("**+500 MB** | L'espace alloué à ce serveur est plein. "
@@ -480,7 +480,7 @@ class Echo:
         else:
             fichnom = url.split("/")[-1]
             ext = fichnom.split(".")[-1]
-        if ext in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
+        if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
             return True
         return False
 
