@@ -66,9 +66,13 @@ class Echo:
         for stk in self.data[server.id]:
             if nom == self.data[server.id][stk]["NOM"]:
                 data = self.data[server.id][stk]
-                output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(nom)[0]
-                racine = output[0]
-                nb = output[1]
+                output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(nom)
+                if output:
+                    racine = output[0][0]
+                    nb = output[0][1]
+                else:
+                    racine = nom
+                    nb = ""
                 fichnom = data["URL"].split("/")[-1]
                 ext = fichnom.split(".")[1]
                 typex = self.get_sticker_type(ext)
