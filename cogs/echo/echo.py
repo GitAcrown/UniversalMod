@@ -1074,6 +1074,8 @@ class Echo:
                                       "**Emplacement** ─ `{}`\n".format(stk.id, stk.type, stk.display, stk.url,
                                                                         stk.path)
                                 em = discord.Embed(title="{}".format(stk.nom), description=txt, color= author.color)
+                                if stk.type == "IMAGE":
+                                    em.set_image(url=stk.url)
                                 em.set_footer(text="Proposé par {}".format(server.get_member(stk.author).name))
                                 await self.bot.send_message(author, embed=em)
                                 continue
