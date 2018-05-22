@@ -929,14 +929,14 @@ class Echo:
                             option = e[0] if e[0] else None
                             output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(stk.nom)[0]
                             racine = output[0]
-                            if option == "r":
+                            if "r" in option:
                                 stk = self.get_sticker(server, racine)
                                 if not stk:
-                                    return
-                            elif option == "c":
+                                    continue
+                            elif "c" in option:
                                 col = self.get_collection(server, racine)
                                 if not col:
-                                    return
+                                    continue
                                 liste = [e.nom for e in col]
                                 liste.sort()
                                 txt = ""
@@ -946,24 +946,24 @@ class Echo:
                                                    color=author.color)
                                 em.set_footer(text="Composée de {} stickers au total".format(len(liste)))
                                 await self.bot.send_message(author, embed=em)
-                                return
-                            elif option == "?":
+                                continue
+                            elif "?" in option:
                                 col = self.get_collection(server, racine)
                                 if not col:
-                                    return
+                                    continue
                                 liste = [e.nom for e in col]
                                 r = random.choice(liste)
                                 stk = self.get_sticker(server, r)
                                 if not stk:
-                                    return
-                            elif option == "w":
+                                    continue
+                            elif "w" in option:
                                 affichage = "web"
-                            elif option == "u":
+                            elif "u" in option:
                                 affichage = "upload"
-                            elif option == "i":
+                            elif "i" in option:
                                 if stk.type == "IMAGE":
                                     affichage = "integre"
-                            elif option == "d":
+                            elif "d" in option:
                                 txt = "**ID** ─ `{}`\n" \
                                       "**Type** ─ `{}`\n" \
                                       "**Affichage** ─ `{}`\n" \
@@ -973,23 +973,23 @@ class Echo:
                                 em = discord.Embed(title="{}".format(stk.nom), description=txt, color= author.color)
                                 em.set_footer(text="Proposé par {}".format(server.get_member(stk.author).name))
                                 await self.bot.send_message(author, embed=em)
-                                return
-                            elif option == "f":
+                                continue
+                            elif "f" in option:
                                 await self.bot.delete_message(message)
-                            elif option == "n":
-                                return
-                            elif option == "p":
+                            elif "p" in option:
                                 await self.bot.send_message(author, stk.url)
-                                return
-                            elif option == "s":
+                                continue
+                            elif "s" in option:
                                 await self.bot.send_message(author, "**Coming soon**")
-                                return
-                            elif option == "+":
+                                continue
+                            elif "+" in option:
                                 await self.bot.send_message(author, "**Bientôt supporté**")
-                                return
-                            elif option == "-":
+                                continue
+                            elif "-" in option:
                                 await self.bot.send_message(author, "**Bientôt supporté**")
-                                return
+                                continue
+                            elif "n" in option:
+                                continue
                             else:
                                 pass
 
@@ -1012,14 +1012,14 @@ class Echo:
                                     em.set_image(url=stk.url)
                                     try:
                                         await self.bot.send_message(channel, embed=em)
-                                        return
+                                        continue
                                     except Exception as e:
                                         print("Impossible d'afficher {} en billet : {}".format(stk.nom, e))
                             elif affichage == "upload":
                                 if stk.path:
                                     try:
                                         await self.bot.send_file(channel, stk.path)
-                                        return
+                                        continue
                                     except Exception as e:
                                         print("Impossible d'afficher {} en upload : {}".format(stk.nom, e))
                             try:
@@ -1047,11 +1047,11 @@ class Echo:
                                                color=author.color)
                             em.set_footer(text="─ Page {}".format(n))
                             await self.bot.send_message(author, embed=em)
-                            return
+                            continue
                         elif e[1] == "vent":
                             await asyncio.sleep(0.10)
                             await self.bot.send_typing(channel)
-                            return
+                            continue
                         else:
                             pass
 
