@@ -23,6 +23,15 @@ class Echo:
         self.data = dataIO.load_json("data/echo/data.json")
         self.sys = dataIO.load_json("data/echo/sys.json")
         self.cooldown = {}
+        # BORDEL D'IMPORT
+        if os.path.exists("data/stickers/stk.json"): # Ancien univ
+            self.backup_univ = dataIO.load_json("data/stickers/stk.json")
+        else:
+            self.backup_univ = False
+        if os.path.exists("data/systex/stk.json"): # EK
+            self.backup_ek = dataIO.load_json("data/systex/stk.json")
+        else:
+            self.backup_ek = False
 
     def save(self):
         fileIO("data/echo/data.json", "save", self.data)
@@ -892,6 +901,75 @@ class Echo:
         self.save()
         self._set_server(server)
         await self.bot.say("**Succès** | Les stickers et paramètres du serveur ont été supprimés")
+
+    @_stkmod.command(pass_context=True)
+    async def importer(self, ctx):
+        """Tente désespérément d'importer des données d'un ancien module...
+
+        Attention : écrase tous les stickers en double"""
+        server = ctx.message.server
+        self._set_server(server)
+        storage = "data/echo/img/{}/".format(server.id)
+        if self.backup_ek:
+            stickers = self.backup_ek["STK"]
+            for stk in stickers:
+                clef = str(random.randint(100000, 999999))
+                fichnom = stickers[stk]["URL"].split("/")[-1]
+                ext = fichnom.split(".")[1]
+                stats = {"COMPTE": stickers[stk]["COMPTAGE"],
+                         "LIKE": [],
+                         "DISLIKE": []}
+                beforefile = stickers[stk]["CHEMIN"]
+                filename = stickers[stk]["CHEMIN"].split('/')[-1]
+                file = storage + filename
+                try:
+                    os.rename(beforefile, file)
+                    chemin = file
+                except:
+                    chemin = beforefile
+                    pass
+                self.data[server.id][clef] = {"NOM": stickers[stk]["NOM"],
+                                              "PATH": chemin,
+                                              "AUTHOR": stickers[stk]["AUTEUR"],
+                                              "URL": stickers[stk]["URL"],
+                                              "CREATION": stickers[stk]["TIMESTAMP"],
+                                              "STATS": stats,
+                                              "DISPLAY": self.get_display(server, self.get_sticker_type(ext)),
+                                              "APPROB": True}
+            if stickers:
+                await self.bot.say("**EK** | Stickers Entre Kheys importés avec succès")
+                self.save()
+        if self.backup_univ:
+            if server.id in self.backup_univ:
+                stickers = self.backup_univ[server.id]["STK"]
+                for stk in stickers:
+                    clef = str(random.randint(100000, 999999))
+                    fichnom = stickers[stk]["URL"].split("/")[-1]
+                    ext = fichnom.split(".")[1]
+                    stats = {"COMPTE": stickers[stk]["COMPTAGE"],
+                             "LIKE": [],
+                             "DISLIKE": []}
+                    beforefile = stickers[stk]["CHEMIN"]
+                    filename = stickers[stk]["CHEMIN"].split('/')[-1]
+                    file = storage + filename
+                    try:
+                        os.rename(beforefile, file)
+                        chemin = file
+                    except:
+                        chemin = beforefile
+                        pass
+                    self.data[server.id][clef] = {"NOM": stickers[stk]["NOM"],
+                                                  "PATH": chemin,
+                                                  "AUTHOR": stickers[stk]["AUTEUR"],
+                                                  "URL": stickers[stk]["URL"],
+                                                  "CREATION": stickers[stk]["TIMESTAMP"],
+                                                  "STATS": stats,
+                                                  "DISPLAY": self.get_display(server, self.get_sticker_type(ext)),
+                                                  "APPROB": True}
+                if stickers:
+                    await self.bot.say("**Kosmos** | Anciens stickers Kosmos importés avec succès")
+                    self.save()
+
 
 # ---------- ASYNC -------------
 
