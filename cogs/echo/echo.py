@@ -73,8 +73,11 @@ class Echo:
                 else:
                     racine = nom
                     nb = ""
-                fichnom = data["URL"].split("/")[-1]
-                ext = fichnom.split(".")[1]
+                if "giphy" in data["URL"]:
+                    ext = "gif"
+                else:
+                    fichnom = data["URL"].split("/")[-1]
+                    ext = fichnom.split(".")[1]
                 typex = self.get_sticker_type(ext)
                 Stats = namedtuple('Stats', ['compte', 'like', 'dislike'])
                 stats = Stats(data["STATS"]["COMPTE"], data["STATS"]["LIKE"], data["STATS"]["DISLIKE"])
@@ -393,8 +396,11 @@ class Echo:
                 else:
                     await self.bot.say("**Ajouté** | Votre sticker est disponible avec `:{}:`".format(nom))
         else:
-            fichnom = url.split("/")[-1]
-            ext = fichnom.split(".")[1]
+            if "giphy" in url:
+                ext = "gif"
+            else:
+                fichnom = url.split("/")[-1]
+                ext = fichnom.split(".")[1]
             type = self.get_sticker_type(ext)
             dl = self.get_download_auth(server, type)
             if ext in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
@@ -469,8 +475,11 @@ class Echo:
             await self.bot.say("**Impossible** | Vous n'avez pas l'autorisation de faire cette action")
 
     def valid_url(self, url: str):
-        fichnom = url.split("/")[-1]
-        ext = fichnom.split(".")[1]
+        if "giphy" in url:
+            ext = "gif"
+        else:
+            fichnom = url.split("/")[-1]
+            ext = fichnom.split(".")[1]
         if ext in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm"]:
             return True
         return False
@@ -979,7 +988,7 @@ class Echo:
 
 # ---------- ASYNC -------------
 
-    async def read(self, message):
+    async def read_stk(self, message):
         author = message.author
         content = message.content
         server = message.server
@@ -1160,4 +1169,4 @@ def setup(bot):
     check_files()
     n = Echo(bot)
     bot.add_cog(n)
-    bot.add_listener(n.read, "on_message")
+    bot.add_listener(n.read_stk, "on_message")
