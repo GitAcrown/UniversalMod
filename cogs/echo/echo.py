@@ -909,16 +909,6 @@ class Echo:
                 if stickers:
                     for e in stickers:
 
-                        # Système anti-flood
-                        heure = time.strftime("%H:%M", time.localtime())
-                        if heure not in self.cooldown:
-                            self.cooldown = {heure: []}
-                        self.cooldown[heure].append(author.id)
-                        if self.cooldown[heure].count(author.id) > self.sys[server.id]["COOLDOWN"]:
-                            await self.bot.send_message(author, "**Cooldown** | Patientez quelques secondes avant de"
-                                                                   " poster d'autres stickers...")
-                            return
-
                         if e[1] not in [n.nom for n in self.get_all_stickers(server, True)]:
                             if self.sys[server.id]["CORRECT"]:
                                 liste = []
@@ -931,6 +921,18 @@ class Echo:
                                 # On préfère la racine pour éviter d'envoyer des stickers random
 
                         if e[1] in [n.nom for n in self.get_all_stickers(server, True)]:
+
+                            # Système anti-flood
+                            heure = time.strftime("%H:%M", time.localtime())
+                            if heure not in self.cooldown:
+                                self.cooldown = {heure: []}
+                            self.cooldown[heure].append(author.id)
+                            if self.cooldown[heure].count(author.id) > self.sys[server.id]["COOLDOWN"]:
+                                await self.bot.send_message(author,
+                                                            "**Cooldown** | Patientez quelques secondes avant de"
+                                                            " poster d'autres stickers...")
+                                return
+
                             stk = self.get_sticker(server, e[1])
                             affichage = stk.display
 
