@@ -17,8 +17,9 @@ class Justice:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/justice/sys.json")
-        self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE" : []}
+        self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE": [], "SLOW": {}}
         self.reg = dataIO.load_json("data/justice/reg.json")
+        self.slow_cooldown = {}
 
     def save(self):
         fileIO("data/justice/sys.json", "save", self.sys)
@@ -245,6 +246,38 @@ class Justice:
         else:
             await self.bot.say("**Impossible** | Vous devez d'abord régler le rôle"
                                " `{0}mp role` et le channel de la prison `{0}mp salon`".format(ctx.prefix))
+
+    @commands.command(pass_context=True)
+    @checks.admin_or_permissions(manage_messages=True)
+    async def slow(self, ctx, user: discord.Member, limite: int = 5):
+        """Passe un member en mode Slow, limitant son nombre de messages par minutes."""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if "SLOW" not in self.sys[server.id]:
+            self.sys[server.id]["SLOW"] = {}
+            self.save()
+        if user.id not in self.sys[server.id]["SLOW"]:
+            self.sys[server.id]["SLOW"][user.id] = limite
+            self.save()
+            em = discord.Embed(description="**Slow** | {} est désormais limité à {} messages par minute.".format(
+                user.mention, limite), color=ctx.message.author.color)
+            msg = await self.bot.say(embed=em)
+            await self.bot.send_message(user, "**Slow** | Vous êtes désormais limité à {} messages par minute (par {})"
+                                              "".format(limite, ctx.message.author.mention))
+            await asyncio.sleep(6)
+            await self.bot.delete_message(msg)
+        else:
+            del self.sys[server.id]["SLOW"][user.id]
+            self.save()
+            em = discord.Embed(description="**Slow** | {} n'est plus limité.".format(
+                user.mention), color=ctx.message.author.color)
+            msg = await self.bot.say(embed=em)
+            await self.bot.send_message(user, "**Slow** | Vous avez été sorti du mode (par {})"
+                                              "".format(ctx.message.author.mention))
+            await asyncio.sleep(6)
+            await self.bot.delete_message(msg)
+
 
     @commands.command(aliases=["ph"], pass_context=True)
     async def historique(self, ctx, nb: int = 10):
@@ -521,6 +554,17 @@ class Justice:
                         else:
                             pass
 
+    async def view(self, message):
+        server = message.server
+        author = message.author
+        if author.id in self.sys[server.id]["SLOW"]:
+            heure = time.strftime("%H:%M", time.localtime())
+            if heure not in self.slow_cooldown:
+                self.slow_cooldown = {heure: []}
+            self.slow_cooldown[heure].append(author.id)
+            if self.slow_cooldown[heure].count(author.id) > self.sys[server.id]["SLOW"][author.id]:
+                await self.bot.delete_message(message)
+
 
 def check_folders():
     folders = ("data", "data/justice/")
@@ -541,6 +585,7 @@ def setup(bot):
     check_folders()
     check_files()
     n = Justice(bot)
+    bot.add_listener(n.view, "on_message")
     bot.add_listener(n.renew, "on_member_join")
     # bot.add_listener(n.reactprison, "on_reaction_add")
     bot.add_cog(n)

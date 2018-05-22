@@ -928,7 +928,7 @@ class Echo:
                 txt += "`{}` ─ *{}*\n".format(self.data[server.id][stk]["NOM"], self.data[server.id][stk]["URL"])
         await self.bot.whisper(txt if txt != "" else "Aucun")
 
-    @_stkmod.command(pass_context=True)
+    @_stkmod.command(pass_context=True, hidden=True)
     async def importer(self, ctx):
         """Tente désespérément d'importer des données d'un ancien module...
 
