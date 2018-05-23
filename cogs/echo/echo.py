@@ -694,9 +694,12 @@ class Echo:
         if nom:
             if self.get_perms(author, "AJOUTER"):
                 if nom == "fullreset":
+                    liste = []
                     for stk in self.data[server.id]:
                         if self.data[server.id][stk]["APPROB"] is False:
-                            del self.data[server.id][stk]
+                            liste.append(stk)
+                    for e in liste:
+                        del self.data[server.id][e]
                     self.save()
                     await self.bot.say("**Succès** | Le reset total des stickers en approbation a été réalisé")
                     return
