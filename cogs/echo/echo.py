@@ -711,7 +711,7 @@ class Echo:
                     em = discord.Embed(title="{}, proposé par {}".format(
                         stk["NOM"], server.get_member(stk["AUTHOR"]).name),
                         color=server.get_member(stk["AUTHOR"]).color)
-                    if stk.type is "IMAGE":
+                    if self.get_sticker(server, nom, pass_approb=True).type is "IMAGE":
                         em.set_image(url=stk["URL"])
                     else:
                         em = discord.Embed(title="{}, proposé par {}".format(
