@@ -286,7 +286,7 @@ class Echo:
     @_stk.command(aliases=["new"], pass_context=True)
     async def add(self, ctx, nom, url=None):
         """Ajouter un Sticker (Image, audio ou vidéo)
-        Supporté : jpeg, jpg, png, gif, mp3, wav, mp4
+        Supporté : jpeg, jpg, png, gif, mp3, wav, mp4, webm
 
         <nom> = Nom du sticker à ajouter
         [url] = Facultatif, URL du fichier si provenant d'Internet
@@ -302,6 +302,12 @@ class Echo:
         self._set_server(server)
         if nom in [s.nom for s in self.approb_list(server)]:
             await self.bot.say("**Impossible** | Un sticker avec ce nom est en attente d'approbation")
+            return
+        if nom in ["list", "liste", "vent", "fullreset"]:
+            await self.bot.say("**Impossible** | Ce nom est réservé à un processus système")
+            return
+        if ":" in nom:
+            await self.bot.say("**Attention** | Ne mettez pas les deux points `:` autour du nom !")
             return
         if self.get_sticker(server, nom):
             if nom == racine:
@@ -687,6 +693,13 @@ class Echo:
         self._set_server(server)
         if nom:
             if self.get_perms(author, "AJOUTER"):
+                if nom == "fullreset":
+                    for stk in self.data[server.id]:
+                        if self.data[server.id][stk]["APPROB"] is False:
+                            del self.data[server.id][stk]
+                    self.save()
+                    await self.bot.say("**Succès** | Le reset total des stickers en approbation a été réalisé")
+                    return
                 stk = self.get_sticker(server, nom, w=True, pass_approb=True)
                 if stk:
                     sid = self.get_sticker(server, nom, pass_approb=True).id
