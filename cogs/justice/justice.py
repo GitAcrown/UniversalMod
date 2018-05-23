@@ -511,7 +511,7 @@ class Justice:
                 else:
                     txt = ""
                 if appel:
-                    txt += "\n─ Vous avez le droit à envoyer un dernier message avec `{}appel`".format(ctx.prefix)
+                    txt += "\n─ Vous avez le droit d'envoyer un dernier message avec `{}appel`".format(ctx.prefix)
                 em = discord.Embed(description="**Peine de prison** ─ **{}{}** par *{}*{}".format(
                     val, form, ctx.message.author.name, txt), color=apply.color)
                 em.set_footer(text="Sortie prévue à {}".format(estim))
