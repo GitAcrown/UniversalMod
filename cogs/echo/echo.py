@@ -717,7 +717,7 @@ class Echo:
                         em = discord.Embed(title="{}, proposé par {}".format(
                             stk["NOM"], server.get_member(stk["AUTHOR"]).name),
                             color=server.get_member(stk["AUTHOR"]).color,
-                            description="[Fichier multimédia]({})".format(stk.url))
+                            description="[Fichier multimédia]({})".format(stk["URL"]))
                     em.set_footer(text="✔ = Approuver | ✖ = Refuser")
                     msg = await self.bot.say(embed=em)
                     await self.bot.add_reaction(msg, "✔")
