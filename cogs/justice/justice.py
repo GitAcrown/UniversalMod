@@ -226,8 +226,6 @@ class Justice:
             self.sys[server.id]["APPEL_SALON"] = False
             await self.bot.say("**Désactivée** | Les prisonniers ne pourront plus envoyer un dernier message.")
         self.save()
-        await self.bot.say("**Succès** | Le salon de prison est désormais {}\n"
-                           "Vérifiez que les prisonniers n'aient accès qu'à ce salon.".format(salon.mention))
 
     @_modprison.command(pass_context=True)
     async def role(self, ctx, role: discord.Role):
