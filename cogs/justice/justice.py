@@ -314,7 +314,7 @@ class Justice:
                     author.name))
                 await self.bot.send_typing(salon)
                 await asyncio.sleep(1)
-                if user.id in self.sys[server.id]["APPEL_USE"]:
+                if author.id in self.sys[server.id]["APPEL_USE"]:
                     self.sys[server.id]["APPEL_USE"].remove(author.id)
                 await self.bot.send_message(salon, embed=em)
                 self.save()
