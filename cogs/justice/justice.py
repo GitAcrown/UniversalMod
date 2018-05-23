@@ -18,7 +18,7 @@ class Justice:
         self.bot = bot
         self.sys = dataIO.load_json("data/justice/sys.json")
         self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE": [], "SLOW": {},
-                         "APPEL_SALON": None, "APPEL_USE": []}
+                         "APPEL_SALON": None, "APPEL_USE": [], "FILTER"}
         self.reg = dataIO.load_json("data/justice/reg.json")
         self.slow_cooldown = {}
 
@@ -264,6 +264,10 @@ class Justice:
         else:
             await self.bot.say("**Impossible** | Vous devez d'abord régler le rôle"
                                " `{0}mp role` et le channel de la prison `{0}mp salon`".format(ctx.prefix))
+
+    @commands.command(aliases=["f"], pass_context=True)
+    @checks.admin_or_permissions(manage_messages=True)
+    async def filtre(self, ctx, cible: discord.Member or discord.Role, texte:str):
 
     @commands.command(aliases=["s"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)

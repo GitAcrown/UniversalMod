@@ -31,7 +31,7 @@ class Labo:
         if user.id in self.msg:
             for e in self.msg[user.id]:
                 if e[0] != jour:
-                    del self.msg[user.id][e]
+                    self.msg[user.id].remove(e)
             fileIO("data/labo/msg.json", "save", self.msg)
             return True
         return False
