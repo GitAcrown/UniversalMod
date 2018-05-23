@@ -17,7 +17,8 @@ class Justice:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/justice/sys.json")
-        self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE": [], "SLOW": {}}
+        self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE": [], "SLOW": {},
+                         "APPEL_SALON": None, "APPEL_USE": []}
         self.reg = dataIO.load_json("data/justice/reg.json")
         self.slow_cooldown = {}
 
@@ -210,6 +211,25 @@ class Justice:
                            "Vérifiez que les prisonniers n'aient accès qu'à ce salon.".format(salon.mention))
 
     @_modprison.command(pass_context=True)
+    async def appelset(self, ctx, salon: discord.Channel = None):
+        """Assigne un salon où recevoir les 'appels' - Si aucun salon n'est donné, désactive la fonctionnalité"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if "APPEL_SALON" not in self.sys[server.id]:
+            self.sys[server.id]["APPEL_SALON"] = False
+            self.sys[server.id]["APPEL_USE"] = []
+        if salon:
+            self.sys[server.id]["APPEL_SALON"] = salon.id
+            await self.bot.say("**Succès** | Les messages d'appel seront envoyés sur le salon {}".format(salon.mention))
+        else:
+            self.sys[server.id]["APPEL_SALON"] = False
+            await self.bot.say("**Désactivée** | Les prisonniers ne pourront plus envoyer un dernier message.")
+        self.save()
+        await self.bot.say("**Succès** | Le salon de prison est désormais {}\n"
+                           "Vérifiez que les prisonniers n'aient accès qu'à ce salon.".format(salon.mention))
+
+    @_modprison.command(pass_context=True)
     async def role(self, ctx, role: discord.Role):
         """Assigne la prison à un salon écrit"""
         server = ctx.message.server
@@ -278,6 +298,31 @@ class Justice:
             await asyncio.sleep(6)
             await self.bot.delete_message(msg)
 
+    @commands.command(pass_context=True)
+    async def appel(self, ctx, *message: str):
+        """Permet d'envoyer un unique message après votre mise en prison"""
+        author = ctx.message.author
+        server = ctx.message.server
+        if self.sys[server.id]["APPEL_SALON"]:
+            salon = self.bot.get_channel(self.sys[server.id]["APPEL_SALON"])
+            message = " ".join(message)
+            if author.id in self.sys[server.id]["APPEL_USE"]:
+                if len(message) > 300:
+                    await self.bot.say("**Trop long** | Ce message est limité à 300 caractères, pas un de plus.")
+                    return
+                em = discord.Embed(color=author.color, description="*{}*".format(message))
+                em.set_author(name="Appel de {}".format(str(author)), icon_url=author.avatar_url)
+                em.set_footer(text="Ce message unique à été envoyé depuis la prison où {} est enfermé.".format(
+                    author.name))
+                await self.bot.send_typing(salon)
+                await asyncio.sleep(1)
+                if user.id in self.sys[server.id]["APPEL_USE"]:
+                    self.sys[server.id]["APPEL_USE"].remove(author.id)
+                await self.bot.send_message(salon, embed=em)
+                self.save()
+                await self.bot.say("**Votre message à été envoyé avec succès**")
+            else:
+                await self.bot.say("**Refusé** | Vous n'y avez pas le droit.")
 
     @commands.command(aliases=["ph"], pass_context=True)
     async def historique(self, ctx, nb: int = 10):
@@ -362,6 +407,10 @@ class Justice:
             self.sys[server.id] = self.base_sys
         if server.id not in self.reg:
             self.reg[server.id] = {}
+        if "APPEL_SALON" not in self.sys[server.id]:
+            self.sys[server.id]["APPEL_SALON"] = False
+            self.sys[server.id]["APPEL_USE"] = []
+        appel = True if self.sys[server.id]["APPEL_SALON"] else False
         role = self.sys[server.id]["PRISON_ROLE"]
         prisonchan = self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]).name if \
             self.sys[server.id]["PRISON_SALON"] else False
@@ -454,6 +503,8 @@ class Justice:
                 self.reg[server.id][user.id]["TS_SORTIE"] = b_peine + sec
                 estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                 await self.bot.add_roles(user, apply)
+                if appel and user.id not in self.sys[server.id]["APPEL_USE"]:
+                    self.sys[server.id]["APPEL_USE"].append(user.id)
                 msg = "{} ─ Mise en prison pour **{}{}**".format(user.mention, val, form)
                 estim_txt = "Sortie estimée à {}".format(estim)
                 self.add_event(user, ">", "{}{}".format(val, form), author=ctx.message.author)
@@ -461,6 +512,8 @@ class Justice:
                     txt = "\nVous avez accès au salon *{}* pour toute réclamation".format(prisonchan)
                 else:
                     txt = ""
+                if appel:
+                    txt += "\n─ Vous avez le droit à envoyer un dernier message avec `{}appel`".format(ctx.prefix)
                 em = discord.Embed(description="**Peine de prison** ─ **{}{}** par *{}*{}".format(
                     val, form, ctx.message.author.name, txt), color=apply.color)
                 em.set_footer(text="Sortie prévue à {}".format(estim))
@@ -481,6 +534,8 @@ class Justice:
                         self.reg[server.id][user.id]["TS_ENTREE"] = self.reg[server.id][user.id]["TS_SORTIE"] = 0
                         self.add_event(user, "<")
                         await self.bot.remove_roles(user, apply)
+                        if user.id in self.sys[server.id]["APPEL_USE"] and appel:
+                            self.sys[server.id]["APPEL_USE"].remove(user.id)
                         em = discord.Embed(description="**Peine de prison** ─ Vous êtes désormais libre",
                                            color=apply.color)
                         await self.bot.send_message(user, embed=em)
@@ -494,6 +549,8 @@ class Justice:
                         return
                 else:
                     em = discord.Embed(description="**Sortie de** <@{}> | Il n'est plus sur le serveur.")
+                    if user.id in self.sys[server.id]["APPEL_USE"] and appel:
+                        self.sys[server.id]["APPEL_USE"].remove(user.id)
                     self.add_event(user, "x<")
                     notif = await self.bot.say(embed=em)
                     await asyncio.sleep(5)
@@ -501,6 +558,8 @@ class Justice:
             else:
                 self.reg[server.id][user.id]["TS_ENTREE"] = self.reg[server.id][user.id]["TS_SORTIE"] = 0
                 await self.bot.remove_roles(user, apply)
+                if user.id in self.sys[server.id]["APPEL_USE"] and appel:
+                    self.sys[server.id]["APPEL_USE"].remove(user.id)
                 self.add_event(user, "!<", author=ctx.message.author)
                 em = discord.Embed(description="{} a été libéré par {}".format(
                     user.mention, ctx.message.author.mention), color=apply.color)
@@ -514,11 +573,17 @@ class Justice:
         server = user.server
         chanp = self.sys[server.id]["PRISON_SALON"]
         role = self.sys[server.id]["PRISON_ROLE"]
+        if "APPEL_SALON" not in self.sys[server.id]:
+            self.sys[server.id]["APPEL_SALON"] = False
+            self.sys[server.id]["APPEL_USE"] = []
+        appel = True if self.sys[server.id]["APPEL_SALON"] else False
         apply = discord.utils.get(server.roles, name=role)
         if user.id in self.reg[server.id]:
             if role not in [r.name for r in user.roles]:
                 if self.reg[server.id][user.id]["TS_SORTIE"] > time.time():
                     await self.bot.add_roles(user, apply)
+                    if appel and user.id not in self.sys[server.id]["APPEL_USE"]:
+                        self.sys[server.id]["APPEL_USE"].append(user.id)
                     estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                     if chanp:
                         em = discord.Embed(description="**Retour automatique en prison** ─ "
@@ -534,6 +599,8 @@ class Justice:
                         if role in [r.name for r in user.roles]:
                             self.reg[server.id][user.id]["TS_ENTREE"] = self.reg[server.id][user.id]["TS_SORTIE"] = 0
                             await self.bot.remove_roles(user, apply)
+                            if appel and user.id in self.sys[server.id]["APPEL_USE"]:
+                                self.sys[server.id]["APPEL_USE"].remove(user.id)
                             em = discord.Embed(description="**Peine de prison** ─ Vous êtes désormais libre",
                                                color=apply.color)
                             await self.bot.send_message(user, embed=em)
@@ -550,6 +617,8 @@ class Justice:
                         if chanp:
                             em = discord.Embed(description="**Sortie de** <@{}> | Il n'est plus sur le serveur.")
                             self.add_event(user, "x<")
+                            if appel and user.id in self.sys[server.id]["APPEL_USE"]:
+                                self.sys[server.id]["APPEL_USE"].remove(user.id)
                             notif = await self.bot.send_message(self.bot.get_channel(chanp), embed=em)
                         else:
                             pass
