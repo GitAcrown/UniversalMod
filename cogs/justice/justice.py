@@ -265,7 +265,7 @@ class Justice:
             await self.bot.say("**Impossible** | Vous devez d'abord régler le rôle"
                                " `{0}mp role` et le channel de la prison `{0}mp salon`".format(ctx.prefix))
 
-    @commands.group(name="filtre", aliases=["filtre"], pass_context=True)
+    @commands.group(name="filtre", aliases=["flr"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def _filtre(self, ctx):
         """Commandes de filtre"""
