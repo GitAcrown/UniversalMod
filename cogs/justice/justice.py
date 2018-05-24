@@ -323,6 +323,10 @@ class Justice:
         if "FILTRE" not in self.sys[server.id]:
             self.sys[server.id]["FILTRE"] = {}
             self.save()
+        if smartmode:
+            smt = " (+ Smartmode)"
+        else:
+            smt = ""
         if texte.lower() not in self.sys[server.id]["FILTRE"]:
             self.sys[server.id]["FILTRE"][texte.lower()] = {"SMART": smartmode,
                                                             "CIBLE_USER":
@@ -330,18 +334,18 @@ class Justice:
                                                             "CIBLE_ROLE":
                                                                 [cible.name] if type(cible) is discord.Role else []}
             self.save()
-            await self.bot.say("**Ajouté** | Le mot `{}` sera désormais filtré pour *{}*".format(texte.lower(),
-                                                                                                 cible.name))
+            await self.bot.say("**Ajouté** | Le mot `{}` sera désormais filtré pour *{}*{}".format(texte.lower(),
+                                                                                                 cible.name, smt))
         else:
             self.sys[server.id]["FILTRE"][texte.lower()]["SMART"] = smartmode
             if type(cible) is discord.Member:
                 self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_USER"].append(cible.id)
-                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*".format(texte.lower(),
-                                                                                                 cible.name))
+                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*{}".format(texte.lower(),
+                                                                                                 cible.name, smt))
             else:
                 self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_ROLE"].append(cible.name)
-                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*".format(texte.lower(),
-                                                                                                 cible.name))
+                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*{}".format(texte.lower(),
+                                                                                                 cible.name, smt))
             self.save()
 
     @_filtre.command(pass_context=True)
