@@ -273,7 +273,7 @@ class Justice:
             await send_cmd_help(ctx)
 
     @_filtre.command(pass_context=True)
-    async def list(self, ctx, cible: discord.Member or discord.Role = None):
+    async def list(self, ctx, cible: discord.Member = None):
         """Affiche les mots filtrés pour le serveur ou si précisé, pour le membre ou le rôle visé"""
         server = ctx.message.server
         if server.id not in self.sys:
@@ -312,7 +312,7 @@ class Justice:
                 await self.bot.say(embed=em)
 
     @_filtre.command(pass_context=True)
-    async def add(self, ctx, cible: discord.Member or discord.Role, texte: str, smartmode: bool = False):
+    async def add(self, ctx, cible: discord.Member, texte: str, smartmode: bool = False):
         """Filtre un texte pour une cible (un mot unique)
 
         La cible peut être un membre en particulier ou un Rôle dans son ensemble
@@ -345,7 +345,7 @@ class Justice:
             self.save()
 
     @_filtre.command(pass_context=True)
-    async def remove(self, ctx, cible: discord.Member or discord.Role, texte: str):
+    async def remove(self, ctx, cible: discord.Member, texte: str):
         """Retire un filtre pour une cible"""
         server = ctx.message.server
         if server.id not in self.sys:
