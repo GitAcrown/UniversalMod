@@ -291,7 +291,8 @@ class Justice:
                     roles.append(role)
                 cibles = users + roles
                 txt += "`{}` ─ {}\n".format(mot, ", ".join([s.name for s in cibles]))
-            em = discord.Embed(title="Mots filtrés sur le serveur", description=txt, color= ctx.message.author.color)
+            em = discord.Embed(title="Mots filtrés sur le serveur", description=txt if txt else "Aucun",
+                               color=ctx.message.author.color)
             await self.bot.say(embed=em)
         else:
             if type(cible) is discord.Member:
