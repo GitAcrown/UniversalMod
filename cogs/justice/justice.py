@@ -773,12 +773,11 @@ class Justice:
     def normalize(self, texte: str):
         norm = [l for l in "neecaiuuo"]
         modif = [l for l in "ñéèçàîûùö"]
-        texte = " ".join(texte)
         fin_texte = texte
         for char in texte:
-            if char in norm:
-                ind = norm.index(char)
-                fin_texte = fin_texte.replace(char, modif[ind])
+            if char in modif:
+                ind = modif.index(char)
+                fin_texte = fin_texte.replace(char, norm[ind])
         return fin_texte
 
     async def view(self, message):
