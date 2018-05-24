@@ -770,6 +770,17 @@ class Justice:
             previous_row = current_row
         return previous_row[-1]
 
+    def normalize(self, texte: str):
+        norm = [l for l in "neecaiuuo"]
+        modif = [l for l in "ñéèçàîûùö"]
+        texte = " ".join(texte)
+        fin_texte = texte
+        for char in texte:
+            if char in norm:
+                ind = norm.index(char)
+                fin_texte = fin_texte.replace(char, modif[ind])
+        return fin_texte
+
     async def view(self, message):
         server = message.server
         author = message.author
@@ -787,6 +798,7 @@ class Justice:
             self.save()
         splitted = message.content.split()
         for w in splitted:
+            w = self.normalize(w)
             if w.lower() in self.sys[server.id]["FILTRE"]:
                 roles = [r.name for r in author.roles]
                 if author.id in self.sys[server.id]["FILTRE"][w.lower()]["CIBLE_USER"]:
