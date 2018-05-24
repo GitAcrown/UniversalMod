@@ -300,7 +300,7 @@ class Justice:
                 for mot in self.sys[server.id]["FILTRE"]:
                     if cible.id in self.sys[server.id]["FILTRE"][mot]["CIBLE_USER"]:
                         txt += "`{}`\n".format(mot)
-                em = discord.Embed(title="Mots filtrés pour {}".format(cible.name), description=txt,
+                em = discord.Embed(title="Mots filtrés pour {}".format(cible.name), description=txt if txt else "Aucun",
                                    color=ctx.message.author.color)
                 await self.bot.say(embed=em)
             else:
