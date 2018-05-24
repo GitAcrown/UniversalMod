@@ -265,7 +265,7 @@ class Justice:
             await self.bot.say("**Impossible** | Vous devez d'abord régler le rôle"
                                " `{0}mp role` et le channel de la prison `{0}mp salon`".format(ctx.prefix))
 
-    @commands.group(name="filtre", aliases=["flr"], pass_context=True)
+    @commands.group(name="filtre", aliases=["f"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def _filtre(self, ctx):
         """Commandes de filtre"""
@@ -340,11 +340,11 @@ class Justice:
             self.sys[server.id]["FILTRE"][texte.lower()]["SMART"] = smartmode
             if type(cible) is discord.Member:
                 self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_USER"].append(cible.id)
-                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*{}".format(texte.lower(),
+                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filtré pour *{}*{}".format(texte.lower(),
                                                                                                  cible.name, smt))
             else:
                 self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_ROLE"].append(cible.name)
-                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*{}".format(texte.lower(),
+                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filtré pour *{}*{}".format(texte.lower(),
                                                                                                  cible.name, smt))
             self.save()
 
