@@ -299,15 +299,15 @@ class Justice:
                 for mot in self.sys[server.id]["FILTRE"]:
                     if cible.id in self.sys[server.id]["FILTRE"][mot]["CIBLE_USER"]:
                         txt += "`{}`\n".format(mot)
-                em = discord.Embed(title="Mots filtrés pour {}".format(cible.nom), description=txt,
+                em = discord.Embed(title="Mots filtrés pour {}".format(cible.name), description=txt,
                                    color=ctx.message.author.color)
                 await self.bot.say(embed=em)
             else:
                 txt = ""
                 for mot in self.sys[server.id]["FILTRE"]:
-                    if cible.nom in self.sys[server.id]["FILTRE"][mot]["CIBLE_ROLE"]:
+                    if cible.name in self.sys[server.id]["FILTRE"][mot]["CIBLE_ROLE"]:
                         txt += "`{}`\n".format(mot)
-                em = discord.Embed(title="Mots filtrés pour {}".format(cible.nom), description=txt,
+                em = discord.Embed(title="Mots filtrés pour {}".format(cible.name), description=txt,
                                    color=ctx.message.author.color)
                 await self.bot.say(embed=em)
 
