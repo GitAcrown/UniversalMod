@@ -18,7 +18,7 @@ class Justice:
         self.bot = bot
         self.sys = dataIO.load_json("data/justice/sys.json")
         self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE": [], "SLOW": {},
-                         "APPEL_SALON": None, "APPEL_USE": [], "FILTER"}
+                         "APPEL_SALON": None, "APPEL_USE": [], "FILTRE": {}}
         self.reg = dataIO.load_json("data/justice/reg.json")
         self.slow_cooldown = {}
 
@@ -265,9 +265,130 @@ class Justice:
             await self.bot.say("**Impossible** | Vous devez d'abord régler le rôle"
                                " `{0}mp role` et le channel de la prison `{0}mp salon`".format(ctx.prefix))
 
-    @commands.command(aliases=["f"], pass_context=True)
+    @commands.group(name="filtre", aliases=["filtre"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
-    async def filtre(self, ctx, cible: discord.Member or discord.Role, texte:str):
+    async def _filtre(self, ctx):
+        """Commandes de filtre"""
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+    @_filtre.command(pass_context=True)
+    async def list(self, ctx, cible: discord.Member or discord.Role = None):
+        """Affiche les mots filtrés pour le serveur ou si précisé, pour le membre ou le rôle visé"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if "FILTRE" not in self.sys[server.id]:
+            self.sys[server.id]["FILTRE"] = {}
+            self.save()
+        if not cible:
+            txt = ""
+            for mot in self.sys[server.id]["FILTRE"]:
+                users = [server.get_member(s) for s in self.sys[server.id]["FILTRE"][mot]["CIBLE_USER"]]
+                roles = []
+                for r in self.sys[server.id]["FILTRE"][mot]["CIBLE_ROLE"]:
+                    role = discord.utils.get(server.roles, name=r)
+                    roles.append(role)
+                cibles = users + roles
+                txt += "`{}` ─ {}\n".format(mot, ", ".join([s.name for s in cibles]))
+            em = discord.Embed(title="Mots filtrés sur le serveur", description=txt, color= ctx.message.author.color)
+            await self.bot.say(embed=em)
+        else:
+            if type(cible) is discord.Member:
+                txt = ""
+                for mot in self.sys[server.id]["FILTRE"]:
+                    if cible.id in self.sys[server.id]["FILTRE"][mot]["CIBLE_USER"]:
+                        txt += "`{}`\n".format(mot)
+                em = discord.Embed(title="Mots filtrés pour {}".format(cible.nom), description=txt,
+                                   color=ctx.message.author.color)
+                await self.bot.say(embed=em)
+            else:
+                txt = ""
+                for mot in self.sys[server.id]["FILTRE"]:
+                    if cible.nom in self.sys[server.id]["FILTRE"][mot]["CIBLE_ROLE"]:
+                        txt += "`{}`\n".format(mot)
+                em = discord.Embed(title="Mots filtrés pour {}".format(cible.nom), description=txt,
+                                   color=ctx.message.author.color)
+                await self.bot.say(embed=em)
+
+    @_filtre.command(pass_context=True)
+    async def add(self, ctx, cible: discord.Member or discord.Role, texte: str, smartmode: bool = False):
+        """Filtre un texte pour une cible (un mot unique)
+
+        La cible peut être un membre en particulier ou un Rôle dans son ensemble
+        Le Smartmode permet de filtrer aussi les mots proches (quand une lettre change par ex.)"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if "FILTRE" not in self.sys[server.id]:
+            self.sys[server.id]["FILTRE"] = {}
+            self.save()
+        if texte.lower() not in self.sys[server.id]["FILTRE"]:
+            self.sys[server.id]["FILTRE"][texte.lower()] = {"SMART": smartmode,
+                                                            "CIBLE_USER":
+                                                                [cible.id] if type(cible) is discord.Member else [],
+                                                            "CIBLE_ROLE":
+                                                                [cible.name] if type(cible) is discord.Role else []}
+            self.save()
+            await self.bot.say("**Ajouté** | Le mot `{}` sera désormais filtré pour *{}*".format(texte.lower(),
+                                                                                                 cible.name))
+        else:
+            self.sys[server.id]["FILTRE"][texte.lower()]["SMART"] = smartmode
+            if type(cible) is discord.Member:
+                self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_USER"].append(cible.id)
+                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*".format(texte.lower(),
+                                                                                                 cible.name))
+            else:
+                self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_ROLE"].append(cible.name)
+                await self.bot.say("**Modifié** | Le mot `{}` sera aussi filté pour *{}*".format(texte.lower(),
+                                                                                                 cible.name))
+            self.save()
+
+    @_filtre.command(pass_context=True)
+    async def remove(self, ctx, cible: discord.Member or discord.Role, texte: str):
+        """Retire un filtre pour une cible"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if "FILTRE" not in self.sys[server.id]:
+            self.sys[server.id]["FILTRE"] = {}
+            self.save()
+        if texte.lower() in self.sys[server.id]["FILTRE"]:
+            if type(cible) is discord.Member:
+                if cible.id in self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_USER"]:
+                    self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_USER"].remove(cible.id)
+                    await self.bot.say("**Retiré** | `{}` n'est plus filtré pour *{}*".format(texte.lower(), cible.name))
+                else:
+                    await self.bot.say("**Erreur** | Ce mot n'est pas filtré pour ce membre.")
+            else:
+                if cible.nom in self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_ROLE"]:
+                    self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_ROLE"].remove(cible.nom)
+                    await self.bot.say("**Retiré** | `{}` n'est plus filtré pour *{}*".format(texte.lower(), cible.name))
+                else:
+                    await self.bot.say("**Erreur** | Ce mot n'est pas filtré pour ce rôle.")
+            if not self.sys[server.id]["FILTRE"][texte.lower()]["CIBLE_ROLE"] and not self.sys[server.id]["FILTRE"][
+                texte.lower()]["CIBLE_USER"]:
+                del self.sys[server.id]["FILTRE"][texte.lower()]
+                await self.bot.say("**Filtre supprimé** | Il n'y a plus aucune cible.")
+            self.save()
+        else:
+            await self.bot.say("**Erreur** | Ce texte n'est pas filtré")
+
+    @_filtre.command(pass_context=True)
+    async def delete(self, ctx, texte: str):
+        """Supprime le filtre pour TOUTES LES CIBLES (Membres et rôles)"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if "FILTRE" not in self.sys[server.id]:
+            self.sys[server.id]["FILTRE"] = {}
+            self.save()
+        if texte.lower() in self.sys[server.id]["FILTRE"]:
+            del self.sys[server.id]["FILTRE"][texte.lower()]
+            await self.bot.say("**Filtre supprimé** | Il n'y a plus aucune cible pour ce texte.")
+            self.save()
+        else:
+            await self.bot.say("**Erreur** | Ce filtre n'existe pas.")
 
     @commands.command(aliases=["s"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
@@ -625,9 +746,29 @@ class Justice:
                         else:
                             pass
 
+    def levenshtein(self, s1, s2):
+        if len(s1) < len(s2):
+            m = s1
+            s1 = s2
+            s2 = m
+        if len(s2) == 0:
+            return len(s1)
+        previous_row = range(len(s2) + 1)
+        for i, c1 in enumerate(s1):
+            current_row = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = previous_row[
+                                 j + 1] + 1
+                deletions = current_row[j] + 1
+                substitutions = previous_row[j] + (c1 != c2)
+                current_row.append(min(insertions, deletions, substitutions))
+            previous_row = current_row
+        return previous_row[-1]
+
     async def view(self, message):
         server = message.server
         author = message.author
+
         if author.id in self.sys[server.id]["SLOW"]:
             heure = time.strftime("%H:%M", time.localtime())
             if heure not in self.slow_cooldown:
@@ -635,6 +776,29 @@ class Justice:
             self.slow_cooldown[heure].append(author.id)
             if self.slow_cooldown[heure].count(author.id) > self.sys[server.id]["SLOW"][author.id]:
                 await self.bot.delete_message(message)
+
+        if "FILTRE" not in self.sys[server.id]:
+            self.sys[server.id]["FILTRE"] = {}
+            self.save()
+        splitted = message.content.split()
+        for w in splitted:
+            if w.lower() in self.sys[server.id]["FILTRE"]:
+                roles = [r.name for r in author.roles]
+                if author.id in self.sys[server.id]["FILTRE"][w.lower()]["CIBLE_USER"]:
+                    await self.bot.delete_message(message)
+                for r in roles:
+                    if r in self.sys[server.id]["FILTRE"][w.lower()]["CIBLE_ROLE"]:
+                        await self.bot.delete_message(message)
+            liste = [m for m in self.sys[server.id]["FILTRE"]]
+            for m in liste:
+                if self.levenshtein(w.lower(), m.lower()) <= 1:
+                    if self.sys[server.id]["FILTRE"][m]["SMART"]:
+                        roles = [r.name for r in author.roles]
+                        if author.id in self.sys[server.id]["FILTRE"][w.lower()]["CIBLE_USER"]:
+                            await self.bot.delete_message(message)
+                        for r in roles:
+                            if r in self.sys[server.id]["FILTRE"][w.lower()]["CIBLE_ROLE"]:
+                                await self.bot.delete_message(message)
 
 
 def check_folders():
