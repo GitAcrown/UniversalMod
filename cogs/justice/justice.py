@@ -794,10 +794,10 @@ class Justice:
                 if self.levenshtein(w.lower(), m.lower()) <= 1:
                     if self.sys[server.id]["FILTRE"][m]["SMART"]:
                         roles = [r.name for r in author.roles]
-                        if author.id in self.sys[server.id]["FILTRE"][w.lower()]["CIBLE_USER"]:
+                        if author.id in self.sys[server.id]["FILTRE"][m.lower()]["CIBLE_USER"]:
                             await self.bot.delete_message(message)
                         for r in roles:
-                            if r in self.sys[server.id]["FILTRE"][w.lower()]["CIBLE_ROLE"]:
+                            if r in self.sys[server.id]["FILTRE"][m.lower()]["CIBLE_ROLE"]:
                                 await self.bot.delete_message(message)
 
 
