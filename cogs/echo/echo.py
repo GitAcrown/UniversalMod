@@ -1166,7 +1166,11 @@ class Echo:
                                 txt = ""
                                 n = 1
                                 for e in sorted:
-                                    txt += "`{}`\n".format(e)
+                                    if len(self.get_collection(server, e)) > 1:
+                                        colltxt = " ({}#)".format(len(self.get_collection(server, e)))
+                                    else:
+                                        colltxt = ""
+                                    txt += "`{}`{}\n".format(e, colltxt)
                                     if len(txt) > 1980 * n:
                                         em = discord.Embed(title="Liste des stickers {} (Par collection)".format(server.name),
                                                            description=txt,
