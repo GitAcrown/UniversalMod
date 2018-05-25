@@ -783,6 +783,8 @@ class Justice:
     async def view(self, message):
         server = message.server
         author = message.author
+        if not server:
+            return
 
         if author.id in self.sys[server.id]["SLOW"]:
             heure = time.strftime("%H:%M", time.localtime())

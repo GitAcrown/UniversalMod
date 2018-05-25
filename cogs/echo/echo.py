@@ -1016,7 +1016,6 @@ class Echo:
                     await self.bot.say("**Kosmos** | Anciens stickers Kosmos importés avec succès")
                     self.save()
 
-
 # ---------- ASYNC -------------
 
     async def read_stk(self, message):
@@ -1157,26 +1156,52 @@ class Echo:
                                 print("Impossible d'afficher {} en URL : {}".format(stk.nom, e))
 
                         elif e[1] in ["liste", "list"]:
-                            liste = [e.nom for e in self.get_all_stickers(server, True)]
-                            txt = ""
-                            liste.sort()
-                            n = 1
-                            for e in liste:
-                                txt += "`{}`\n".format(e)
-                                if len(txt) > 1980 * n:
-                                    em = discord.Embed(title="Liste des stickers {}".format(server.name),
-                                                       description=txt,
-                                                       color=author.color)
-                                    em.set_footer(text="─ Page {}".format(n))
-                                    await self.bot.send_message(author, embed=em)
-                                    n += 1
-                                    txt = ""
-                            em = discord.Embed(title="Liste des stickers {}".format(server.name),
-                                               description=txt,
-                                               color=author.color)
-                            em.set_footer(text="─ Page {}".format(n))
-                            await self.bot.send_message(author, embed=em)
-                            continue
+                            if e[0] == "c":
+                                liste = self.get_all_stickers(server, True)
+                                sorted = []
+                                for e in liste:
+                                    if e.racine not in sorted:
+                                        sorted.append(e.racine)
+                                sorted.sort()
+                                txt = ""
+                                n = 1
+                                for e in sorted:
+                                    txt += "`{}`\n".format(e)
+                                    if len(txt) > 1980 * n:
+                                        em = discord.Embed(title="Liste des stickers {} (Par collection)".format(server.name),
+                                                           description=txt,
+                                                           color=author.color)
+                                        em.set_footer(text="─ Page {}".format(n))
+                                        await self.bot.send_message(author, embed=em)
+                                        n += 1
+                                        txt = ""
+                                em = discord.Embed(title="Liste des stickers {} (Par collection)".format(server.name),
+                                                   description=txt,
+                                                   color=author.color)
+                                em.set_footer(text="─ Page {}".format(n))
+                                await self.bot.send_message(author, embed=em)
+                                continue
+                            else:
+                                liste = [e.nom for e in self.get_all_stickers(server, True)]
+                                txt = ""
+                                liste.sort()
+                                n = 1
+                                for e in liste:
+                                    txt += "`{}`\n".format(e)
+                                    if len(txt) > 1980 * n:
+                                        em = discord.Embed(title="Liste des stickers {}".format(server.name),
+                                                           description=txt,
+                                                           color=author.color)
+                                        em.set_footer(text="─ Page {}".format(n))
+                                        await self.bot.send_message(author, embed=em)
+                                        n += 1
+                                        txt = ""
+                                em = discord.Embed(title="Liste des stickers {}".format(server.name),
+                                                   description=txt,
+                                                   color=author.color)
+                                em.set_footer(text="─ Page {}".format(n))
+                                await self.bot.send_message(author, embed=em)
+                                continue
                         elif e[1] == "vent":
                             await asyncio.sleep(0.10)
                             await self.bot.send_typing(channel)
