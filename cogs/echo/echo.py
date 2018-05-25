@@ -1016,6 +1016,16 @@ class Echo:
                     await self.bot.say("**Kosmos** | Anciens stickers Kosmos importés avec succès")
                     self.save()
 
+# ---------- MKR --------------
+
+    @commands.group(name="mkr", pass_context=True, no_pm=True)
+    async def _maker(self, ctx):
+        """Création de commandes personnalisées"""
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+
+
 # ---------- ASYNC -------------
 
     async def read_stk(self, message):

@@ -162,24 +162,6 @@ class Labo:
         else:
             await self.bot.say("**Erreur** | Impossible de faire un résumé de ça.")
 
-    async def read(self, message):
-        splitted = message.content.split(" ")
-        server = message.channel.server
-        if not message.author.bot:
-            if "http" in message.content:
-                for e in splitted:
-                    if e.startswith("http"):
-                        if server.id not in self.sys:
-                            self.sys[server.id] = self.sys_def
-                            fileIO("data/labo/sys.json", "save", self.sys)
-                        if e.lower() in self.sys[server.id]["REPOST"]:
-                            await self.bot.add_reaction(message, "♻")
-                        else:
-                            self.sys[server.id]["REPOST"].append(e.lower())
-                            if len(self.sys[server.id]["REPOST"]) > 100:
-                                self.sys[server.id]["REPOST"].remove(self.sys[server.id]["REPOST"][0])
-                            fileIO("data/labo/sys.json", "save", self.sys)
-
     async def read_edit(self, before, after):
         user = before.author
         if user.id not in self.msg:
@@ -203,6 +185,8 @@ class Labo:
     async def reactrecap(self, reaction, user):
         message = reaction.message
         server = message.channel.server
+        if not server:
+            return
         texte = message.content
         if reaction.emoji == "✂":
             if message.content.startswith("http"):
@@ -251,7 +235,6 @@ def setup(bot):
     check_folders()
     check_files()
     n = Labo(bot)
-    bot.add_listener(n.read, "on_message")
     bot.add_listener(n.read_suppr, "on_message_delete")
     bot.add_listener(n.read_edit, "on_message_edit")
     bot.add_listener(n.reactrecap, "on_reaction_add")
