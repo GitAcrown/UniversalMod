@@ -80,12 +80,16 @@ class Echo:
                     ext = fichnom.split(".")[-1]
                 typex = self.get_sticker_type(ext)
                 Stats = namedtuple('Stats', ['compte', 'like', 'dislike'])
+                if "NEED_REPAIR" not in data:
+                    repair = False
+                else:
+                    repair = data["NEED_REPAIR"]
                 stats = Stats(data["STATS"]["COMPTE"], data["STATS"]["LIKE"], data["STATS"]["DISLIKE"])
                 Sticker = namedtuple('Sticker', ['id', 'nom', 'path', 'author', 'url', 'creation', 'stats', 'display',
-                                                 'racine', 'place', 'type', 'approb'])
+                                                 'racine', 'place', 'type', 'approb', 'repair'])
                 return Sticker(stk, data["NOM"], data["PATH"] if data["PATH"] else False,
                                data["AUTHOR"], data["URL"], data["CREATION"],
-                               stats, data["DISPLAY"], racine, nb, typex, data["APPROB"])
+                               stats, data["DISPLAY"], racine, nb, typex, data["APPROB"], repair)
         return False
 
     def get_sticker(self, server: discord.Server, nom: str, w: bool = False, pass_approb: bool = False):
@@ -144,7 +148,8 @@ class Echo:
                                           "CREATION": time.time(),
                                           "STATS": stats,
                                           "DISPLAY": self.get_display(server, self.get_sticker_type(ext)),
-                                          "APPROB": self.get_perms(author, "AJOUTER")}
+                                          "APPROB": self.get_perms(author, "AJOUTER"),
+                                          "NEED_REPAIR": False}
             self.save()
             return True if self.get_perms(author, "AJOUTER") else False
         if replace:
@@ -161,7 +166,8 @@ class Echo:
                                           "CREATION": time.time(),
                                           "STATS": stats,
                                           "DISPLAY": self.get_display(server, self.get_sticker_type(ext)),
-                                          "APPROB": self.get_perms(author, "AJOUTER")}
+                                          "APPROB": self.get_perms(author, "AJOUTER"),
+                                          "NEED_REPAIR": False}
             self.save()
             return True if self.get_perms(author, "EDITER") else False
         return False
@@ -510,6 +516,10 @@ class Echo:
             if stk:
                 while True:
                     infos = self.get_sticker(server, nom)
+                    repair = infos.repair
+                    repairtxt = ""
+                    if repair:
+                        repairtxt = "\🛠 ─ Réparer"
                     poids = False
                     if infos.path:
                         if os.path.exists(infos.path):
@@ -517,8 +527,8 @@ class Echo:
                     txt = "\🇦 ─ Nom: `{}`\n".format(infos.nom)
                     txt += "\🇧 ─ URL: `{}`\n".format(infos.url)
                     txt += "\🇨 ─ Affichage: `{}`\n".format(infos.display)
-                    txt += "\🇩 ─ Téléchargé: `{}`{}\n".format(
-                        True if poids else False, "" if not poids else " ({} KB)".format(poids))
+                    txt += "\🇩 ─ Téléchargé: `{}`{}\n{}".format(
+                        True if poids else False, "" if not poids else " ({} KB)".format(poids), repairtxt)
                     if infos.type != "IMAGE":
                         txt += "\n[**Fichier multimédia**]({})\n".format(infos.url)
                     em = discord.Embed(title="Modifier Sticker #{}".format(infos.id), description=txt,
@@ -527,17 +537,21 @@ class Echo:
                         em.set_image(url=infos.url)
                     em.set_footer(text="Cliquez sur la réaction correspondante à l'action désirée | ❌ = Quitter")
                     msg = await self.bot.say(embed=em)
+                    emolist = ["🇦", "🇧", "🇨", "🇩", "❌"]
                     await self.bot.add_reaction(msg, "🇦")
                     await self.bot.add_reaction(msg, "🇧")
                     await self.bot.add_reaction(msg, "🇨")
                     await self.bot.add_reaction(msg, "🇩")
+                    if repair:
+                        await self.bot.add_reaction(msg, "🛠")
+                        emolist.append("🛠")
                     await self.bot.add_reaction(msg, "❌")
                     await asyncio.sleep(0.25)
 
                     def check(reaction, user):
                         return not user.bot
 
-                    rep = await self.bot.wait_for_reaction(["🇦", "🇧", "🇨", "🇩", "❌"], message=msg, timeout=30,
+                    rep = await self.bot.wait_for_reaction(emolist, message=msg, timeout=30,
                                                            check=check, user=ctx.message.author)
                     if rep is None or rep.reaction.emoji == "❌":
                         await self.bot.delete_message(msg)
@@ -639,21 +653,6 @@ class Echo:
                             if rep is None:
                                 await self.bot.delete_message(m)
                                 valid = True
-                            elif rep.content.lower() == "reparer" or rep.content.lower() == "repair":
-                                await self.bot.delete_message(m)
-                                txt = ""
-                                if infos.path:
-                                    try:
-                                        os.remove(infos.path)
-                                        txt += "─ Fichier local supprimé\n"
-                                    except:
-                                        txt += "─ Fichier local corrompu : ignoré\n"
-                                self.data[server.id][infos.id]["PATH"] = False
-                                self.save()
-                                txt += "─ Données réparées (PATH = FALSE)"
-                                em = discord.Embed(title="Réparation de {}".format(infos.nom), description=txt)
-                                await self.bot.say(embed=em)
-                                valid = True
                             elif rep.content.lower() == "non":
                                 await self.bot.delete_message(m)
                                 if infos.path:
@@ -665,6 +664,10 @@ class Echo:
                                     except:
                                         await self.bot.say("**Erreur** | "
                                                            "Je n'ai pas réussi à effacer le fichier local du sticker")
+                                        if "NEED_REPAIR" not in self.data[server.id][infos.id]:
+                                            self.data[server.id][infos.id]["NEED_REPAIR"] = False
+                                        self.data[server.id][infos.id]["NEED_REPAIR"] = True
+                                        self.save()
                                 else:
                                     await self.bot.say("**Inutile** | Aucun"
                                                        " fichier de ce sticker n'est présent localement")
@@ -704,6 +707,23 @@ class Echo:
                             else:
                                 await self.bot.say("**Erreur** | Cette réponse n'est pas valable.")
                                 valid = True
+                    elif rep.reaction.emoji == "🛠":
+                        await self.bot.delete_message(msg)
+                        txt = ""
+                        if infos.path:
+                            try:
+                                os.remove(infos.path)
+                                txt += "─ Fichier local supprimé\n"
+                            except:
+                                txt += "─ Fichier local corrompu : ignoré\n"
+                        self.data[server.id][infos.id]["PATH"] = False
+                        txt += "─ Données réparées (PATH = FALSE)"
+                        em = discord.Embed(title="Réparation de {}".format(infos.nom), description=txt)
+                        em.set_footer(text="La réparation semble être une réussite.")
+                        await self.bot.say(embed=em)
+                        self.data[server.id][infos.id]["NEED_REPAIR"] = False
+                        self.save()
+                        await asyncio.sleep(2)
                     else:
                         await self.bot.say("**Erreur** | Désolé je n'ai pas compris...")
             else:
