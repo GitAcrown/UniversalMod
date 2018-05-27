@@ -1016,16 +1016,6 @@ class Echo:
                     await self.bot.say("**Kosmos** | Anciens stickers Kosmos importés avec succès")
                     self.save()
 
-# ---------- MKR --------------
-
-    @commands.group(name="mkr", pass_context=True, no_pm=True)
-    async def _maker(self, ctx):
-        """Création de commandes personnalisées"""
-        if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
-
-
-
 # ---------- ASYNC -------------
 
     async def read_stk(self, message):
@@ -1036,6 +1026,7 @@ class Echo:
             return
         channel = message.channel
         self._set_server(server)
+
         if author.id not in self.sys[server.id]["BLACKLIST"]:
             if ":" in content:
                 stickers = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
@@ -1044,18 +1035,8 @@ class Echo:
                         if e[1] in [e.name for e in server.emojis]:
                             continue
 
-                        if e[1] not in [n.nom for n in self.get_all_stickers(server, True)]:
-                            if self.sys[server.id]["CORRECT"]:
-                                liste = []
-                                for s in self.get_all_stickers(server, True):
-                                    liste.append(s.nom)
-                                found = self.similarite(e[1], liste, self.sys[server.id]["CORRECT"])
-                                output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(found)[0]
-                                racine = output[0]
-                                e = [e[0], self.get_sticker(server, racine).nom]
-                                # On préfère la racine pour éviter d'envoyer des stickers random
-
                         if e[1] in [n.nom for n in self.get_all_stickers(server, True)]:
+                            await self.bot.send_typing(channel)
                             stk = self.get_sticker(server, e[1])
                             affichage = stk.display
 
@@ -1143,7 +1124,6 @@ class Echo:
                                 return
 
                             # Publication du sticker
-                            await self.bot.send_typing(channel)
                             if affichage == "integre":
                                 if stk.type == "IMAGE":
                                     em = discord.Embed(color=author.color)
