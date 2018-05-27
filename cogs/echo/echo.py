@@ -55,9 +55,9 @@ class Echo:
                   "VIDEO": False}
             self.sys[server.id] = {"PERMISSIONS_STK": perms, "DISPLAY_STK": disp, "DOWNLOAD_STK": dl,
                                    "BLACKLIST": [], "CORRECT": None, "COOLDOWN": 3}
+            if not os.path.exists("data/echo/img/{}".format(server.id)):
+                os.makedirs("data/echo/img/{}".format(server.id))
             self.save()
-        if not os.path.exists("data/echo/img/{}".format(server.id)):
-            os.makedirs("data/echo/img/{}".format(server.id))
         return True
 
     def _obj_sticker(self, server: discord.Server, nom: str):
@@ -107,15 +107,21 @@ class Echo:
                 liste.append(self._obj_sticker(server, self.data[server.id][stk]["NOM"]))
         return liste
 
-    def get_all_stickers(self, server: discord.Server, approuved: bool = False):
+    def get_all_stickers(self, server: discord.Server, approuved: bool = False, type: str = None):
         self._set_server(server)
         all = []
         for s in self.data[server.id]:
             if approuved:
                 if self.data[server.id][s]["APPROB"]:
-                    all.append(self._obj_sticker(server, self.data[server.id][s]["NOM"]))
+                    if type:
+                        all.append(self.data[server.id][s][type.upper()])
+                    else:
+                        all.append(self._obj_sticker(server, self.data[server.id][s]["NOM"]))
             else:
-                all.append(self._obj_sticker(server, self.data[server.id][s]["NOM"]))
+                if type:
+                    all.append(self.data[server.id][s][type.upper()])
+                else:
+                    all.append(self._obj_sticker(server, self.data[server.id][s]["NOM"]))
         return all
 
     def add_sticker(self, nom: str, author: discord.Member, url: str, chemin: str = None, replace: bool = False):
@@ -1035,7 +1041,7 @@ class Echo:
                         if e[1] in [e.name for e in server.emojis]:
                             continue
 
-                        if e[1] in [n.nom for n in self.get_all_stickers(server, True)]:
+                        if e[1] in self.get_all_stickers(server, True, "NOM"):
                             await self.bot.send_typing(channel)
                             stk = self.get_sticker(server, e[1])
                             affichage = stk.display
