@@ -814,9 +814,9 @@ class Justice:
         if self.sys[server.id]["GLOBALSLOW"]:
             heure = time.strftime("%H:%M", time.localtime())
             if heure not in self.globalslow_cooldown:
-                self.globalslow_cooldown = {heure: 0}
-            self.globalslow_cooldown[heure] += 1
-            if self.globalslow_cooldown[heure] > self.sys[server.id]["GLOBALSLOW"]:
+                self.globalslow_cooldown = {heure: []}
+            self.globalslow_cooldown[heure].append(author.id)
+            if self.globalslow_cooldown[heure].count(author.id) > self.sys[server.id]["GLOBALSLOW"]:
                 await self.bot.delete_message(message)
 
         if author.id in self.sys[server.id]["SLOW"]:
