@@ -635,8 +635,26 @@ class Echo:
                         while valid is False:
                             rep = await self.bot.wait_for_message(channel=ctx.message.channel,
                                                                   author=ctx.message.author,
-                                                                  timeout=60)
-                            if rep is None or rep.content.lower() == "non":
+                                                                  timeout=30)
+                            if rep is None:
+                                await self.bot.delete_message(m)
+                                valid = True
+                            elif rep.content.lower() == "reparer" or rep.content.lower() == "repair":
+                                await self.bot.delete_message(m)
+                                txt = ""
+                                if infos.path:
+                                    try:
+                                        os.remove(infos.path)
+                                        txt += "─ Fichier local supprimé\n"
+                                    except:
+                                        txt += "─ Fichier local corrompu : ignoré\n"
+                                self.data[server.id][infos.id]["PATH"] = False
+                                self.save()
+                                txt += "─ Données réparées (PATH = FALSE)"
+                                em = discord.Embed(title="Réparation de {}".format(infos.nom), description=txt)
+                                await self.bot.say(embed=em)
+                                valid = True
+                            elif rep.content.lower() == "non":
                                 await self.bot.delete_message(m)
                                 if infos.path:
                                     try:
@@ -645,7 +663,7 @@ class Echo:
                                         self.save()
                                         await self.bot.say("**Effacé** | Le fichier local du sticker à été supprimé")
                                     except:
-                                        await self.bot.sat("**Erreur** | "
+                                        await self.bot.say("**Erreur** | "
                                                            "Je n'ai pas réussi à effacer le fichier local du sticker")
                                 else:
                                     await self.bot.say("**Inutile** | Aucun"
