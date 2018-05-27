@@ -18,9 +18,10 @@ class Justice:
         self.bot = bot
         self.sys = dataIO.load_json("data/justice/sys.json")
         self.base_sys = {"PRISON_ROLE": "Prison", "PRISON_SALON": None, "HISTORIQUE": [], "SLOW": {},
-                         "APPEL_SALON": None, "APPEL_USE": [], "FILTRE": {}}
+                         "APPEL_SALON": None, "APPEL_USE": [], "FILTRE": {}, "GLOBALSLOW": False}
         self.reg = dataIO.load_json("data/justice/reg.json")
         self.slow_cooldown = {}
+        self.globalslow_cooldown = {}
 
     def save(self):
         fileIO("data/justice/sys.json", "save", self.sys)
@@ -394,6 +395,26 @@ class Justice:
             self.save()
         else:
             await self.bot.say("**Erreur** | Ce filtre n'existe pas.")
+
+    @commands.command(aliases=["gs"], pass_context=True)
+    @checks.admin_or_permissions(manage_messages=True)
+    async def globalslow(self, ctx, limite: int = 5):
+        """Passe le serveur entier en mode Slow, limitant le nombre de messages par minute des membres"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.base_sys
+        if "GLOBALSLOW" not in self.sys[server.id]:
+            self.sys[server.id]["GLOBALSLOW"] = False
+            self.save()
+        if self.sys[server.id]["GLOBALSLOW"]:
+            self.sys[server.id]["GLOBALSLOW"] = False
+            self.save()
+            await self.bot.say("**Sortie du mode** | Les messages ne sont désormais plus limités.")
+        else:
+            self.sys[server.id]["GLOBALSLOW"] = limite
+            self.save()
+            await self.bot.say("**Entrée en mode Slow** | Les membres sont désormais limités à "
+                               "**{}** msg/minute.".format(limite))
 
     @commands.command(aliases=["s"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
@@ -785,6 +806,18 @@ class Justice:
         author = message.author
         if not server:
             return
+
+        if "GLOBALSLOW" not in self.sys[server.id]:
+            self.sys[server.id]["GLOBALSLOW"] = False
+        if "SLOW" not in self.sys[server.id]:
+            self.sys[server.id]["SLOW"] = {}
+        if self.sys[server.id]["GLOBALSLOW"]:
+            heure = time.strftime("%H:%M", time.localtime())
+            if heure not in self.globalslow_cooldown:
+                self.globalslow_cooldown = {heure: 0}
+            self.globalslow_cooldown[heure] += 1
+            if self.globalslow_cooldown[heure] > self.sys[server.id]["GLOBALSLOW"]:
+                await self.bot.delete_message(message)
 
         if author.id in self.sys[server.id]["SLOW"]:
             heure = time.strftime("%H:%M", time.localtime())
