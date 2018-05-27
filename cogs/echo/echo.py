@@ -1037,11 +1037,12 @@ class Echo:
             if ":" in content:
                 stickers = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
                 if stickers:
+                    stickers_list = self.get_all_stickers(server, True, "NOM")
                     for e in stickers:
                         if e[1] in [e.name for e in server.emojis]:
                             continue
 
-                        if e[1] in self.get_all_stickers(server, True, "NOM"):
+                        if e[1] in stickers_list:
                             await self.bot.send_typing(channel)
                             stk = self.get_sticker(server, e[1])
                             affichage = stk.display
