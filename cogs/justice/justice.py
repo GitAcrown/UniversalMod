@@ -806,7 +806,8 @@ class Justice:
         author = message.author
         if not server:
             return
-
+        if server.id not in self.sys:
+            self.sys[server.id] = {}
         if "GLOBALSLOW" not in self.sys[server.id]:
             self.sys[server.id]["GLOBALSLOW"] = False
         if "SLOW" not in self.sys[server.id]:
