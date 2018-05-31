@@ -132,9 +132,9 @@ class Assist:
                 if not resum:
                     resum = "Contenu indisponible"
                 if len(resum) + len(r) > 1995:
-                    resum = self.redux(resum, limite=1900)
+                    resum = self.redux(resum, limite=1960)
                 p = wikiplus.page(r)
-                resum += "\n\n(En savoir plus...)[{}]".format(p.fullurl)
+                resum += "\n\n[En savoir plus...]({})".format(p.fullurl)
                 em = discord.Embed(title=r.title(), description=resum, color=0xeeeeee)
                 em.set_thumbnail(url=image)
                 em.set_footer(text="Similaire: {}".format(", ".join(s[0])))
