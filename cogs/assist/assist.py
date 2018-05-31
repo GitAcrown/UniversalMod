@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import aiohttp
 import discord
-import wikipedia
+import wikipediaapi
 from __main__ import send_cmd_help
 from discord.ext import commands
 from sympy import sympify
@@ -113,6 +113,7 @@ class Assist:
 
     def wiki(self, recherche: str, langue: str = 'fr', souple: bool = True):
         wikipedia.set_lang(langue)
+        wikiplus = wikipediaapi.Wikipedia(langue)
         s = wikipedia.search(recherche, 8, True)
         try:
             if s[1]:
@@ -130,8 +131,10 @@ class Assist:
                 if not resum:
                     resum = "Contenu indisponible"
                 if len(resum) + len(r) > 1995:
-                    resum = self.redux(resum, limite=1950)
-                em = discord.Embed(title=r.capitalize(), description=resum, color=0xeeeeee)
+                    resum = self.redux(resum, limite=1900)
+                p = wikiplus.page(r)
+                resum += "\n\n(En savoir plus...)[{}]".format(p.fullurl)
+                em = discord.Embed(title=r.title(), description=resum, color=0xeeeeee)
                 em.set_thumbnail(url=image)
                 em.set_footer(text="Similaire: {}".format(", ".join(s[0])))
                 return em
