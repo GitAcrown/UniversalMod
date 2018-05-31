@@ -5,6 +5,7 @@ from copy import deepcopy
 
 import aiohttp
 import discord
+import wikipedia
 import wikipediaapi
 from __main__ import send_cmd_help
 from discord.ext import commands
