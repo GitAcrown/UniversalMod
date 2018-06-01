@@ -1,10 +1,12 @@
 import asyncio
+import operator
 import os
 import random
 import re
 import time
 from collections import namedtuple
 from copy import deepcopy
+from datetime import datetime as dt
 from urllib import request
 
 import aiohttp
@@ -84,6 +86,8 @@ class Echo:
                     repair = False
                 else:
                     repair = data["NEED_REPAIR"]
+                if type(data["STATS"]["COMPTE"]) is int:
+                    data["STATS"]["COMPTE"] = {}
                 stats = Stats(data["STATS"]["COMPTE"], data["STATS"]["LIKE"], data["STATS"]["DISLIKE"])
                 Sticker = namedtuple('Sticker', ['id', 'nom', 'path', 'author', 'url', 'creation', 'stats', 'display',
                                                  'racine', 'place', 'type', 'approb', 'repair'])
@@ -136,7 +140,7 @@ class Echo:
             clef = str(random.randint(100000, 999999))
             if clef in self.data[server.id]:
                 return self.add_sticker(nom, author, url, chemin)
-            stats = {"COMPTE": 0,
+            stats = {"COMPTE": {},
                      "LIKE": [],
                      "DISLIKE": []}
             fichnom = url.split("/")[-1]
@@ -154,7 +158,7 @@ class Echo:
             return True if self.get_perms(author, "AJOUTER") else False
         if replace:
             clef = self.get_sticker(server, nom).id
-            stats = {"COMPTE": 0,
+            stats = {"COMPTE": {},
                      "LIKE": [],
                      "DISLIKE": []}
             fichnom = url.split("/")[-1]
@@ -503,6 +507,134 @@ class Echo:
         if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm", "gifv"]:
             return True
         return False
+
+    @_stk.command(pass_context=True)
+    async def repair(self, ctx, nom: str):
+        """Répare, si besoin, un sticker dont les données sont corrompues"""
+        author = ctx.message.author
+        server = ctx.message.server
+        storage = "data/echo/img/{}/".format(server.id)
+        poids = self.get_size(storage)
+        self._set_server(server)
+        if self.get_perms(author, "EDITER"):
+            stk = self.get_sticker(server, nom, w=True)
+            stkid = self.get_sticker(server, nom).id
+            if stk:
+                if stk["PATH"]:
+                    if stk["DISPLAY"] is "upload":
+                        proc = ""
+                        try:
+                            os.remove(stk["PATH"])
+                            self.data[server.id][stkid]["PATH"] = False
+                            proc += "─ Fichier local supprimé\n"
+                        except:
+                            self.data[server.id][stkid]["PATH"] = False
+                            proc += "─ Chemin du fichier ignoré\n"
+
+                url = stk["URL"]
+                filename = url.split('/')[-1]
+                if filename in os.listdir(storage):
+                    exten = filename.split(".")[1]
+                    nomsup = random.randint(1, 999999)
+                    filename = filename.split(".")[0] + str(nomsup) + "." + exten
+                try:
+                    f = open(filename, 'wb')
+                    f.write(request.urlopen(url).read())
+                    f.close()
+                    file = storage + filename
+                    os.rename(filename, file)
+                    self.data[server.id][stkid]["PATH"] = file
+                    self.save()
+                    proc += "─ Fichier retéléchargé depuis l'URL d'origine\n"
+                    dl = True
+                except:
+                    proc += "─ Echec du téléchargement depuis l'URL d'origine\n"
+                    em = discord.Embed(description="**Je n'arrive pas à retélécharger l'image depuis l'URL.**\n"
+                                                   "Donnez-moi s'il-vous plaît le fichier à télécharger "
+                                                   "(URL ou Upload)")
+                    msg = await self.bot.say(embed=em)
+                    valid = False
+                    while valid is False:
+                        rep = await self.bot.wait_for_message(channel=ctx.message.channel,
+                                                              author=ctx.message.author,
+                                                              timeout=300)
+                        if rep is None:
+                            await self.bot.delete_message(msg)
+                            return
+                        elif rep.content.startswith("http"):
+                            url = rep.content
+                            message = rep
+                            valid = True
+                        else:
+                            message = rep
+
+                    if not url:
+                        attach = message.attachments
+                        if len(attach) > 1:
+                            await self.bot.say(
+                                "**Erreur** | Je n'ai besoin que d'un seul fichier.")
+                            return
+                        if attach:
+                            a = attach[0]
+                            url = a["url"]
+                            filename = a["filename"]
+                        else:
+                            await self.bot.say("**Erreur** | Ce fichier n'est pas pris en charge.")
+                            return
+                        fichnom = url.split("/")[-1]
+                        ext = fichnom.split(".")[-1]
+                        if poids > 500000000:
+                            await self.bot.say("**+500 MB** | L'espace alloué à ce serveur est plein. "
+                                               "Veuillez faire de la place en supprimant quelques stickers enregistrés.")
+                            return
+                        filepath = os.path.join(storage, filename)
+
+                        async with aiohttp.get(url) as new:
+                            f = open(filepath, "wb")
+                            f.write(await new.read())
+                            f.close()
+                        stk["PATH"] = filepath
+                        stk["URL"] = url
+                        proc += "─ Sticker retéléchargé avec succès depuis la nouvelle source\n"
+                    else:
+                        if "giphy" in url or "imgur" in url:
+                            ext = "gif"
+                        else:
+                            fichnom = url.split("/")[-1]
+                            ext = fichnom.split(".")[-1]
+                        if ext.lower() in ["jpg", "jpeg", "png", "gif", "wav", "mp3", "mp4", "webm", "gifv"]:
+
+                            if poids > 500000000:
+                                await self.bot.say("**+500 MB** | L'espace alloué à ce serveur est plein. "
+                                                   "Veuillez faire de la place en supprimant quelques stickers enregistrés.")
+                                return
+                            filename = url.split('/')[-1]
+                            if filename in os.listdir(storage):
+                                exten = filename.split(".")[1]
+                                nomsup = random.randint(1, 999999)
+                                filename = filename.split(".")[0] + str(nomsup) + "." + exten
+                            try:
+                                f = open(filename, 'wb')
+                                f.write(request.urlopen(url).read())
+                                f.close()
+                                file = storage + filename
+                                os.rename(filename, file)
+                                stk["URL"] = url
+                                stk["PATH"] = file
+                                proc += "─ Sticker retéléchargé avec succès depuis la nouvelle source\n"
+                            except Exception as e:
+                                print("Impossible de télécharger le fichier : {}".format(e))
+                                proc += "─ Impossible de télécharger l'image depuis la nouvelle source\n"
+                        else:
+                            await self.bot.say("**Erreur** | Ce format n'est pas supporté.")
+                            return
+                em = discord.Embed(title="Réparation de :{}:".format(stk["NOM"]), description=proc)
+                await self.bot.say(embed=em)
+                self.save()
+            else:
+                await self.bot.say("**Introuvable** | Ce sticker n'existe pas.")
+        else:
+            await self.bot.say("**Impossible** | Vous n'avez pas le droit de modifier un sticker.")
 
     @_stk.command(pass_context=True)
     async def edit(self, ctx, nom: str):
@@ -1002,7 +1134,7 @@ class Echo:
             stickers = self.backup_ek["STK"]
             for stk in stickers:
                 clef = str(random.randint(100000, 999999))
-                stats = {"COMPTE": stickers[stk]["COMPTAGE"],
+                stats = {"COMPTE": {},
                          "LIKE": [],
                          "DISLIKE": []}
                 beforefile = stickers[stk]["CHEMIN"]
@@ -1033,7 +1165,7 @@ class Echo:
                 stickers = self.backup_univ[server.id]["STK"]
                 for stk in stickers:
                     clef = str(random.randint(100000, 999999))
-                    stats = {"COMPTE": stickers[stk]["COMPTAGE"],
+                    stats = {"COMPTE": {},
                              "LIKE": [],
                              "DISLIKE": []}
                     beforefile = stickers[stk]["CHEMIN"]
@@ -1076,6 +1208,7 @@ class Echo:
                 stickers = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
                 if stickers:
                     stickers_list = self.get_all_stickers(server, True, "NOM")
+                    semaine = dt.isocalendar(dt.now())[1]
                     for e in stickers:
                         if e[1] in [e.name for e in server.emojis]:
                             continue
@@ -1083,6 +1216,7 @@ class Echo:
                         if e[1] in stickers_list:
                             await self.bot.send_typing(channel)
                             stk = self.get_sticker(server, e[1])
+                            stkmod = self.get_sticker(server, e[1], w=True)
                             affichage = stk.display
 
                             # Gestion des options
@@ -1143,14 +1277,42 @@ class Echo:
                                     await self.bot.send_message(author, stk.url)
                                     continue
                                 if "s" in option:
-                                    await self.bot.send_message(author, "**Coming soon**")
+                                    listec = []
+                                    listel = []
+                                    for s in self.data[server.id]:
+                                        listec.append([self.data[server.id][s]["NOM"],
+                                                       self.data[server.id][s]["STATS"]["COMPTE"][semaine]])
+                                        listel.append([self.data[server.id][s]["NOM"],
+                                                       len(self.data[server.id][s]["STATS"]["LIKE"]) - len(
+                                                           self.data[server.id][s]["STATS"]["DISLIKE"])])
+                                    sortc = sorted(listec, key=operator.itemgetter(1), reverse=True)
+                                    searchc = [stk.nom, self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine]]
+                                    sortl = sorted(listel, key=operator.itemgetter(1), reverse=True)
+                                    searchl = [stk.nom, len(self.data[server.id][stk.id]["STATS"]["LIKE"]) - len(
+                                        self.data[server.id][stk.id]["STATS"]["DISLIKE"])]
+
+                                    sts = "**Invocations cette semaine** ─ {}\n" \
+                                          "**Classement utilisation** ─ {}e\*\n" \
+                                          "**Likes** ─ {}\n" \
+                                          "**Dislikes** ─ {}\n" \
+                                          "**Classement général** ─ {}e\*\n".format(stk.stats.compte[semaine],
+                                                                                    sortc.index(searchc) + 1,
+                                                                                    len(stk.stats.like),
+                                                                                    len(stk.stats.dislike),
+                                                                                    sortl.index(searchl) + 1)
+                                    em = discord.Embed(title="Statistiques sur :{}:".format(stk.nom),
+                                                       description=sts, color=author.color)
+                                    em.set_footer(text="(*) sur {} stickers au total".format(len(stickers_list)))
+                                    await self.bot.send_message(author, embed=em)
                                     continue
                                 if "+" in option:
-                                    await self.bot.send_message(author, "**Bientôt supporté**")
-                                    continue
+                                    if author.id not in stkmod["STATS"]["LIKE"]:
+                                        stkmod["STATS"]["LIKE"].append(author.id)
+                                        await self.bot.add_reaction(message, "✅")
                                 if "-" in option:
-                                    await self.bot.send_message(author, "**Bientôt supporté**")
-                                    continue
+                                    if author.id not in stkmod["STATS"]["DISLIKE"]:
+                                        stkmod["STATS"]["DISLIKE"].append(author.id)
+                                        await self.bot.add_reaction(message, "✅")
                                 if "n" in option:
                                     continue
 
@@ -1175,6 +1337,9 @@ class Echo:
                                     em.set_image(url=stk.url)
                                     try:
                                         await self.bot.send_message(channel, embed=em)
+                                        self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] = \
+                                            self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] + 1 \
+                                                if semaine in self.data[server.id][stk.id]["STATS"]["COMPTE"] else 1
                                         continue
                                     except Exception as e:
                                         print("Impossible d'afficher {} en billet : {}".format(stk.nom, e))
@@ -1182,25 +1347,31 @@ class Echo:
                                 if stk.path:
                                     try:
                                         await self.bot.send_file(channel, stk.path)
+                                        self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] = \
+                                            self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] + 1 \
+                                                if semaine in self.data[server.id][stk.id]["STATS"]["COMPTE"] else 1
                                         continue
                                     except Exception as e:
                                         print("Impossible d'afficher {} en upload : {}".format(stk.nom, e))
                             try:
                                 await self.bot.send_message(channel, stk.url)
+                                self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] = \
+                                    self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] + 1 \
+                                        if semaine in self.data[server.id][stk.id]["STATS"]["COMPTE"] else 1
                             except Exception as e:
                                 print("Impossible d'afficher {} en URL : {}".format(stk.nom, e))
 
                         elif e[1] in ["liste", "list"]:
                             if e[0] == "c":
                                 liste = self.get_all_stickers(server, True)
-                                sorted = []
+                                sorteds = []
                                 for e in liste:
-                                    if e.racine not in sorted:
-                                        sorted.append(e.racine)
-                                sorted.sort()
+                                    if e.racine not in sorteds:
+                                        sorteds.append(e.racine)
+                                sorteds.sort()
                                 txt = ""
                                 n = 1
-                                for e in sorted:
+                                for e in sorteds:
                                     if len(self.get_collection(server, e)) > 1:
                                         colltxt = " ({}#)".format(len(self.get_collection(server, e)))
                                     else:
