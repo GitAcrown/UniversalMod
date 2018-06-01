@@ -520,9 +520,9 @@ class Echo:
             stk = self.get_sticker(server, nom, w=True)
             stkid = self.get_sticker(server, nom).id
             if stk:
+                proc = ""
                 if stk["PATH"]:
                     if stk["DISPLAY"] is "upload":
-                        proc = ""
                         try:
                             os.remove(stk["PATH"])
                             self.data[server.id][stkid]["PATH"] = False
@@ -1214,7 +1214,6 @@ class Echo:
                             continue
 
                         if e[1] in stickers_list:
-                            await self.bot.send_typing(channel)
                             stk = self.get_sticker(server, e[1])
                             stkmod = self.get_sticker(server, e[1], w=True)
                             affichage = stk.display
@@ -1317,6 +1316,8 @@ class Echo:
                                         await self.bot.add_reaction(message, "✅")
                                 if "n" in option:
                                     continue
+
+                            await self.bot.send_typing(channel)
 
                             if not self.get_perms(author, "UTILISER"):
                                 return
