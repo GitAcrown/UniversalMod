@@ -34,6 +34,24 @@ class Echo:
             self.backup_ek = dataIO.load_json("data/systex/stk.json")
         else:
             self.backup_ek = False
+        self.defaut_quit = ["Au revoir {user.mention} !", "Bye bye {user.mention}.", "{user.mention} s'est trompé de bouton.",
+                         "{user.mention} a été suicidé de deux bans dans le dos.", "{user.mention} a ragequit le serveur.",
+                         "GAME OVER {user.mention}", "A jamais {user.mention} !", "Les meilleurs partent en premier, sauf {user.mention}...",
+                         "{user.mention} est parti, un de moins !", "{user.mention} s'envole vers d'autres cieux !", "YOU DIED {user.mention}",
+                         "De toute évidence {user.mention} ne faisait pas parti de l'élite.", "{user.mention} a sauté d'un trottoir.",
+                         "{user.mention} a roulé jusqu'en bas de la falaise.", "{user.mention} est parti ouvrir son propre serveur...",
+                         "{user.mention} n'était de toute évidence pas assez *gaucho* pour ce serveur.",
+                         "{user.mention}... désolé c'est qui ce random ?", "On m'annonce à l'oreillette que {user.mention} est parti.",
+                         "C'est la fin pour {user.mention}...",
+                         "{user.mention} a été jeté dans la fosse aux randoms.", "{user.mention} est parti rejoindre Johnny...",
+                         "{user.mention} ne supportait plus d'être l'*Omega* du serveur.", "{user.mention} a paniqué une fois de plus.",
+                         "{user.mention} s'est *enfin* barré !", "Plus besoin de le bloquer, {user.mention} est parti !",
+                         "Boop bip boup {user.mention} bip", "{user.mention} a pris sa retraite.",
+                         "{user.mention} a disparu dans des circonstances floues...", "Non pas toi {user.mention} ! 😢",
+                         "{user.mention} a quitté. Un de plus ou un de moins hein...",
+                         "{user.mention} était de toute évidence trop underground pour ce serveur de normies.",
+                         "{user.mention} est parti faire une manif'.",
+                         "{user.mention} a quitté/20", "Ce n'est qu'un *au revoir* {user.mention} !"]
 
     def save(self):
         fileIO("data/echo/data.json", "save", self.data)
@@ -56,9 +74,14 @@ class Echo:
                   "AUDIO": True,
                   "VIDEO": False}
             self.sys[server.id] = {"PERMISSIONS_STK": perms, "DISPLAY_STK": disp, "DOWNLOAD_STK": dl,
-                                   "BLACKLIST": [], "CORRECT": None, "COOLDOWN": 3}
+                                   "BLACKLIST": [], "CORRECT": None, "COOLDOWN": 3, "QUIT_MSG": self.defaut_quit,
+                                   "QUIT": False}
             if not os.path.exists("data/echo/img/{}".format(server.id)):
                 os.makedirs("data/echo/img/{}".format(server.id))
+            self.save()
+        if "QUIT_MSG" not in self.sys[server.id]:
+            self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
+            self.sys[server.id]["QUIT"] = False
             self.save()
         return True
 
@@ -936,7 +959,7 @@ class Echo:
             em.set_footer(text="Approuvez un sticker avec {}stk approb <nom>".format(ctx.prefix))
             await self.bot.say(embed=em)
 
-# ---------- OPTIONS ------------
+# ---------- OPTIONS STK ------------
 
     @commands.group(name="stkmod", pass_context=True, no_pm=True)
     @checks.admin_or_permissions(ban_members=True)
@@ -1422,6 +1445,148 @@ class Echo:
                         else:
                             pass
 
+    @commands.group(name="departmsg", aliases=["dpm"], pass_context=True, no_pm=True)
+    @checks.admin_or_permissions(ban_members=True)
+    async def _departmsg(self, ctx):
+        """Paramètres serveur des messages de Départ"""
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+    @_departmsg.command(pass_context=True)
+    async def channel(self, ctx, channel: discord.Channel = None):
+        """Change le channel où sont diffusés les messages
+
+        Si aucun channel n'est fourni, désactive la fonctionnalité"""
+        server = ctx.message.server
+        self._set_server(server)
+        if self.sys[server.id]["QUIT"]:
+            self.sys[server.id]["QUIT"] = False
+            await self.bot.say("**Désactivé** | Vous n'aurez plus de messages de départ")
+        else:
+            self.sys[server.id]["QUIT"] = channel.id
+            await self.bot.say("**Activé** | Les messages de départ seront affichés sur {}".format(channel.mention))
+        self.save()
+
+    @_departmsg.command(pass_context=True)
+    async def add(self, ctx, *message):
+        """Ajoute un message de départ
+
+        Aide : https://github.com/GitAcrown/WikiHelp/wiki/Stickers#formatage"""
+        server = ctx.message.server
+        self._set_server(server)
+        message = " ".join(message)
+        if message.lower() not in self.sys[server.id]["QUIT_MSG"]:
+            self.sys[server.id]["QUIT_MSG"].append(message)
+            self.save()
+            plus = "" if self.sys[server.id]["QUIT"] else "\n*Pensez à activer cette fonctionnalité avec* " \
+                                                          "`{}dpm channel`".format(ctx.prefix)
+            await self.bot.say("**Succès** | Le message à été ajouté{}".format(plus))
+        else:
+            await self.bot.say("**Erreur** | Un message similaire existe déjà")
+
+    @_departmsg.command(pass_context=True)
+    async def remove(self, ctx):
+        """Supprimer un message de départ (Interface)"""
+        server = ctx.message.server
+        self._set_server(server)
+        if self.sys[server.id]["QUIT_MSG"]:
+            liste = []
+            n = 1
+            s = 1
+            txt = ""
+            for e in self.sys[server.id]["QUIT_MSG"]:
+                liste.append([n, e])
+                txt += "**{}**. `{}`\n".format(n, e)
+                n += 1
+                if len(txt) >= 1960 * s:
+                    em = discord.Embed(title="Messages de départ", description=txt)
+                    em.set_footer(text="─ Page {}".format(s))
+                    await self.bot.say(embed=em)
+                    s += 1
+                    txt = ""
+            em = discord.Embed(title="Messages de départ", description=txt)
+            em.set_footer(text="─ Page {} | Entrez le numéro correspondant à la phrase à supprimer... (0 pour quitter)"
+                               "".format(s))
+            await self.bot.say(embed=em)
+            valid = False
+            while valid is False:
+                rep = await self.bot.wait_for_message(channel=ctx.message.channel,
+                                                      author=ctx.message.author,
+                                                      timeout=60)
+                if rep is None or rep.content == "0":
+                    await self.bot.say("**Annulé** | La session a expirée.")
+                    return
+                elif rep.content.isdigit():
+                    if rep.content <= n:
+                        for e in liste:
+                            if e[0] == rep.content:
+                                self.sys[server.id]["QUIT_MSG"].remove(e[1])
+                                await self.bot.say("**Succès** | Ce message à été supprimé")
+                                self.save()
+                                return
+                    else:
+                        await self.bot.say("**Erreur** | Ce nombre n'est pas attribué.")
+                        return
+                else:
+                    await self.bot.say("**Invalide** | Tapez le chiffre correspondant à la phrase à supprimer.")
+        else:
+            await self.bot.say("**Vide** | Aucun message de départ n'a été ajouté sur ce serveur.")
+
+    @_departmsg.command(pass_context=True)
+    async def defaut(self, ctx):
+        """Permet d'intégrer ou de retirer les phrases de départ par défaut"""
+        server = ctx.message.server
+        self._set_server(server)
+        msg = await self.bot.say("**Voulez-vous conserver les messages par défaut ?** ─"
+                                 " Ceci ne vous empêche pas d'en retirer ou d'en ajouter vous-même.")
+        await self.bot.add_reaction(msg, "✔")
+        await self.bot.add_reaction(msg, "✖")
+        await asyncio.sleep(0.25)
+
+        def check(reaction, user):
+            return not user.bot
+
+        rep = await self.bot.wait_for_reaction(["✔", "✖"], message=msg, timeout=30,
+                                               check=check, user=ctx.message.author)
+        if rep is None:
+            await self.bot.delete_message(msg)
+            return
+        elif rep.reaction.emoji == "✖":
+            await self.bot.delete_message(msg)
+            for e in self.sys[server.id]["QUIT_MSG"]:
+                if e in self.defaut_quit:
+                    self.sys[server.id]["QUIT_MSG"].remove(e)
+            if not self.sys[server.id]["QUIT_MSG"]:
+                self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
+                await self.bot.say("**Impossible** ─ Si je retire ces messages, la liste sera vide."
+                                   " Je les ai donc rétablis...")
+            else:
+                await self.bot.say("**Supprimés** ─ Vous pourrez toujours les remettre en cliquant sur \✔".format(
+                    ctx.prefix))
+                return
+            self.save()
+        elif rep.reaction.emoji == "✔":
+            for e in self.sys[server.id]["QUIT_MSG"]:
+                if e in self.defaut_quit:
+                    self.sys[server.id]["QUIT_MSG"].remove(e)
+            for e in self.defaut_quit:
+                self.sys[server.id]["QUIT_MSG"].append(e)
+            await self.bot.say("**Rétablis** ─ Toutes les phrases par défaut ont été ajoutées à la liste de ce serveur")
+            self.save()
+        else:
+            await self.bot.say("**Erreur** | Désolé je n'ai pas compris...")
+            return False
+
+    async def echo_quit(self, user: discord.Member):
+        server = user.server
+        self._set_server(server)
+        if self.sys[server.id]["QUIT"]:
+            channel = self.bot.get_channel(self.sys[server.id]["QUIT"])
+            msg = random.choice(self.sys[server.id]["QUIT_MSG"])
+            msg = msg.format(user=user, channel=channel, server=server)
+            em = discord.Embed(description=msg, color=user.color)
+            em.set_footer(text=user.display_name)
+            await self.bot.send_message(channel, embed=em)
 
 def check_folders():
     if not os.path.exists("data/echo"):
@@ -1447,3 +1612,4 @@ def setup(bot):
     n = Echo(bot)
     bot.add_cog(n)
     bot.add_listener(n.read_stk, "on_message")
+    bot.add_listener(n.echo_quit, "on_member_remove")
