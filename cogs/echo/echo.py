@@ -1277,6 +1277,8 @@ class Echo:
                                     await self.bot.send_message(author, stk.url)
                                     continue
                                 if "s" in option:
+                                    if type(self.data[server.id][s]["STATS"]["COMPTE"]) is int:
+                                        self.data[server.id][s]["STATS"] = {"COMPTE": {}, "LIKE": [], "DISLIKE": []}
                                     listec = []
                                     listel = []
                                     for s in self.data[server.id]:
