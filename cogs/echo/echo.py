@@ -1544,12 +1544,17 @@ class Echo:
                     return
                 elif rep.content.isdigit():
                     if int(rep.content) <= n:
-                        for e in liste:
-                            if e[0] == int(rep.content):
-                                self.sys[server.id]["QUIT_MSG"].remove(e[1])
-                                await self.bot.say("**Succès** | Ce message à été supprimé")
-                                self.save()
-                                return
+                        if len(self.sys[server.id]["QUI_MSG"]) > 1:
+                            for e in liste:
+                                if e[0] == int(rep.content):
+                                    self.sys[server.id]["QUIT_MSG"].remove(e[1])
+                                    await self.bot.say("**Succès** | Ce message à été supprimé")
+                                    self.save()
+                                    return
+                        else:
+                            await self.bot.say("**Impossible** | C'est le seul élément de la liste, pour désactiver"
+                                               " faîtes `dpm channel`")
+                            return
                     else:
                         await self.bot.say("**Erreur** | Ce nombre n'est pas attribué.")
                         return
@@ -1579,8 +1584,8 @@ class Echo:
             return
         elif rep.reaction.emoji == "✖":
             await self.bot.delete_message(msg)
-            for e in self.sys[server.id]["QUIT_MSG"]:
-                if e in self.defaut_quit:
+            for e in self.defaut_quit:
+                if e in self.sys[server.id]["QUIT_MSG"]:
                     self.sys[server.id]["QUIT_MSG"].remove(e)
             if not self.sys[server.id]["QUIT_MSG"]:
                 self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
@@ -1594,11 +1599,9 @@ class Echo:
                 self.save()
                 return
         elif rep.reaction.emoji == "✔":
-            for e in self.sys[server.id]["QUIT_MSG"]:
-                if e in self.defaut_quit:
-                    self.sys[server.id]["QUIT_MSG"].remove(e)
             for e in self.defaut_quit:
-                self.sys[server.id]["QUIT_MSG"].append(e)
+                if e not in self.sys[server.id]["QUIT_MSG"]:
+                    self.sys[server.id]["QUIT_MSG"].append(e)
             await self.bot.say("**Rétablis** ─ Toutes les phrases par défaut ont été ajoutées à la liste de ce serveur")
             self.save()
         else:
