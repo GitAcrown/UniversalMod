@@ -1528,6 +1528,16 @@ class Echo:
             await self.bot.say("**Erreur** | Un message similaire existe déjà")
 
     @_departmsg.command(pass_context=True)
+    async def defaut(self, ctx):
+        """Permet de récupérer les phrases par défaut"""
+        server = ctx.message.server
+        self._set_server(server)
+        for i in self.defaut_quit:
+            if i not in self.sys[server.id]["QUIT_MSG"]:
+                self.sys[server.id]["QUIT_MSG"].append(i)
+        await self.bot.say("**Restaurés** | Les messages par défaut ont été restaurés")
+
+    @_departmsg.command(pass_context=True)
     async def remove(self, ctx):
         """Supprimer un message de départ (Interface)"""
         server = ctx.message.server
