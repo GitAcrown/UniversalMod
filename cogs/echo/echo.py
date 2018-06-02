@@ -1579,7 +1579,7 @@ class Echo:
                     deb = rep.content.split("-")[0] if rep.content.split("-")[0].isdigit() else False
                     fin = rep.content.split("-")[1]
                     if deb:
-                        if deb <= n and fin <= n:
+                        if int(deb) <= n and int(fin) <= n:
                             for e in liste:
                                 if len(self.sys[server.id]["QUIT_MSG"]) > 1:
                                     if int(deb) <= int(e[0]) <= int(fin):
