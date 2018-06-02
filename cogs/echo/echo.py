@@ -1548,8 +1548,8 @@ class Echo:
                     s += 1
                     txt = ""
             em = discord.Embed(title="Messages de départ", description=txt)
-            em.set_footer(text="─ Page {} | Entrez le numéro correspondant à la phrase à supprimer... (0 pour quitter)"
-                               "".format(s))
+            em.set_footer(text="─ Page {} | Entrez le numéro/l'intervalle correspondant à/aux la phrases à supprimer..."
+                               " (0 pour quitter)".format(s))
             await self.bot.say(embed=em)
             valid = False
             while valid is False:
@@ -1561,7 +1561,7 @@ class Echo:
                     return
                 elif rep.content.isdigit():
                     if int(rep.content) <= n:
-                        if len(self.sys[server.id]["QUI_MSG"]) > 1:
+                        if len(self.sys[server.id]["QUIT_MSG"]) > 1:
                             for e in liste:
                                 if e[0] == int(rep.content):
                                     self.sys[server.id]["QUIT_MSG"].remove(e[1])
@@ -1575,57 +1575,27 @@ class Echo:
                     else:
                         await self.bot.say("**Erreur** | Ce nombre n'est pas attribué.")
                         return
+                elif "-" in rep.content:
+                    deb = rep.content.split("-")[0] if rep.content.split("-")[0].isdigit() else False
+                    fin = rep.content.split("-")[1]
+                    if deb:
+                        if deb <= n and fin <= n:
+                            for e in liste:
+                                if len(self.sys[server.id]["QUIT_MSG"]) > 1:
+                                    if int(deb) <= int(e[0]) <= int(fin):
+                                        self.sys[server.id]["QUIT_MSG"].remove(e[1])
+                            await self.bot.say("**Succès** | Ces messages ont été supprimés")
+                            self.save()
+                            return
+                        else:
+                            await self.bot.say("**Erreur** | Intervalle invalide")
+                    else:
+                        await self.bot.say("**Erreur** | Intervalle invalide")
+
                 else:
                     await self.bot.say("**Invalide** | Tapez le chiffre correspondant à la phrase à supprimer.")
         else:
             await self.bot.say("**Vide** | Aucun message de départ n'a été ajouté sur ce serveur.")
-
-    @_departmsg.command(pass_context=True)
-    async def defaut(self, ctx):
-        """Permet d'intégrer ou de retirer les phrases de départ par défaut"""
-        server = ctx.message.server
-        self._set_server(server)
-        msg = await self.bot.say("**Voulez-vous conserver les messages par défaut ?** ─"
-                                 " Ceci ne vous empêche pas d'en retirer ou d'en ajouter vous-même.")
-        await self.bot.add_reaction(msg, "✔")
-        await self.bot.add_reaction(msg, "✖")
-        await asyncio.sleep(0.25)
-
-        def check(reaction, user):
-            return not user.bot
-
-        rep = await self.bot.wait_for_reaction(["✔", "✖"], message=msg, timeout=30,
-                                               check=check, user=ctx.message.author)
-        if rep is None:
-            await self.bot.delete_message(msg)
-            return
-        elif rep.reaction.emoji == "✖":
-            await self.bot.delete_message(msg)
-            save = self.sys[server.id]["QUIT_MSG"]
-            for i in self.defaut_quit:
-                if i in save:
-                    self.sys[server.id]["QUIT_MSG"].remove(i)
-            if not self.sys[server.id]["QUIT_MSG"]:
-                self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
-                await self.bot.say("**Impossible** ─ Si je retire ces messages, la liste sera vide."
-                                   " Je les ai donc rétablis...")
-                self.save()
-                return
-            else:
-                await self.bot.say("**Supprimés** ─ Vous pourrez toujours les remettre en cliquant sur \✔".format(
-                    ctx.prefix))
-                self.save()
-                return
-        elif rep.reaction.emoji == "✔":
-            save = self.sys[server.id]["QUIT_MSG"]
-            for i in self.defaut_quit:
-                if i not in save:
-                    self.sys[server.id]["QUIT_MSG"].append(i)
-            await self.bot.say("**Rétablis** ─ Toutes les phrases par défaut ont été ajoutées à la liste de ce serveur")
-            self.save()
-        else:
-            await self.bot.say("**Erreur** | Désolé je n'ai pas compris...")
-            return False
 
     async def echo_quit(self, user: discord.Member):
         server = user.server
