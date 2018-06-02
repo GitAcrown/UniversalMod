@@ -34,24 +34,39 @@ class Echo:
             self.backup_ek = dataIO.load_json("data/systex/stk.json")
         else:
             self.backup_ek = False
-        self.defaut_quit = ["Au revoir {user.mention} !", "Bye bye {user.mention}.", "{user.mention} s'est trompé de bouton.",
-                         "{user.mention} a été suicidé de deux bans dans le dos.", "{user.mention} a ragequit le serveur.",
-                         "GAME OVER {user.mention}", "A jamais {user.mention} !", "Les meilleurs partent en premier, sauf {user.mention}...",
-                         "{user.mention} est parti, un de moins !", "{user.mention} s'envole vers d'autres cieux !", "YOU DIED {user.mention}",
-                         "De toute évidence {user.mention} ne faisait pas parti de l'élite.", "{user.mention} a sauté d'un trottoir.",
-                         "{user.mention} a roulé jusqu'en bas de la falaise.", "{user.mention} est parti ouvrir son propre serveur...",
-                         "{user.mention} n'était de toute évidence pas assez *gaucho* pour ce serveur.",
-                         "{user.mention}... désolé c'est qui ce random ?", "On m'annonce à l'oreillette que {user.mention} est parti.",
-                         "C'est la fin pour {user.mention}...",
-                         "{user.mention} a été jeté dans la fosse aux randoms.", "{user.mention} est parti rejoindre Johnny...",
-                         "{user.mention} ne supportait plus d'être l'*Omega* du serveur.", "{user.mention} a paniqué une fois de plus.",
-                         "{user.mention} s'est *enfin* barré !", "Plus besoin de le bloquer, {user.mention} est parti !",
-                         "Boop bip boup {user.mention} bip", "{user.mention} a pris sa retraite.",
-                         "{user.mention} a disparu dans des circonstances floues...", "Non pas toi {user.mention} ! 😢",
-                         "{user.mention} a quitté. Un de plus ou un de moins hein...",
-                         "{user.mention} était de toute évidence trop underground pour ce serveur de normies.",
-                         "{user.mention} est parti faire une manif'.",
-                         "{user.mention} a quitté/20", "Ce n'est qu'un *au revoir* {user.mention} !"]
+        self.defaut_quit = ["Au revoir {user.mention} !", "Bye bye {user.mention}.",
+                            "{user.mention} s'est trompé de bouton.",
+                            "{user.mention} a été suicidé de deux bans dans le dos.",
+                            "{user.mention} a ragequit le serveur.",
+                            "GAME OVER {user.mention}",
+                            "A jamais {user.mention} !",
+                            "Les meilleurs partent en premier, sauf {user.mention}...",
+                            "{user.mention} est parti, un de moins !",
+                            "{user.mention} s'envole vers d'autres cieux !",
+                            "YOU DIED {user.mention}",
+                            "De toute évidence {user.mention} ne faisait pas parti de l'élite.",
+                            "{user.mention} a sauté d'un trottoir.",
+                            "{user.mention} a roulé jusqu'en bas de la falaise.",
+                            "{user.mention} est parti ouvrir son propre serveur...",
+                            "{user.mention} n'était de toute évidence pas assez *gaucho* pour ce serveur.",
+                            "{user.mention}... désolé c'est qui ce random ?",
+                            "On m'annonce à l'oreillette que {user.mention} est parti.",
+                            "C'est la fin pour {user.mention}...",
+                            "{user.mention} a été jeté dans la fosse aux randoms.",
+                            "{user.mention} est parti rejoindre Johnny...",
+                            "{user.mention} ne supportait plus d'être l'*Omega* du serveur.",
+                            "{user.mention} a paniqué une fois de plus.",
+                            "{user.mention} s'est *enfin* barré !",
+                            "Plus besoin de le bloquer, {user.mention} est parti !",
+                            "Boop bip boup {user.mention} bip",
+                            "{user.mention} a pris sa retraite.",
+                            "{user.mention} a disparu dans des circonstances floues...",
+                            "Non pas toi {user.mention} ! 😢",
+                            "{user.mention} a quitté. Un de plus ou un de moins hein...",
+                            "{user.mention} était de toute évidence trop underground pour ce serveur de normies.",
+                            "{user.mention} est parti faire une manif'.",
+                            "{user.mention} a quitté/20",
+                            "Ce n'est qu'un *au revoir* {user.mention} !"]
 
     def save(self):
         fileIO("data/echo/data.json", "save", self.data)
@@ -1584,11 +1599,9 @@ class Echo:
             return
         elif rep.reaction.emoji == "✖":
             await self.bot.delete_message(msg)
-            todel = self.sys[server.id]["QUIT_MSG"]
-            for e in self.defaut_quit:
-                if e in todel:
-                    todel.remove(e)
-            self.sys[server.id]["QUIT_MSG"] = todel
+            for i in self.defaut_quit:
+                if i in self.sys[server.id]["QUIT_MSG"]:
+                    self.sys[server.id]["QUIT_MSG"].remove(i)
             if not self.sys[server.id]["QUIT_MSG"]:
                 self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
                 await self.bot.say("**Impossible** ─ Si je retire ces messages, la liste sera vide."
@@ -1601,11 +1614,9 @@ class Echo:
                 self.save()
                 return
         elif rep.reaction.emoji == "✔":
-            toadd = self.sys[server.id]["QUIT_MSG"]
-            for e in self.defaut_quit:
-                if e not in toadd:
-                    toadd.append(e)
-            self.sys[server.id]["QUIT_MSG"] = toadd
+            for i in self.defaut_quit:
+                if i not in self.sys[server.id]["QUIT_MSG"]:
+                    self.sys[server.id]["QUIT_MSG"].append(i)
             await self.bot.say("**Rétablis** ─ Toutes les phrases par défaut ont été ajoutées à la liste de ce serveur")
             self.save()
         else:
