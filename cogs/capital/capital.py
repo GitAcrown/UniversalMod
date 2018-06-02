@@ -609,7 +609,7 @@ class Capital:
             n += 1
         em = discord.Embed(title="Palmares", description=txt, color=0xf2d348)
         total = self.api.total_server_credits(server)
-        em.set_footer(text="Sur le serveur {} | Total = {}{}".format(server.name, total,
+        em.set_footer(text="Sur le serveur {} | Total = {} {}".format(server.name, total,
                                                                      self.api.get_money(server, total, True)))
         try:
             await self.bot.say(embed=em)
@@ -652,8 +652,10 @@ class Capital:
                     rj = delta * 50
                     self.api.depot_credits(user, rj, "Revenus journaliers")
                 em = discord.Embed(title="Revenu{}".format("s" if delta > 1 else ""),
-                                   description="Voici votre revenu: **+{} {}**{}".format(rj, self.api.get_money(server, rj), mult),
+                                   description="Votre revenu ─ **+{} {}**{}".format(rj, self.api.get_money(server, rj), mult),
                                    color=ctx.message.author.color)
+                em.set_footer(text="Vous avez désormais {} {}".format(self.api.get_account(user).solde,
+                                                                      self.api.get_money(server, rj)))
                 await self.bot.say(embed=em)
             else:
                 await self.bot.say("**Refusé** ─ Vous avez déjà pris votre revenu aujourd'hui")
