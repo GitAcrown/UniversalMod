@@ -1468,6 +1468,32 @@ class Echo:
         self.save()
 
     @_departmsg.command(pass_context=True)
+    async def list(self, ctx):
+        """Affiche une liste des messages de départ personnalisés du serveur"""
+        server = ctx.message.server
+        self._set_server(server)
+        if self.sys[server.id]["QUIT_MSG"]:
+            liste = []
+            n = 1
+            s = 1
+            txt = ""
+            for e in self.sys[server.id]["QUIT_MSG"]:
+                liste.append([n, e])
+                txt += "**{}**. `{}`\n".format(n, e)
+                n += 1
+                if len(txt) >= 1960 * s:
+                    em = discord.Embed(title="Messages de départ", description=txt)
+                    em.set_footer(text="─ Page {}".format(s))
+                    await self.bot.say(embed=em)
+                    s += 1
+                    txt = ""
+            em = discord.Embed(title="Messages de départ", description=txt)
+            em.set_footer(text="─ Page {}".format(s))
+            await self.bot.say(embed=em)
+        else:
+            await self.bot.say("**Vide** | Aucun message personnalisé n'a été enregistré.")
+
+    @_departmsg.command(pass_context=True)
     async def add(self, ctx, *message):
         """Ajoute un message de départ
 
@@ -1517,9 +1543,9 @@ class Echo:
                     await self.bot.say("**Annulé** | La session a expirée.")
                     return
                 elif rep.content.isdigit():
-                    if rep.content <= n:
+                    if int(rep.content) <= n:
                         for e in liste:
-                            if e[0] == rep.content:
+                            if e[0] == int(rep.content):
                                 self.sys[server.id]["QUIT_MSG"].remove(e[1])
                                 await self.bot.say("**Succès** | Ce message à été supprimé")
                                 self.save()
@@ -1560,11 +1586,13 @@ class Echo:
                 self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
                 await self.bot.say("**Impossible** ─ Si je retire ces messages, la liste sera vide."
                                    " Je les ai donc rétablis...")
+                self.save()
+                return
             else:
                 await self.bot.say("**Supprimés** ─ Vous pourrez toujours les remettre en cliquant sur \✔".format(
                     ctx.prefix))
+                self.save()
                 return
-            self.save()
         elif rep.reaction.emoji == "✔":
             for e in self.sys[server.id]["QUIT_MSG"]:
                 if e in self.defaut_quit:
