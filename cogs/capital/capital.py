@@ -758,7 +758,7 @@ class Capital:
                         m = await self.bot.say(embed=em)
                     else:
                         await self.bot.edit_message(m, embed=em)
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.75)
                 if offre > 0:
                     gain = offre - base
                     self.api.depot_credits(user, gain, "Gain machine à sous")
