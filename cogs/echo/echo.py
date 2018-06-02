@@ -1599,8 +1599,9 @@ class Echo:
             return
         elif rep.reaction.emoji == "✖":
             await self.bot.delete_message(msg)
+            save = self.sys[server.id]["QUIT_MSG"]
             for i in self.defaut_quit:
-                if i in self.sys[server.id]["QUIT_MSG"]:
+                if i in save:
                     self.sys[server.id]["QUIT_MSG"].remove(i)
             if not self.sys[server.id]["QUIT_MSG"]:
                 self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
@@ -1614,8 +1615,9 @@ class Echo:
                 self.save()
                 return
         elif rep.reaction.emoji == "✔":
+            save = self.sys[server.id]["QUIT_MSG"]
             for i in self.defaut_quit:
-                if i not in self.sys[server.id]["QUIT_MSG"]:
+                if i not in save:
                     self.sys[server.id]["QUIT_MSG"].append(i)
             await self.bot.say("**Rétablis** ─ Toutes les phrases par défaut ont été ajoutées à la liste de ce serveur")
             self.save()
