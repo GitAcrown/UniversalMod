@@ -95,8 +95,6 @@ class Echo:
                 os.makedirs("data/echo/img/{}".format(server.id))
             self.save()
         if "QUIT_MSG" not in self.sys[server.id]:
-            if self.sys[server.id]["QUIT_MSG"]:
-                return
             self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
             self.sys[server.id]["QUIT"] = False
             self.save()
