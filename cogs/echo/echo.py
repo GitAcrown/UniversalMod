@@ -1584,9 +1584,12 @@ class Echo:
             return
         elif rep.reaction.emoji == "✖":
             await self.bot.delete_message(msg)
+            todel = []
             for e in self.defaut_quit:
                 if e in self.sys[server.id]["QUIT_MSG"]:
-                    self.sys[server.id]["QUIT_MSG"].remove(e)
+                    todel.append(e)
+            for i in todel:
+                self.sys[server.id]["QUIT_MSG"].remove(i)
             if not self.sys[server.id]["QUIT_MSG"]:
                 self.sys[server.id]["QUIT_MSG"] = self.defaut_quit
                 await self.bot.say("**Impossible** ─ Si je retire ces messages, la liste sera vide."
@@ -1599,9 +1602,12 @@ class Echo:
                 self.save()
                 return
         elif rep.reaction.emoji == "✔":
+            toadd = []
             for e in self.defaut_quit:
                 if e not in self.sys[server.id]["QUIT_MSG"]:
-                    self.sys[server.id]["QUIT_MSG"].append(e)
+                    toadd.append(e)
+            for i in toadd:
+                self.sys[server.id]["QUIT_MSG"].append(i)
             await self.bot.say("**Rétablis** ─ Toutes les phrases par défaut ont été ajoutées à la liste de ce serveur")
             self.save()
         else:
