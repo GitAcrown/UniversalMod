@@ -1509,7 +1509,7 @@ class Echo:
             await self.bot.say("**Vide** | Aucun message personnalisé n'a été enregistré.")
 
     @_departmsg.command(pass_context=True)
-    async def add(self, ctx, *message):
+    async def ajt(self, ctx, *message):
         """Ajoute un message de départ
 
         Aide : https://github.com/GitAcrown/WikiHelp/wiki/Stickers#formatage"""
