@@ -1252,6 +1252,7 @@ class Echo:
                             continue
 
                         if e[1] == "5s" or e[1] == "auto":
+                            await self.bot.add_reaction(message, "⏱")
                             await asyncio.sleep(5.5)
                             await self.bot.delete_message(message)
                             continue
