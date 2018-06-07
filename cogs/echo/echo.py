@@ -1251,6 +1251,11 @@ class Echo:
                         if e[1] in [e.name for e in server.emojis]:
                             continue
 
+                        if e[1] == "5s" or e[1] == "auto":
+                            await asyncio.sleep(5.5)
+                            await self.bot.delete_message(message)
+                            continue
+
                         if e[1] in stickers_list:
                             stk = self.get_sticker(server, e[1])
                             stkmod = self.get_sticker(server, e[1], w=True)
