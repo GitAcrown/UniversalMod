@@ -1240,6 +1240,11 @@ class Echo:
             return
         channel = message.channel
         self._set_server(server)
+        if ".5s" in content.lower():
+            await self.bot.add_reaction(message, "⏱")
+            await asyncio.sleep(5.5)
+            await self.bot.delete_message(message)
+            return
 
         if author.id not in self.sys[server.id]["BLACKLIST"]:
             if ":" in content:
