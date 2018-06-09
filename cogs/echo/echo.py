@@ -1156,6 +1156,7 @@ class Echo:
         for stk in self.data[server.id]:
             self.data[server.id][stk]["STATS"] = {"COMPTE": {}, "LIKE": [], "DISLIKE": []}
         self.save()
+        await self.bot.say("**OK** | Changements effectués !")
 
     @_stkmod.command(pass_context=True, hidden=True)
     async def urlpb(self, ctx):
