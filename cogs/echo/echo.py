@@ -6,7 +6,6 @@ import re
 import time
 from collections import namedtuple
 from copy import deepcopy
-from datetime import datetime as dt
 from urllib import request
 
 import aiohttp
@@ -124,8 +123,6 @@ class Echo:
                     repair = False
                 else:
                     repair = data["NEED_REPAIR"]
-                if type(data["STATS"]["COMPTE"]) is int:
-                    data["STATS"]["COMPTE"] = {}
                 stats = Stats(data["STATS"]["COMPTE"], data["STATS"]["LIKE"], data["STATS"]["DISLIKE"])
                 Sticker = namedtuple('Sticker', ['id', 'nom', 'path', 'author', 'url', 'creation', 'stats', 'display',
                                                  'racine', 'place', 'type', 'approb', 'repair'])
@@ -1150,6 +1147,17 @@ class Echo:
         await self.bot.say("**Succès** | Les stickers et paramètres du serveur ont été supprimés")
 
     @_stkmod.command(pass_context=True, hidden=True)
+    async def restable(self, ctx, serverid: str = None):
+        """Remet en ordre les données corrompues par une erreur critique"""
+        if not serverid:
+            server = ctx.message.server
+        else:
+            server = self.bot.get_server(serverid)
+        for stk in self.data[server.id]:
+            self.data[server.id][stk]["STATS"] = {"COMPTE": {}, "LIKE": [], "DISLIKE": []}
+        self.save()
+
+    @_stkmod.command(pass_context=True, hidden=True)
     async def urlpb(self, ctx):
         """Trouve les URL qui vont potentiellement poser problème"""
         server = ctx.message.server
@@ -1251,7 +1259,6 @@ class Echo:
                 stickers = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
                 if stickers:
                     stickers_list = self.get_all_stickers(server, True, "NOM")
-                    semaine = dt.isocalendar(dt.now())[1]
                     for e in stickers:
                         if e[1] in [e.name for e in server.emojis]:
                             continue
@@ -1355,16 +1362,6 @@ class Echo:
                                     em.set_footer(text="(*) sur {} stickers au total".format(len(stickers_list)))
                                     await self.bot.send_message(author, embed=em)
                                     continue
-                                if "+" in option:
-                                    if author.id not in stkmod["STATS"]["LIKE"]:
-                                        stkmod["STATS"]["LIKE"].append(author.id)
-                                        await self.bot.add_reaction(message, "✅")
-                                if "-" in option:
-                                    if author.id not in stkmod["STATS"]["DISLIKE"]:
-                                        stkmod["STATS"]["DISLIKE"].append(author.id)
-                                        await self.bot.add_reaction(message, "✅")
-                                if "n" in option:
-                                    continue
 
                             await self.bot.send_typing(channel)
 
@@ -1389,9 +1386,7 @@ class Echo:
                                     em.set_image(url=stk.url)
                                     try:
                                         await self.bot.send_message(channel, embed=em)
-                                        self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] = \
-                                            self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] + 1 \
-                                                if semaine in self.data[server.id][stk.id]["STATS"]["COMPTE"] else 1
+
                                         continue
                                     except Exception as e:
                                         print("Impossible d'afficher {} en billet : {}".format(stk.nom, e))
@@ -1399,17 +1394,13 @@ class Echo:
                                 if stk.path:
                                     try:
                                         await self.bot.send_file(channel, stk.path)
-                                        self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] = \
-                                            self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] + 1 \
-                                                if semaine in self.data[server.id][stk.id]["STATS"]["COMPTE"] else 1
+
                                         continue
                                     except Exception as e:
                                         print("Impossible d'afficher {} en upload : {}".format(stk.nom, e))
                             try:
                                 await self.bot.send_message(channel, stk.url)
-                                self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] = \
-                                    self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine] + 1 \
-                                        if semaine in self.data[server.id][stk.id]["STATS"]["COMPTE"] else 1
+
                             except Exception as e:
                                 print("Impossible d'afficher {} en URL : {}".format(stk.nom, e))
 
