@@ -591,7 +591,11 @@ class Justice:
                         em = discord.Embed(description="**Peine augmentée** ─ **+{}{}** par *{}*".format(
                             val, form, ctx.message.author.name), color=apply.color)
                         em.set_footer(text="Sortie prévue à {}".format(estim))
-                        await self.bot.send_message(user, embed=em)
+                        try:
+                            await self.bot.send_message(user, embed=em)
+                        except:
+                            if prisonchan:
+                                await self.bot.send_message(prisonchan, embed=em)
                     elif temps[0] == "-":
                         self.reg[server.id][user.id]["TS_SORTIE"] -= modif
                         if self.reg[server.id][user.id]["TS_SORTIE"] < time.time():
@@ -611,7 +615,11 @@ class Justice:
                         em = discord.Embed(description="**Peine réduite** ─ **-{}{}** par *{}*".format(
                             val, form, ctx.message.author.name), color=apply.color)
                         em.set_footer(text="Sortie prévue à {}".format(estim))
-                        await self.bot.send_message(user, embed=em)
+                        try:
+                            await self.bot.send_message(user, embed=em)
+                        except:
+                            if prisonchan:
+                                await self.bot.send_message(prisonchan, embed=em)
                     else:
                         await self.bot.say("**Symbole non reconnu** | `+` = Ajouter / `-` = Réduire")
                         return
@@ -666,7 +674,12 @@ class Justice:
                 em = discord.Embed(description="**Peine de prison** ─ **{}{}** par *{}*{}".format(
                     val, form, ctx.message.author.name, txt), color=apply.color)
                 em.set_footer(text="Sortie prévue à {}".format(estim))
-                await self.bot.send_message(user, embed=em)
+                try:
+                    await self.bot.send_message(user, embed=em)
+                except:
+                    if prisonchan:
+                        await self.bot.send_message(prisonchan, "{}".format(user.mention))
+                        await self.bot.send_message(prisonchan, embed=em)
 
                 em = discord.Embed(description=msg, color=apply.color)
                 em.set_footer(text=estim_txt)
@@ -687,7 +700,12 @@ class Justice:
                             self.sys[server.id]["APPEL_USE"].remove(user.id)
                         em = discord.Embed(description="**Peine de prison** ─ Vous êtes désormais libre",
                                            color=apply.color)
-                        await self.bot.send_message(user, embed=em)
+                        try:
+                            await self.bot.send_message(user, embed=em)
+                        except:
+                            if prisonchan:
+                                await self.bot.send_message(prisonchan, "{}".format(user.mention))
+                                await self.bot.send_message(prisonchan, embed=em)
                         rand = random.choice(["est désormais libre", "regagne sa liberté", "est sorti de prison",
                                               "profite à nouveau de l'air frais"])
                         em = discord.Embed(description="{} {}".format(user.mention, rand), color=apply.color)
@@ -714,7 +732,12 @@ class Justice:
                     user.mention, ctx.message.author.mention), color=apply.color)
                 notif = await self.bot.say(embed=em)
                 em = discord.Embed(description="**Peine de prison** ─ Vous êtes désormais libre", color=apply.color)
-                await self.bot.send_message(user, embed=em)
+                try:
+                    await self.bot.send_message(user, embed=em)
+                except:
+                    if prisonchan:
+                        await self.bot.send_message(prisonchan, "{}".format(user.mention))
+                        await self.bot.send_message(prisonchan, embed=em)
                 await asyncio.sleep(7)
                 await self.bot.delete_message(notif)
 
