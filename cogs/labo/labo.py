@@ -47,6 +47,14 @@ class Labo:
     def check(self, reaction, user):
         return not user.bot
 
+    @commands.command(aliases=["ge"], pass_context=True)
+    async def getemoji(self, ctx, emoji: discord.Emoji):
+        """Retourne l'Emoji discord"""
+        em = discord.Embed(title=emoji.name, description="[URL]({})".format(emoji.url))
+        em.set_footer(text="Création ─ {}".format(emoji.created_at))
+        em.set_image(url=emoji.url)
+        await self.bot.say(embed=em)
+
     @commands.command(aliases=["hp"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def chronos(self, ctx, user: discord.Member, identifiant: str = None):
