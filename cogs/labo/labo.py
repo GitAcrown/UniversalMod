@@ -116,6 +116,7 @@ class Labo:
         out = re.compile(r'(trois[-\s]?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
         out2 = re.compile(r'(quart)', re.DOTALL | re.IGNORECASE).findall(texte)
         out3 = re.compile(r'(demie?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out4 = re.compile(r'(moins[-\s]?(?:le\s?)?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
         modifmin = False
         if out:
             date = date.replace(minute=45)
