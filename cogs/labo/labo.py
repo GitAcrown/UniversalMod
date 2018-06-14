@@ -116,12 +116,16 @@ class Labo:
         out = re.compile(r'(trois[-\s]?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
         out2 = re.compile(r'(quart)', re.DOTALL | re.IGNORECASE).findall(texte)
         out3 = re.compile(r'(demie?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        modifmin = False
         if out:
             date = date + timedelta(minutes=45)
+            modifmin = True
         elif out2:
             date = date + timedelta(minutes=15)
+            modifmin = True
         elif out3:
             date = date + timedelta(minutes=30)
+            modifmin = True
 
         out = re.compile(r'(semaine)\s(?=prochaine?)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
@@ -158,7 +162,10 @@ class Labo:
         out = re.compile(r'([0-2]?[0-9])[:h]([0-5][0-9])?', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             out = out[0]
-            date = date.replace(hour=int(out[0]), minute=int(out[1]) if out[1] else 0, second=0)
+            if not modifmin:
+                date = date.replace(hour=int(out[0]), minute=int(out[1]) if out[1] else 0, second=0)
+            else:
+                date = date.replace(hour=int(out[0]),second=0)
 
         out = re.compile(r'(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
