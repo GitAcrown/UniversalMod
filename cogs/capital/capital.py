@@ -172,8 +172,8 @@ class CapitalAPI:
         liste = []
         if user:
             for t in user["TRSAC"]:
-                if user["TRSAC"][t][2] == jour:
-                    j, h = user["TRSAC"][t][2], user["TRSAC"][t][1]
+                if t[2] == jour:
+                    j, h = t[2], t[1]
                     liste.append([time.mktime(time.strptime("{} {}".format(j, h), "%d/%m/%Y %H:%M")),
                                   self._obj_transaction(t)])
             sort = sorted(liste, key=operator.itemgetter(0), reverse=True)
