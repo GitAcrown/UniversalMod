@@ -83,16 +83,16 @@ class Labo:
         annee = date.year
         texte = self.normalize(texte)
         out = re.compile(r'(apres[-\s]?demain)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out2 = re.compile(r'(demain)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             date = date + timedelta(days=2)
-        out = re.compile(r'(demain)', re.DOTALL | re.IGNORECASE).findall(texte)
-        if out:
+        elif out2:
             date = date + timedelta(days=1)
         out = re.compile(r'(avant[-\s]?hier)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out2 = re.compile(r'(hier)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             date = date - timedelta(days=2)
-        out = re.compile(r'(hier)', re.DOTALL | re.IGNORECASE).findall(texte)
-        if out:
+        elif out2:
             date = date - timedelta(days=1)
         out = re.compile(r'(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s(?=prochaine?)',
                          re.DOTALL | re.IGNORECASE).findall(texte)
