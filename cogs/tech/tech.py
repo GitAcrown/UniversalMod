@@ -114,7 +114,7 @@ class Tech:
         await self.bot.say("**Succès** | La suggestion a été envoyée !")
 
     @commands.command(pass_context=True, no_pm=True, hidden=True)
-    async def meta(self, ctx, channelid: str):
+    async def metabot(self, ctx, channelid: str):
         """Prendre le contrôle du bot"""
         if channelid == "reset":
             if self.meta:
