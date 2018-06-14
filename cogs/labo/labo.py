@@ -159,7 +159,7 @@ class Labo:
                 m = 11
             else:
                 m = 12
-            date = date.replace(day=out[0], month=m, year=out[2] if out[2] else annee)
+            date = date.replace(day=int(out[0]), month=m, year=int(out[2]) if out[2] else int(annee))
 
         out = re.compile(r'dans\s?(\d+)\s?(heures? | minutes?| jours? |[hmj])(\d{1,2})?',
                          re.DOTALL | re.IGNORECASE).findall(texte)
