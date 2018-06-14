@@ -82,21 +82,21 @@ class Labo:
         date = datetime.now()
         annee = date.year
         texte = self.normalize(texte)
-        out = re.compile(r'((?:apres)?[-\s]?demain)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out = re.compile(r'(apres[-\s]?demain)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
-            if out[0] == " demain":
-                date = date + timedelta(days=1)
-            else:
-                date = date + timedelta(days=2)
-        out = re.compile(r'((?:avant)?[-\s]?hier)', re.DOTALL | re.IGNORECASE).findall(texte)
+            date = date + timedelta(days=2)
+        out = re.compile(r'(demain)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
-            if out[0] == " hier":
-                date = date - timedelta(days=1)
-            else:
-                date = date - timedelta(days=2)
+            date = date + timedelta(days=1)
+        out = re.compile(r'(avant[-\s]?hier)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date - timedelta(days=2)
+        out = re.compile(r'(hier)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date - timedelta(days=1)
         out = re.compile(r'(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s(?=prochaine?)',
                          re.DOTALL | re.IGNORECASE).findall(texte)
-        if out: # On est obligé de traduire, datetime ne supporte pas le français
+        if out:  # On est obligé de traduire, datetime ne supporte pas le français
             if out[0] == "lundi":
                 wd = 0
             elif out[0] == "mardi":
@@ -120,6 +120,30 @@ class Labo:
         out = re.compile(r'(tou[ts]\s?a\s?l\'?heure)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             date = date + timedelta(hours=4)
+
+        out = re.compile(r'(soire?e?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=20, minute=0, second=0)
+
+        out = re.compile(r'(journee?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=15, minute=0, second=0)
+
+        out = re.compile(r'(midi)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=12, minute=0, second=0)
+
+        out = re.compile(r'(apres[-\s]?midi|aprem)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=13, minute=0, second=0)
+
+        out = re.compile(r'(minuit)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=0, minute=0, second=0)
+
+        out = re.compile(r'(matin)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=9, minute=0, second=0)
 
         out = re.compile(r'([0-2]?[0-9])[:h]([0-5][0-9])?', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
@@ -161,14 +185,14 @@ class Labo:
                 m = 12
             date = date.replace(day=int(out[0]), month=m, year=int(out[2]) if out[2] else int(annee))
 
-        out = re.compile(r'dans\s?(\d+)\s?(heures? | minutes?| jours? |[hmj])(\d{1,2})?',
+        out = re.compile(r'dans\s?(\d+)\s?(heures? | minutes?| jours? | semaines? |[hmj])(\d{1,2})?',
                          re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             out = out[0]
             if out[1] in ["h", "heure", "heures"]:
                 r = out[0]
                 if int(out[0]) >= 24:
-                    jours = int(out[0]/24)
+                    jours = int(out[0] / 24)
                     date = date + timedelta(days=jours)
                     r = out[0] - (jours * 24)
                 date = date + timedelta(hours=int(r))
@@ -176,32 +200,14 @@ class Labo:
                     date = date + timedelta(minutes=int(out[2]))
             elif out[1] in ["m", "minute", "minutes"]:
                 date = date + timedelta(minutes=int(out[0]))
+            elif out[1] in ["semaine", "semaines"]:
+                date = date + timedelta(weeks=int(out[0]))
             else:
                 date = date + timedelta(days=int(out[0]))
 
-        out = re.compile(r'(soire?e?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out = re.compile(r'(la\s?veill?e)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
-            date = date.replace(hour=20, minute=0, second=0)
-
-        out = re.compile(r'(journee?)', re.DOTALL | re.IGNORECASE).findall(texte)
-        if out:
-            date = date.replace(hour=15, minute=0, second=0)
-
-        out = re.compile(r'(midi)', re.DOTALL | re.IGNORECASE).findall(texte)
-        if out:
-            date = date.replace(hour=12, minute=0, second=0)
-
-        out = re.compile(r'(apres[-\s]?midi|aprem)', re.DOTALL | re.IGNORECASE).findall(texte)
-        if out:
-            date = date.replace(hour=13, minute=0, second=0)
-
-        out = re.compile(r'(minuit)', re.DOTALL | re.IGNORECASE).findall(texte)
-        if out:
-            date = date.replace(hour=0, minute=0, second=0)
-
-        out = re.compile(r'(matin)', re.DOTALL | re.IGNORECASE).findall(texte)
-        if out:
-            date = date.replace(hour=9, minute=0, second=0)
+            date = date - timedelta(days=1)
 
         return date
 
