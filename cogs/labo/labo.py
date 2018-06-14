@@ -84,30 +84,30 @@ class Labo:
         texte = self.normalize(texte)
         out = re.compile(r'((?:apres)?[-\s]?demain)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
-            if out[0] is " demain":
+            if out[0] == " demain":
                 date = date + timedelta(days=1)
             else:
                 date = date + timedelta(days=2)
         out = re.compile(r'((?:avant)?[-\s]?hier)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
-            if out[0] is " hier":
+            if out[0] == " hier":
                 date = date - timedelta(days=1)
             else:
                 date = date - timedelta(days=2)
         out = re.compile(r'(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s(?=prochaine?)',
                          re.DOTALL | re.IGNORECASE).findall(texte)
         if out: # On est obligé de traduire, datetime ne supporte pas le français
-            if out[0] is "lundi":
+            if out[0] == "lundi":
                 wd = 0
-            elif out[0] is "mardi":
+            elif out[0] == "mardi":
                 wd = 1
-            elif out[0] is "mercredi":
+            elif out[0] == "mercredi":
                 wd = 2
-            elif out[0] is "jeudi":
+            elif out[0] == "jeudi":
                 wd = 3
-            elif out[0] is "vendredi":
+            elif out[0] == "vendredi":
                 wd = 4
-            elif out[0] is "samedi":
+            elif out[0] == "samedi":
                 wd = 5
             else:
                 wd = 6
@@ -135,27 +135,27 @@ class Labo:
                          r'|juillet|aout)\s?(\d{4})?', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             out = out[0]
-            if out[1] is "janvier":
+            if out[1] == "janvier":
                 m = 1
-            elif out[1] is "fevrier":
+            elif out[1] == "fevrier":
                 m = 2
-            elif out[1] is "mars":
+            elif out[1] == "mars":
                 m = 3
-            elif out[1] is "avril":
+            elif out[1] == "avril":
                 m = 4
-            elif out[1] is "mai":
+            elif out[1] == "mai":
                 m = 5
-            elif out[1] is "juin":
+            elif out[1] == "juin":
                 m = 6
-            elif out[1] is "juillet":
+            elif out[1] == "juillet":
                 m = 7
-            elif out[1] is "aout":
+            elif out[1] == "aout":
                 m = 8
-            elif out[1] is "septembre":
+            elif out[1] == "septembre":
                 m = 9
-            elif out[1] is "octobre":
+            elif out[1] == "octobre":
                 m = 10
-            elif out[1] is "novembre":
+            elif out[1] == "novembre":
                 m = 11
             else:
                 m = 12
