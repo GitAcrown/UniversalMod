@@ -139,17 +139,23 @@ class Tech:
                 while True:
                     msg = await self.bot.wait_for_message(channel=ctx.message.channel,
                                                           author=ctx.message.author, timeout=120)
-                    if not msg:
+                    if not msg or msg.content.lower() == "stop":
                         await self.bot.say("**Session terminée** | "
                                            "Ce channel n'est plus connecté à *{}*".format(channel.name))
                         self.meta = False
                         return
                     else:
-                        r = random.randint(0.06, 0.09)
-                        typing = len(msg.content) * r
-                        await self.bot.send_typing(channel)
-                        await asyncio.sleep(typing)
-                        await self.bot.send_message(channel, msg.content)
+                        if self.meta:
+                            r = random.randint(0.06, 0.09)
+                            typing = len(msg.content) * r
+                            await self.bot.send_typing(channel)
+                            await asyncio.sleep(typing)
+                            await self.bot.send_message(channel, msg.content)
+                        else:
+                            await self.bot.say("**Session arrêtée à distance** | Ce channel n'est plus connecté à *{}*"
+                                               "".format(channel.name))
+                            self.meta = False
+                            return
             else:
                 await self.bot.say("**Erreur** | Une session est déjà en cours")
         else:
@@ -158,6 +164,10 @@ class Tech:
     async def listen_msg(self, message):
         if self.meta:
             if message.channel.id == self.meta:
+                if message.author.id == "172376505354158080":
+                    if message.content.lower().startswith("asimov"):
+                        self.meta = False
+                        return
                 if "<@{}>".format(self.bot.user.id) in message.content:
                     color = 0xfab84c
                 else:
