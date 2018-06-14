@@ -565,7 +565,7 @@ class Capital:
                     msg = await self.bot.say(embed=em)
                 else:
                     try:
-                        await self.bot.clear_reactions(menu)
+                        await self.bot.clear_reactions(msg)
                     except:
                         pass
                     msg = await self.bot.edit_message(msg, embed=em)
