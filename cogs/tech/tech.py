@@ -15,7 +15,7 @@ class Tech:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/tech/sys.json")  # Pas très utile mais on le garde pour plus tard
-        self.meta = False
+        self.meta = {"USER": False, "CHANNEL": False}
 
     def make_zipfile(self, output_filename, source_dir):
         relroot = os.path.abspath(os.path.join(source_dir, os.pardir))
@@ -117,8 +117,8 @@ class Tech:
     async def metabot(self, ctx, channelid: str):
         """Prendre le contrôle du bot"""
         if channelid == "reset":
-            if self.meta:
-                self.meta = False
+            if self.meta["CHANNEL"]:
+                self.meta = {"USER": False, "CHANNEL": False}
             await self.bot.say("**Reset effectué**")
             return
         if ctx.message.channel.id != "456948766935875604":
@@ -126,7 +126,7 @@ class Tech:
             return
         channel = self.bot.get_channel(channelid)
         if channel:
-            if not self.meta:
+            if not self.meta["CHANNEL"]:
                 em = discord.Embed(title="META | {}".format(channel.name),
                                    description="**Connexion établie** - Les messages provenant du salon seront copiés"
                                                " dans ce channel. Tout message que vous enverrez ici sera reproduit à "
@@ -136,28 +136,25 @@ class Tech:
                 em.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar_url)
                 await self.bot.say(embed=em)
                 await asyncio.sleep(1.5)
-                self.meta = channel.id
+                self.meta["CHANNEL"] = channel.id
+                self.meta["USER"] = ctx.message.author.id
                 while True:
                     msg = await self.bot.wait_for_message(channel=ctx.message.channel,
                                                           author=ctx.message.author, timeout=120)
                     if not msg or msg.content.lower() == "stop":
                         await self.bot.say("**Session terminée** | "
                                            "Ce channel n'est plus connecté à *{}*".format(channel.name))
-                        self.meta = False
+                        self.meta = {"USER": False, "CHANNEL": False}
                         return
                     else:
-                        if self.meta:
+                        if self.meta["CHANNEL"]:
                             if msg.content.startswith("\\"):
                                 continue
-                            r = random.randint(6, 9) / 100
-                            typing = len(msg.content) * r
-                            await self.bot.send_typing(channel)
-                            await asyncio.sleep(typing)
                             await self.bot.send_message(channel, msg.content)
                         else:
                             await self.bot.say("**Session arrêtée à distance** | Ce channel n'est plus connecté à *{}*"
                                                "".format(channel.name))
-                            self.meta = False
+                            self.meta = {"USER": False, "CHANNEL": False}
                             return
             else:
                 await self.bot.say("**Erreur** | Une session est déjà en cours")
@@ -165,11 +162,11 @@ class Tech:
             await self.bot.say("**Erreur** | Le channel n'est pas valide/impossible à atteindre")
 
     async def listen_msg(self, message):
-        if self.meta:
-            if message.channel.id == self.meta:
+        if self.meta["CHANNEL"]:
+            if message.channel.id == self.meta["CHANNEL"]:
                 if message.author.id == "172376505354158080":
                     if message.content.lower().startswith("asimov"):
-                        self.meta = False
+                        self.meta = {"USER": False, "CHANNEL": False}
                         return
                 if "<@{}>".format(self.bot.user.id) in message.content:
                     color = 0xfab84c
@@ -179,6 +176,13 @@ class Tech:
                 em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
                 userchan = self.bot.get_channel("456948766935875604")
                 await self.bot.send_message(userchan, embed=em)
+
+    async def listen_typing(self, channel, user, when):
+        if self.meta["CHANNEL"]:
+            if channel.id == "456948766935875604":
+                if user.id == self.meta["USER"]:
+                    chan = self.bot.get_channel(self.meta["CHANNEL"])
+                    await self.bot.send_typing(chan)
 
 
 def check_folders():
@@ -201,5 +205,6 @@ def setup(bot):
     check_files()
     n = Tech(bot)
     bot.add_listener(n.listen_msg, "on_message")
+    bot.add_listener(n.listen_typing, "on_typing")
     bot.add_cog(n)
 
