@@ -165,6 +165,29 @@ class CapitalAPI:
         else:
             return []
 
+    def get_day_transactions(self, user: discord.Member, jour: str = None):
+        if jour is None:
+            jour = time.strftime("%d/%m/%Y", time.localtime())
+        user = self.get_account(user, True)
+        liste = []
+        if user:
+            for t in user["TRSAC"]:
+                if user["TRSAC"][t][2] == jour:
+                    j, h = user["TRSAC"][t][2], user["TRSAC"][t][1]
+                    liste.append([time.mktime(time.strptime("{} {}".format(j, h), "%d/%m/%Y %H:%M")),
+                                  self._obj_transaction(t)])
+            sort = sorted(liste, key=operator.itemgetter(0), reverse=True)
+            liste = [s[0] for s in sort]
+            return liste
+        return False
+
+    def get_total_day_gain(self, user: discord.Member, jour: str = None):
+        liste = self.get_day_transactions(user, jour)
+        if liste:
+            total = sum([t.somme for t in liste])
+            return total
+        return False
+
 # Snips CREDITS & SOLDE
 
     def total_server_credits(self, server: discord.Server):
@@ -475,11 +498,16 @@ class Capital:
         server = ctx.message.server
         if data:
             moneyname = self.api.get_money(server, data.solde)
-            em = discord.Embed(description="**Solde** ─ {} {}".format(data.solde, moneyname),
+            gains = self.api.get_total_day_gain(user)
+            gainstxt = "+{}".format(gains) if gains >= 0 else "{}".format(gains)
+            em = discord.Embed(description="**Solde** ─ {0} {1}\n"
+                                           "**Bénéfice** ─ **{2}**".format(data.solde, moneyname,
+                                                                                    gainstxt),
                                color=user.color if user else ctx.message.author.color)
             em.set_author(name=str(user) if user else str(ctx.message.author),
                           icon_url=user.avatar_url if user else ctx.message.author.avatar_url)
-            trs = self.api.get_lasts_transactions(user if user else ctx.message.author, 5)
+            trs = self.api.get_lasts_transactions(user if user else ctx.message.author, 3)
+            trs.reverse()
             if trs:
                 txt = ""
                 for i in trs:
@@ -488,15 +516,89 @@ class Capital:
                     else:
                         somme = str(i.somme) if i.somme < 0 else "+{}".format(i.somme)
                     desc = i.desc if len(i.desc) <= 40 else i.desc[:38] + "..."
-                    txt += "**{}** ─ *{}* #{}\n".format(somme, desc, i.id)
-                em.add_field(name="Historique des transactions", value=txt)
-            em.set_footer(text="Compte ouvert le {}".format(data.timestamp))
+                    txt += "**{}** ─ *{}* `#{}`\n".format(somme, desc, i.id)
+                em.add_field(name="Historique", value=txt)
+            em.set_footer(text="`{0}b trs` ─ Voir transaction | `{0}b histo` ─ Voir historique".format(ctx.prefix))
             await self.bot.say(embed=em)
         else:
             if user != ctx.message.author:
                 await self.bot.say("**Introuvable** | Cette personne ne possède pas de compte bancaire sur ce serveur")
             else:
                 await self.api.inscription(ctx)
+
+    @_banque.command(aliases=["histo"], pass_context=True)
+    async def historique(self, ctx, user: discord.Member = None):
+        """Affiche l'historique bancaire complet d'un membre"""
+        data = self.api.get_account(user) if user else self.api.get_account(ctx.message.author)
+        server = ctx.message.server
+        if data:
+            jour = time.strftime("%d/%m/%Y", time.localtime())
+            msg = False
+            while True:
+                trs = self.api.get_day_transactions(user, jour)
+                txt = ""
+                n = 1
+                delid = []
+                if msg:
+                    for i in delid:
+                        await self.bot.delete_message(ctx.message.channel, await self.bot.get_message(i))
+                for t in trs:
+                    txt += "{} | **{}** ─ *{}* `#{}`\n".format(t.ts_heure, t.somme, t.desc, t.id)
+                    if len(txt) > 1980 * n:
+                        em = discord.Embed(title="Historique de {} | {}".format(user.name, jour),
+                                           description=txt, color=user.color)
+                        em.set_footer(text="─ Page {}".format(n))
+                        txt = ""
+                        n += 1
+                        delmsg = await self.bot.say(embed=em)
+                        delid.append(delmsg.id)
+
+                em = discord.Embed(title="Historique de {} | {}".format(user.name, jour),
+                                   description=txt, color=user.color)
+                em.set_footer(text="─ Page {} | ⬅ ➡ = Naviguer |"
+                                   " 🔢 = Entrer une date | 🚫 = Quitter".format(n, user.name, server.name))
+
+                if not msg:
+                    msg = await self.bot.say(embed=em)
+                else:
+                    msg = await self.bot.edit_message(msg, embed=em)
+                await self.bot.add_reaction(msg, "⬅")
+                await self.bot.add_reaction(msg, "🔢")
+                if jour != time.strftime("%d/%m/%Y", time.localtime()):
+                    await self.bot.add_reaction(msg, "➡")
+                await self.bot.add_reaction(msg, "🚫")
+                await asyncio.sleep(0.10)
+                rep = await self.bot.wait_for_reaction(["⬅", "🔢", "➡", "🚫"], message=msg, timeout=60,
+                                                       check=self.check, user=ctx.message.author)
+                if rep is None or rep.reaction.emoji == "🚫":
+                    await self.bot.delete_message(msg)
+                    return
+                elif rep.reaction.emoji == "⬅":
+                    jour = time.strftime("%d/%m/%Y", time.localtime(
+                        time.mktime(time.strptime(jour, "%d/%m/%Y")) - 86400))
+                elif rep.reaction.emoji == "➡":
+                    if jour != time.strftime("%d/%m/%Y", time.localtime()):
+                        jour = time.strftime("%d/%m/%Y", time.localtime(
+                            time.mktime(time.strptime(jour, "%d/%m/%Y")) + 86400))
+                    else:
+                        continue
+                elif rep.reaction.emoji == "🔢":
+                    em.set_footer(text="Entrez la date désirée ci-dessous (DD/MM/AAAA)")
+                    await self.bot.edit_message(msg, embed=em)
+                    rep = await self.bot.wait_for_message(author=user, channel=msg.channel, timeout=30)
+                    if rep is None:
+                        continue
+                    elif len(rep.content) == 10:
+                        if time.mktime(time.strptime(rep.content, "%d/%m/%Y")) > time.time():
+                            await self.bot.delete_message(rep)
+                            em.set_footer(text="Impossible d'aller dans le futur")
+                            await self.bot.edit_message(msg, embed=em)
+                        else:
+                            jour = rep.content
+                else:
+                    continue
+        else:
+            await self.bot.say("**Inconnu** | Cet utilisateur n'a pas de compte bancaire.")
 
     @_banque.command(aliases=["trs"], pass_context=True)
     async def transaction(self, ctx, identifiant: str):
@@ -519,7 +621,7 @@ class Capital:
         else:
             await self.bot.say("**Erreur** | Identifiant invalide (composé de 5 lettres et chiffres)")
 
-    @_banque.command(pass_context=True)
+    @_banque.command(aliases=["decode"], pass_context=True)
     async def unlock(self, ctx, code: str):
         """Interface permettant de rentrer des codes afin de débloquer des éléments"""
         data = self.api.get_account(ctx.message.author)
@@ -699,7 +801,7 @@ class Capital:
         if self.api.enough_credits(user, offre):
             cool = self.api.is_cooldown_blocked(user, "slot")
             if not cool:
-                self.api.add_cooldown(user, "slot", 30)
+                self.api.add_cooldown(user, "slot", 15)
                 roue = [":zap:", ":gem:", ":cherries:", ":strawberry:", ":watermelon:", ":tangerine:", ":lemon:",
                         ":four_leaf_clover:", ":100:"]
                 plus_after = [":zap:", ":gem:", ":cherries:"]
@@ -748,10 +850,13 @@ class Capital:
                 else:
                     offre = 0
                     msg = "Perdu ─ Tu perds ta mise !"
+
                 intros = ["Ça tourne", "Croisez les doigts", "Peut-être cette fois-ci", "Alleeeezzz",
                           "Ah les jeux d'argent", "Les dés sont lancés", "Il vous faut un peu de CHANCE",
                           "C'est parti", "Bling bling", "Le début de la richesse"]
                 intro = random.choice(intros)
+                if base == 69:
+                    intro = "Oh, petit cochon"
                 m = None
                 for i in range(3):
                     points = "•" * (i + 1)
@@ -762,7 +867,7 @@ class Capital:
                         m = await self.bot.say(embed=em)
                     else:
                         await self.bot.edit_message(m, embed=em)
-                    await asyncio.sleep(0.75)
+                    await asyncio.sleep(0.50)
                 if offre > 0:
                     gain = offre - base
                     self.api.depot_credits(user, gain, "Gain machine à sous")
