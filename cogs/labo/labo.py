@@ -113,6 +113,16 @@ class Labo:
                 wd = 6
             date = date + timedelta(((wd-1)-date.weekday()) % 7+1)
 
+        out = re.compile(r'(trois[-\s]?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out2 = re.compile(r'(quart)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out3 = re.compile(r'(demie?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date + timedelta(minutes=45)
+        elif out2:
+            date = date + timedelta(minutes=15)
+        elif out3:
+            date = date + timedelta(minutes=30)
+
         out = re.compile(r'(semaine)\s(?=prochaine?)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             date = date + timedelta(weeks=1)
