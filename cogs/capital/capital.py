@@ -602,6 +602,10 @@ class Capital:
                             await self.bot.edit_message(msg, embed=em)
                         else:
                             jour = rep.content
+                            try:
+                                await self.bot.delete_message(rep)
+                            except:
+                                pass
                 else:
                     continue
         else:
