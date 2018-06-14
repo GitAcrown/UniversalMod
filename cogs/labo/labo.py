@@ -1,8 +1,10 @@
 
 import asyncio
 import os
+import re
 import time
 from collections import namedtuple
+from datetime import datetime, timedelta
 
 import discord
 from discord.ext import commands
@@ -54,6 +56,148 @@ class Labo:
         em.set_footer(text="Création ─ {}".format(emoji.created_at))
         em.set_image(url=emoji.url)
         await self.bot.say(embed=em)
+
+    @commands.command(pass_context=True)
+    async def aion(self, ctx, texte: str):
+        """ALPHA TEST | Extrait des informations temporelles d'un message"""
+        date = self.rolex(texte)
+        txt = date.strftime("Le %d/%m/%Y à %H:%M")
+        em = discord.Embed(title=texte.capitalize(), description=txt)
+        await self.bot.say(embed=em)
+
+    def normalize(self, texte: str):
+        texte = texte.lower()
+        norm = [l for l in "neeecaiiuuo"]
+        modif = [l for l in "ñéèêçàîïûùö"]
+        fin_texte = texte
+        for char in texte:
+            if char in modif:
+                ind = modif.index(char)
+                fin_texte = fin_texte.replace(char, norm[ind])
+        return fin_texte
+
+    def rolex(self, texte: str):
+        """Permet d'extraire des informations temporelles d'un message en français"""
+        date = datetime.now()
+        annee = date.year
+        texte = self.normalize(texte)
+        out = re.compile(r'((?:apres)?[-\s]?demain)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            if out[0] is "demain":
+                date = date + timedelta(days=1)
+            else:
+                date = date + timedelta(days=2)
+        out = re.compile(r'((?:avant)?[-\s]?hier)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            if out[0] is "hier":
+                date = date - timedelta(days=1)
+            else:
+                date = date - timedelta(days=2)
+        out = re.compile(r'(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s(?=prochaine?)',
+                         re.DOTALL | re.IGNORECASE).findall(texte)
+        if out: # On est obligé de traduire, datetime ne supporte pas le français
+            if out[0] is "lundi":
+                wd = 0
+            elif out[0] is "mardi":
+                wd = 1
+            elif out[0] is "mercredi":
+                wd = 2
+            elif out[0] is "jeudi":
+                wd = 3
+            elif out[0] is "vendredi":
+                wd = 4
+            elif out[0] is "samedi":
+                wd = 5
+            else:
+                wd = 6
+            date = date + timedelta(((wd-1)-date.weekday()) % 7+1)
+
+        out = re.compile(r'(semaine)\s(?=prochaine?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date + timedelta(weeks=1)
+
+        out = re.compile(r'(tou[ts]\s?a\s?l\'?heure)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date + timedelta(hours=4)
+
+        out = re.compile(r'([0-2][0-9])[:h]([0-5][0-9])?', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            out = out[0]
+            date = date.replace(hour=int(out[0]), minute=int(out[1]), second=0)
+
+        out = re.compile(r'(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            out = out[0]
+            date = date.replace(day=int(out[0]), month=int(out[1]), year=int(out[2]))
+
+        out = re.compile(r'(\d{1,2})\s?(septembre|octobre|novembre|decembre|janvier|fevrier|mars|avril|mai|juin'
+                         r'|juillet|aout)\s?(\d{4})?', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            out = out[0]
+            if out[1] is "janvier":
+                m = 1
+            elif out[1] is "fevrier":
+                m = 2
+            elif out[1] is "mars":
+                m = 3
+            elif out[1] is "avril":
+                m = 4
+            elif out[1] is "mai":
+                m = 5
+            elif out[1] is "juin":
+                m = 6
+            elif out[1] is "juillet":
+                m = 7
+            elif out[1] is "aout":
+                m = 8
+            elif out[1] is "septembre":
+                m = 9
+            elif out[1] is "octobre":
+                m = 10
+            elif out[1] is "novembre":
+                m = 11
+            else:
+                m = 12
+            date = date.replace(day=out[0], month=m, year=out[2] if out[2] else annee)
+
+        out = re.compile(r'dans\s?(\d+)\s?(heures? | minutes?| jours? |[hmj])(\d{1,2})?',
+                         re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            out = out[0]
+            if out[1] in ["h", "heure", "heures"]:
+                date = date + timedelta(hours=int(out[0]))
+                if out[2]:
+                    date = date + timedelta(minutes=int(out[2]))
+            elif out[1] in ["m", "minute", "minutes"]:
+                date = date + timedelta(minutes=int(out[0]))
+            else:
+                date = date + timedelta(days=int(out[0]))
+
+        out = re.compile(r'(soire?e?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=20, minute=0, second=0)
+
+        out = re.compile(r'(journee?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=15, minute=0, second=0)
+
+        out = re.compile(r'(midi)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=12, minute=0, second=0)
+
+        out = re.compile(r'(apres[-\s]?midi|aprem)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=13, minute=0, second=0)
+
+        out = re.compile(r'(minuit)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=0, minute=0, second=0)
+
+        out = re.compile(r'(matin)', re.DOTALL | re.IGNORECASE).findall(texte)
+        if out:
+            date = date.replace(hour=9, minute=0, second=0)
+
+        return date
 
     @commands.command(aliases=["hp"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
