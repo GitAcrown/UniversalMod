@@ -127,6 +127,10 @@ class Labo:
         elif out3:
             date = date.replace(minute=30)
             modifmin = True
+        elif out4:
+            date = date - timedelta(hours=1)
+            date = date.replace(minute=45)
+            modifmin = True
 
         out = re.compile(r'(semaine)\s(?=prochaine?)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
