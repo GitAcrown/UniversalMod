@@ -1,6 +1,7 @@
 import asyncio
 import os
 import random
+import re
 import zipfile
 
 import discord
@@ -172,8 +173,15 @@ class Tech:
                     color = 0xfab84c
                 else:
                     color = message.author.color
+
                 em = discord.Embed(description=message.content, color=color)
                 em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                out = re.compile(r'(https?:\/\/(?:.*)\/\w*\.[A-z]*)',
+                                 re.DOTALL | re.IGNORECASE).findall(message.content)
+                if out:
+                    out = out[0]
+                    em.set_image(url=out)
+
                 userchan = self.bot.get_channel("456948766935875604")
                 await self.bot.send_message(userchan, embed=em)
 
