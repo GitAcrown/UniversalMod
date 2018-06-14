@@ -145,7 +145,8 @@ class Tech:
                         self.meta = False
                         return
                     else:
-                        typing = len(msg.content) * 0.08
+                        r = random.randint(0.06, 0.09)
+                        typing = len(msg.content) * r
                         await self.bot.send_typing(channel)
                         await asyncio.sleep(typing)
                         await self.bot.send_message(channel, msg.content)
