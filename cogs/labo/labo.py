@@ -121,7 +121,7 @@ class Labo:
         if out:
             date = date + timedelta(hours=4)
 
-        out = re.compile(r'([0-2][0-9])[:h]([0-5][0-9])?', re.DOTALL | re.IGNORECASE).findall(texte)
+        out = re.compile(r'([0-2]?[0-9])[:h]([0-5][0-9])?', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             out = out[0]
             date = date.replace(hour=int(out[0]), minute=int(out[1]), second=0)
