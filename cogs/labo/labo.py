@@ -118,13 +118,13 @@ class Labo:
         out3 = re.compile(r'(demie?)', re.DOTALL | re.IGNORECASE).findall(texte)
         modifmin = False
         if out:
-            date = date + timedelta(minutes=45)
+            date = date.replace(minute=45)
             modifmin = True
         elif out2:
-            date = date + timedelta(minutes=15)
+            date = date.replace(minute=15)
             modifmin = True
         elif out3:
-            date = date + timedelta(minutes=30)
+            date = date.replace(minute=30)
             modifmin = True
 
         out = re.compile(r'(semaine)\s(?=prochaine?)', re.DOTALL | re.IGNORECASE).findall(texte)
@@ -165,7 +165,7 @@ class Labo:
             if not modifmin:
                 date = date.replace(hour=int(out[0]), minute=int(out[1]) if out[1] else 0, second=0)
             else:
-                date = date.replace(hour=int(out[0]),second=0)
+                date = date.replace(hour=int(out[0]), second=0)
 
         out = re.compile(r'(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
