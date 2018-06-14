@@ -62,7 +62,7 @@ class Labo:
         """ALPHA TEST | Extrait des informations temporelles d'un message"""
         texte = " ".join(texte)
         date = self.rolex(texte)
-        txt = date.strftime("Le %d/%m/%Y à %H:%M")
+        txt = date.strftime("Le %d/%m/%Y vers %H:%M")
         em = discord.Embed(title=texte.capitalize(), description=txt)
         await self.bot.say(embed=em)
 
@@ -84,13 +84,13 @@ class Labo:
         texte = self.normalize(texte)
         out = re.compile(r'((?:apres)?[-\s]?demain)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
-            if out[0] is "demain":
+            if out[0] is " demain":
                 date = date + timedelta(days=1)
             else:
                 date = date + timedelta(days=2)
         out = re.compile(r'((?:avant)?[-\s]?hier)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
-            if out[0] is "hier":
+            if out[0] is " hier":
                 date = date - timedelta(days=1)
             else:
                 date = date - timedelta(days=2)
@@ -166,7 +166,12 @@ class Labo:
         if out:
             out = out[0]
             if out[1] in ["h", "heure", "heures"]:
-                date = date + timedelta(hours=int(out[0]))
+                r = out[0]
+                if int(out[0]) >= 24:
+                    jours = int(out[0]/24)
+                    date = date + timedelta(days=jours)
+                    r = out[0] - (jours * 24)
+                date = date + timedelta(hours=int(r))
                 if out[2]:
                     date = date + timedelta(minutes=int(out[2]))
             elif out[1] in ["m", "minute", "minutes"]:
