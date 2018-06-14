@@ -186,7 +186,7 @@ class CapitalAPI:
         if liste:
             total = sum([t.somme for t in liste])
             return total
-        return False
+        return 0
 
 # Snips CREDITS & SOLDE
 
