@@ -177,7 +177,7 @@ class CapitalAPI:
                     liste.append([time.mktime(time.strptime("{} {}".format(j, h), "%d/%m/%Y %H:%M")),
                                   self._obj_transaction(t)])
             sort = sorted(liste, key=operator.itemgetter(0), reverse=True)
-            liste = [s[0] for s in sort]
+            liste = [s[1] for s in sort]
             return liste
         return False
 
