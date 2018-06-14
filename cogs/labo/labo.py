@@ -113,25 +113,6 @@ class Labo:
                 wd = 6
             date = date + timedelta(((wd-1)-date.weekday()) % 7+1)
 
-        out = re.compile(r'(trois[-\s]?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
-        out2 = re.compile(r'(quart)', re.DOTALL | re.IGNORECASE).findall(texte)
-        out3 = re.compile(r'(demie?)', re.DOTALL | re.IGNORECASE).findall(texte)
-        out4 = re.compile(r'(moins[-\s]?(?:le\s?)?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
-        modifmin = False
-        if out:
-            date = date.replace(minute=45)
-            modifmin = True
-        elif out4:
-            date = date.replace(minute=45)
-            date = date - timedelta(hours=1)
-            modifmin = True
-        elif out2:
-            date = date.replace(minute=15)
-            modifmin = True
-        elif out3:
-            date = date.replace(minute=30)
-            modifmin = True
-
         out = re.compile(r'(semaine)\s(?=prochaine?)', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             date = date + timedelta(weeks=1)
@@ -176,6 +157,25 @@ class Labo:
         if out:
             out = out[0]
             date = date.replace(day=int(out[0]), month=int(out[1]), year=int(out[2]))
+
+        out = re.compile(r'(trois[-\s]?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out2 = re.compile(r'(quart)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out3 = re.compile(r'(demie?)', re.DOTALL | re.IGNORECASE).findall(texte)
+        out4 = re.compile(r'(moins[-\s]?(?:le\s?)?quart)', re.DOTALL | re.IGNORECASE).findall(texte)
+        modifmin = False
+        if out:
+            date = date.replace(minute=45)
+            modifmin = True
+        elif out4:
+            date = date.replace(minute=45)
+            date = date - timedelta(hours=1)
+            modifmin = True
+        elif out2:
+            date = date.replace(minute=15)
+            modifmin = True
+        elif out3:
+            date = date.replace(minute=30)
+            modifmin = True
 
         out = re.compile(r'(\d{1,2})\s?(septembre|octobre|novembre|decembre|janvier|fevrier|mars|avril|mai|juin'
                          r'|juillet|aout)\s?(\d{4})?', re.DOTALL | re.IGNORECASE).findall(texte)
