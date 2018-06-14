@@ -147,7 +147,9 @@ class Tech:
                         return
                     else:
                         if self.meta:
-                            r = random.randint(0.06, 0.09)
+                            if msg.content.startswith("\\"):
+                                continue
+                            r = random.randint(6, 9) / 100
                             typing = len(msg.content) * r
                             await self.bot.send_typing(channel)
                             await asyncio.sleep(typing)
