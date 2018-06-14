@@ -119,7 +119,8 @@ class Tech:
         if channelid == "reset":
             if self.meta:
                 self.meta = False
-                return
+            await self.bot.say("**Reset effectué**")
+            return
         if ctx.message.channel.id != "456948766935875604":
             await self.bot.say("**Sécurité** | Cette commande n'est disponible que sur `meta-room`")
             return
