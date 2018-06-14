@@ -122,8 +122,8 @@ class Labo:
             date = date.replace(minute=45)
             modifmin = True
         elif out4:
-            date = date - timedelta(hours=1)
             date = date.replace(minute=45)
+            date = date - timedelta(hours=1)
             modifmin = True
         elif out2:
             date = date.replace(minute=15)
