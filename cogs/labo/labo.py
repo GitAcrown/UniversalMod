@@ -58,8 +58,9 @@ class Labo:
         await self.bot.say(embed=em)
 
     @commands.command(pass_context=True)
-    async def aion(self, ctx, texte: str):
+    async def aion(self, ctx, *texte: str):
         """ALPHA TEST | Extrait des informations temporelles d'un message"""
+        texte = " ".join(texte)
         date = self.rolex(texte)
         txt = date.strftime("Le %d/%m/%Y à %H:%M")
         em = discord.Embed(title=texte.capitalize(), description=txt)
