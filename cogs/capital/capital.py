@@ -498,11 +498,12 @@ class Capital:
         server = ctx.message.server
         if data:
             moneyname = self.api.get_money(server, data.solde)
+            symb = self.api.get_money(server, data.solde, True)
             gains = self.api.get_total_day_gain(user)
             gainstxt = "+{}".format(gains) if gains >= 0 else "{}".format(gains)
             em = discord.Embed(description="**Solde** ─ {0} {1}\n"
-                                           "**Bénéfice** ─ **{2}**".format(data.solde, moneyname,
-                                                                                    gainstxt),
+                                           "**Bénéfice** ─ {2} {3}".format(data.solde, moneyname,
+                                                                                    gainstxt, symb),
                                color=user.color if user else ctx.message.author.color)
             em.set_author(name=str(user) if user else str(ctx.message.author),
                           icon_url=user.avatar_url if user else ctx.message.author.avatar_url)
@@ -529,7 +530,9 @@ class Capital:
     @_banque.command(aliases=["histo"], pass_context=True)
     async def historique(self, ctx, user: discord.Member = None):
         """Affiche l'historique bancaire complet d'un membre"""
-        data = self.api.get_account(user) if user else self.api.get_account(ctx.message.author)
+        if user is None:
+            user = ctx.message.author
+        data = self.api.get_account(user)
         server = ctx.message.server
         if data:
             jour = time.strftime("%d/%m/%Y", time.localtime())
