@@ -124,7 +124,7 @@ class Labo:
         out = re.compile(r'([0-2]?[0-9])[:h]([0-5][0-9])?', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
             out = out[0]
-            date = date.replace(hour=int(out[0]), minute=int(out[1]), second=0)
+            date = date.replace(hour=int(out[0]), minute=int(out[1]) if out[1] else 0, second=0)
 
         out = re.compile(r'(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})', re.DOTALL | re.IGNORECASE).findall(texte)
         if out:
