@@ -602,10 +602,14 @@ class Capital:
                 await self.bot.say("**Trop grand** | Discord n'accepte pas des messages aussi longs, "
                                    "réduisez le nombre")
                 return
+            try:
+                username = server.get_member(l[1]).name
+            except:
+                username = self.bot.get_user(l[1]).name
             if l[1] == uid:
-                txt += "**{}.** __**{}**__ ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
+                txt += "**{}.** __**{}**__ ─ {}\n".format(n, username, l[0])
             else:
-                txt += "**{}.** **{}** ─ {}\n".format(n, server.get_member(l[1]).name, l[0])
+                txt += "**{}.** **{}** ─ {}\n".format(n, username, l[0])
             n += 1
         em = discord.Embed(title="Palmares", description=txt, color=0xf2d348)
         total = self.api.total_server_credits(server)
