@@ -439,6 +439,7 @@ class Justice:
         <temps> = Valeur suivie de l'unité (m, h ou j)
         -- Il est possible d'ajouter devant la valeur de temps '+' et '-' pour moduler une peine"""
         message = ctx.message
+        today = time.strftime("%d/%m", time.localtime())
         server = message.server
         form = temps[-1:]  # C'est le format du temps (smhj)
         if form not in ["s", "m", "h", "j"]:
@@ -471,8 +472,12 @@ class Justice:
                     if temps[0] == "+":
                         self.reg[server.id][user.id]["TS_SORTIE"] += modif
                         estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+                        estimdate = time.strftime("%d/%m", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                         msg = "{} ─ Ajout de **{}{}** de peine".format(user.mention, val, form)
-                        estim_txt = "Sortie estimée à {}".format(estim)
+                        if estimdate == today:
+                            estim_txt = "Sortie estimée à {}".format(estim)
+                        else:
+                            estim_txt = "Sortie estimée le {} à {}".format(estimdate, estim)
                         self.add_event(user, "+", "{}{}".format(val, form), author=ctx.message.author)
 
                         em = discord.Embed(description=msg, color=apply.color)
@@ -483,7 +488,10 @@ class Justice:
 
                         em = discord.Embed(description="**Peine augmentée** ─ **+{}{}** par *{}*".format(
                             val, form, ctx.message.author.name), color=apply.color)
-                        em.set_footer(text="Sortie prévue à {}".format(estim))
+                        if estimdate == today:
+                            em.set_footer(text="Sortie prévue à {}".format(estim))
+                        else:
+                            em.set_footer(text="Sortie prévue le {} à {}".format(estimdate, estim))
                         try:
                             await self.bot.send_message(user, embed=em)
                         except:
@@ -493,10 +501,15 @@ class Justice:
                         self.reg[server.id][user.id]["TS_SORTIE"] -= modif
                         if self.reg[server.id][user.id]["TS_SORTIE"] < time.time():
                             estim = time.strftime("%H:%M", time.localtime())
+                            estimdate = time.strftime("%d/%m", time.localtime())
                         else:
                             estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+                            estimdate = time.strftime("%d/%m", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                         msg = "{} ─ Réduction de **{}{}** de peine".format(user.mention, val, form)
-                        estim_txt = "Sortie estimée à {}".format(estim)
+                        if estimdate == today:
+                            estim_txt = "Sortie estimée à {}".format(estim)
+                        else:
+                            estim_txt = "Sortie estimée le {} à {}".format(estimdate, estim)
                         self.add_event(user, "-", "{}{}".format(val, form), author=ctx.message.author)
 
                         em = discord.Embed(description=msg, color=apply.color)
@@ -507,7 +520,10 @@ class Justice:
 
                         em = discord.Embed(description="**Peine réduite** ─ **-{}{}** par *{}*".format(
                             val, form, ctx.message.author.name), color=apply.color)
-                        em.set_footer(text="Sortie prévue à {}".format(estim))
+                        if estimdate == today:
+                            em.set_footer(text="Sortie prévue à {}".format(estim))
+                        else:
+                            em.set_footer(text="Sortie prévue le {} à {}".format(estimdate, estim))
                         try:
                             await self.bot.send_message(user, embed=em)
                         except:
@@ -552,12 +568,16 @@ class Justice:
                 b_peine = time.time()
                 self.reg[server.id][user.id]["TS_ENTREE"] = b_peine
                 self.reg[server.id][user.id]["TS_SORTIE"] = b_peine + sec
-                estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
                 await self.bot.add_roles(user, apply)
                 if appel and user.id not in self.sys[server.id]["APPEL_USE"]:
                     self.sys[server.id]["APPEL_USE"].append(user.id)
                 msg = "{} ─ Mise en prison pour **{}{}**".format(user.mention, val, form)
-                estim_txt = "Sortie estimée à {}".format(estim)
+                estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+                estimdate = time.strftime("%d/%m", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+                if estimdate == today:
+                    estim_txt = "Sortie estimée à {}".format(estim)
+                else:
+                    estim_txt = "Sortie estimée le {} à {}".format(estimdate, estim)
                 self.add_event(user, ">", "{}{}".format(val, form), author=ctx.message.author)
                 if prisonchan:
                     txt = "\nVous avez accès au salon *{}* pour toute réclamation".format(prisonchan)
@@ -567,7 +587,10 @@ class Justice:
                     txt += "\n─ Vous avez le droit d'envoyer un dernier message avec `{}appel`".format(ctx.prefix)
                 em = discord.Embed(description="**Peine de prison** ─ **{}{}** par *{}*{}".format(
                     val, form, ctx.message.author.name, txt), color=apply.color)
-                em.set_footer(text="Sortie prévue à {}".format(estim))
+                if estimdate == today:
+                    em.set_footer(text="Sortie prévue à {}".format(estim))
+                else:
+                    em.set_footer(text="Sortie prévue le {} à {}".format(estimdate, estim))
                 try:
                     await self.bot.send_message(user, embed=em)
                 except:
@@ -643,6 +666,7 @@ class Justice:
         [user] = Membre à emprisonner pour la visite si ce n'est pas vous-même"""
         message = ctx.message
         server = message.server
+        today = time.strftime("%d/%m", time.localtime())
         temps = "10m"
         form = temps[-1:]  # C'est le format du temps (smhj)
         if form not in ["s", "m", "h", "j"]:
@@ -681,15 +705,22 @@ class Justice:
             self.reg[server.id][user.id]["VISITE"] = True
             self.reg[server.id][user.id]["TS_ENTREE"] = b_peine
             self.reg[server.id][user.id]["TS_SORTIE"] = b_peine + sec
-            estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
             await self.bot.add_roles(user, apply)
             if appel and user.id not in self.sys[server.id]["APPEL_USE"]:
                 self.sys[server.id]["APPEL_USE"].append(user.id)
             msg = "{} ─ Visite de la prison (10 minutes)".format(user.mention)
-            estim_txt = "Sortie estimée à {}".format(estim)
+            estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+            estimdate = time.strftime("%d/%m", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+            if estimdate == today:
+                estim_txt = "Sortie estimée à {}".format(estim)
+            else:
+                estim_txt = "Sortie estimée le {} à {}".format(estimdate, estim)
             self.add_event(user, "V>", "{}{}".format(val, form), author=ctx.message.author)
             em = discord.Embed(description="**Visite de la prison** ─ 10 minutes", color=apply.color)
-            em.set_footer(text="Sortie prévue à {}".format(estim))
+            if estimdate == today:
+                em.set_footer(text="Sortie prévue à {}".format(estim))
+            else:
+                em.set_footer(text="Sortie prévue le {} à {}".format(estimdate, estim))
             try:
                 await self.bot.send_message(user, embed=em)
             except:
