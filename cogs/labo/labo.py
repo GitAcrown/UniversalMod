@@ -7,6 +7,7 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 
 import discord
+import pyfootball
 from discord.ext import commands
 from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
@@ -26,6 +27,7 @@ class Labo:
         self.sys = dataIO.load_json("data/labo/sys.json")  # Pas très utile mais on le garde pour plus tard
         self.sys_def = {"REPOST": []}
         self.msg = dataIO.load_json("data/labo/msg.json")
+        self.foot = pyfootball.Football("ec9727b5fad84d18ae9bb716743b61c4")
         # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
 
     def clean_chronos(self, user: discord.Member):
@@ -57,13 +59,49 @@ class Labo:
         em.set_image(url=emoji.url)
         await self.bot.say(embed=em)
 
-    @commands.command(pass_context=True)
-    async def aion(self, ctx, *texte: str):
-        """ALPHA TEST | Extrait des informations temporelles d'un message"""
-        texte = " ".join(texte)
-        date = self.rolex(texte)
-        txt = date.strftime("Le %d/%m/%Y vers %H:%M")
-        em = discord.Embed(title=texte.capitalize(), description=txt)
+    @commands.group(name="football", aliases=["fb"], pass_context=True)
+    @checks.admin_or_permissions(ban_members=True)
+    async def _football(self, ctx):
+        """Informations sur les prochains matchs de la Coupe du Monde"""
+        if ctx.invoked_subcommand is None:
+            await ctx.invoke(self.show)
+
+    @_football.command(pass_context=True)
+    async def show(self, ctx):
+        """Affiche les matchs du moment (terminés et à venir)"""
+        comp = self.foot.get_competition(467)
+        today = datetime.now()
+        date = lambda dt: dt.strftime("%d/%m")
+        fixt = comp.get_fixtures()
+        em = discord.Embed(title="Matchs")
+        n = 0
+        for f in fixt:
+            localdate = f.date + timedelta(hours=2)
+            if f.date.strftime("%d/%m") == today.strftime("%d/%m"):
+                if f.result:
+                    home = "**{}**".format(f.result.home_team_goals) if \
+                        f.result.home_team_goals >= f.result.away_team_goals else "{}".format(f.result.home_team_goals)
+                    away = "**{}**".format(f.result.awat_team_goals) if \
+                        f.result.away_team_goals >= f.result.home_team_goals else "{}".format(f.result.away_team_goals)
+                    txt = "**Terminé**\n{} — {}".format(home, away)
+                    em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt)
+                else:
+                    if f.odds:
+                        odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
+                    else:
+                        odds = ""
+                    txt = "**{}**\n{}".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
+                    em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt)
+            else:
+                if f.odds:
+                    odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
+                else:
+                    odds = ""
+                txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
+                em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt)
+            n += 1
+            if n == 5:
+                break
         await self.bot.say(embed=em)
 
     def normalize(self, texte: str):
