@@ -665,6 +665,8 @@ class Justice:
 
         [user] = Membre à emprisonner pour la visite si ce n'est pas vous-même"""
         message = ctx.message
+        if user is None:
+            user = ctx.message.author
         server = message.server
         today = time.strftime("%d/%m", time.localtime())
         temps = "10m"
