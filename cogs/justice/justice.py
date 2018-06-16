@@ -461,7 +461,7 @@ class Justice:
                     return
                 em = discord.Embed(color=author.color, description="*{}*".format(message))
                 em.set_author(name="Appel de {}".format(str(author)), icon_url=author.avatar_url)
-                em.set_footer(text="Ce message unique à été envoyé depuis la prison où {} est enfermé.".format(
+                em.set_footer(text="Ce message unique à été envoyé depuis la prison où {} est enfermé·e.".format(
                     author.name))
                 await self.bot.send_typing(salon)
                 await asyncio.sleep(1)

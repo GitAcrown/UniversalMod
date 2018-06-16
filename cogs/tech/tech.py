@@ -141,7 +141,7 @@ class Tech:
                 self.meta["USER"] = ctx.message.author.id
                 while True:
                     msg = await self.bot.wait_for_message(channel=ctx.message.channel,
-                                                          author=ctx.message.author, timeout=120)
+                                                          author=ctx.message.author, timeout=300)
                     if not msg or msg.content.lower() == "stop":
                         await self.bot.say("**Session terminée** | "
                                            "Ce channel n'est plus connecté à *{}*".format(channel.name))
