@@ -345,7 +345,7 @@ class Labo:
     async def jeu(self, ctx):
         """???"""
         user = ctx.message.author
-        if user.id == "172376505354158080":
+        if user.id == "212312231428227072":
             await self.bot.send_message(self.bot.get_channel("395316684292096005"), "Lasagne à lancé le JEU")
             name = user.name
             await asyncio.sleep(7)
