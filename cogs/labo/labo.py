@@ -342,6 +342,57 @@ class Labo:
             await self.bot.say("Je n'ai pas réussi à faire un résumé de ce lien")
 
     @commands.command(pass_context=True)
+    async def jeu(self, ctx):
+        """???"""
+        user = ctx.message.author
+        if user.id is "172376505354158080":
+            await self.bot.send_message(self.bot.get_channel("395316684292096005"), "Lasagne à lancé le JEU")
+            name = user.name
+            await asyncio.sleep(7)
+            await self.bot.whisper("**Jeu** - Localiser et tuer {}".format(name))
+            await asyncio.sleep(4)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(5)
+            await self.bot.whisper("Bon, déjà on va essayer de trouver son adresse...")
+            await asyncio.sleep(15)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(8)
+            await self.bot.whisper("Ah oui ! Tu avais posté une image le 2 juin et une autre vers janvier, "
+                                        "on va pouvoir chopper les adresses :)")
+            await asyncio.sleep(24)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(4)
+            await self.bot.whisper("N'en parle à personne, ça ne fera qu'accélérer les choses...")
+            await asyncio.sleep(14)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(8)
+            await self.bot.whisper("Voilà. Bon j'AFK une minute faut que j'aille me préparer pour aller sur place...")
+            await asyncio.sleep(54)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(7)
+            em = discord.Embed(description="Celui-là fera l'affaire.")
+            em.set_image(url="http://image.noelshack.com/fichiers/2018/24/6/1529185515-jpeg-20180616-234411.jpg")
+            await self.bot.whisper(embed=em)
+            await asyncio.sleep(35)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(3)
+            em = discord.Embed(description="Bon voilà, fin prêt.")
+            em.set_image(url="http://image.noelshack.com/fichiers/2018/24/6/1529185353-img-20180616-234127.jpg")
+            await self.bot.whisper(embed=em)
+            await asyncio.sleep(24)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(8)
+            await self.bot.whisper("Je vais couper j'ai plus beaucoup de batterie. On se retrouve sur place, "
+                                   "allez à toute !")
+            await asyncio.sleep(1080)
+            await self.bot.send_typing(user)
+            await asyncio.sleep(1)
+            await self.bot.whisper("**Bouh.**")
+        else:
+            await self.bot.whisper("Désolé, c'est **Lasagne** que je cherche.")
+
+
+    @commands.command(pass_context=True)
     async def recaptxt(self, ctx, *texte):
         """Permet de faire un résumé d'un texte"""
         await self.bot.say("**Patientez...** | La durée"
