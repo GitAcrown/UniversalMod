@@ -84,21 +84,21 @@ class Labo:
                     away = "**{}**".format(f.result.awat_team_goals) if \
                         f.result.away_team_goals >= f.result.home_team_goals else "{}".format(f.result.away_team_goals)
                     txt = "**Terminé**\n{} — {}".format(home, away)
-                    em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt)
+                    em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=True)
                 else:
                     if f.odds:
                         odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
                     else:
                         odds = ""
                     txt = "**{}**\n{}".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
-                    em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt)
+                    em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=True)
             else:
                 if f.odds:
                     odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
                 else:
                     odds = ""
                 txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
-                em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt)
+                em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=True)
             n += 1
             if n == 5:
                 break
