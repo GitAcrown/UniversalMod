@@ -380,8 +380,19 @@ class Labo:
             await asyncio.sleep(24)
             await self.bot.send_typing(user)
             await asyncio.sleep(8)
+            heure = int(time.strftime("%H", time.localtime()))
+            if 22 <= heure <= 5:
+                bye = "bonne *dernière* nuit"
+            elif 6 <= heure <= 10:
+                bye = "bonne matinée"
+            elif heure == 11 or heure == 12 or heure == 13:
+                bye = "bon appétit, savoure ton dernier repas"
+            elif 14 <= heure <= 18:
+                bye = "bonne aprem'"
+            else:
+                bye = "bonne soirée"
             await self.bot.whisper("Je vais couper j'ai plus beaucoup de batterie. On se retrouve sur place, "
-                                   "allez à plus tard !")
+                                   "allez à plus tard et {} !".format(bye))
             await asyncio.sleep(64800)
             await self.bot.send_typing(user)
             await asyncio.sleep(1)
