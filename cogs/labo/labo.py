@@ -99,6 +99,13 @@ class Labo:
                     odds = ""
                 txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
                 em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
+            else:
+                if f.odds:
+                    odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
+                else:
+                    odds = ""
+                txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
+                em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
             n += 1
             if n == 5:
                 break
