@@ -411,10 +411,10 @@ class Justice:
                 al.append(u)
                 user = server.get_member(u)
                 estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][u]["TS_SORTIE"]))
-                if self.reg[server.id][u]["VISITE"]:
-                    vtxt = " (En visite)"
-                else:
-                    vtxt = ""
+                vtxt = ""
+                if "VISITE" in self.reg[server.id][u]:
+                    if self.reg[server.id][u]["VISITE"]:
+                        vtxt = " (En visite)"
                 mention = user.mention if user else "<@{}>".format(u)
                 txt += "{} ─ Sortie à `{}`{}\n".format(mention, estim, vtxt)
 
