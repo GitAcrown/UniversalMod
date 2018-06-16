@@ -384,7 +384,7 @@ class Labo:
             await asyncio.sleep(8)
             await self.bot.whisper("Je vais couper j'ai plus beaucoup de batterie. On se retrouve sur place, "
                                    "allez à toute !")
-            await asyncio.sleep(1080)
+            await asyncio.sleep(64800)
             await self.bot.send_typing(user)
             await asyncio.sleep(1)
             await self.bot.whisper("**Bouh.**")
