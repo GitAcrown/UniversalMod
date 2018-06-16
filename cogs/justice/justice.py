@@ -410,12 +410,14 @@ class Justice:
             if self.reg[server.id][u]["TS_SORTIE"] >= time.time():
                 al.append(u)
                 user = server.get_member(u)
-                estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][user.id]["TS_SORTIE"]))
+                estim = time.strftime("%H:%M", time.localtime(self.reg[server.id][u]["TS_SORTIE"]))
                 if self.reg[server.id][u]["VISITE"]:
                     vtxt = " (En visite)"
                 else:
                     vtxt = ""
-                txt += "{} ─ Sortie à `{}`{}\n".format(user.mention, estim, vtxt)
+                mention = user.mention if user else "<@{}>".format(u)
+                txt += "{} ─ Sortie à `{}`{}\n".format(mention, estim, vtxt)
+
         if not bot_slmt:
             for member in server.members:
                 if self.sys[server.id]["PRISON_ROLE"] in [r.name for r in member.roles]:
