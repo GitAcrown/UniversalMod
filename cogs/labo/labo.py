@@ -79,10 +79,10 @@ class Labo:
             if localdate.strftime("%d/%m") == today.strftime("%d/%m"):
                 if f.result:
                     n += 1
-                    home = "**{}**".format(f.result.home_team_goals) if \
-                        f.result.home_team_goals >= f.result.away_team_goals else "{}".format(f.result.home_team_goals)
+                    home = "**{}**".format(f.result["home_team_goals"]) if \
+                        f.result["home_team_goals"] >= f.result["away_team_goals"] else "{}".format(f.result["home_team_goals"])
                     away = "**{}**".format(f.result.awat_team_goals) if \
-                        f.result.away_team_goals >= f.result.home_team_goals else "{}".format(f.result.away_team_goals)
+                        f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(f.result["away_team_goals"])
                     txt = "**Terminé**\n{} — {}".format(home, away)
                     em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
                 else:
