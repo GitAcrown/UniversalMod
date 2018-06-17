@@ -26,11 +26,39 @@ class Labo:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/labo/sys.json")  # Pas très utile mais on le garde pour plus tard
-        self.sys_def = {"REPOST": [], "FOOT_SUB": {}}
+        self.sys_def = {"REPOST": [], "FOOT_SUB": {}, "SERV_CONV": {}}
         self.msg = dataIO.load_json("data/labo/msg.json")
         self.foot = pyfootball.Football("ec9727b5fad84d18ae9bb716743b61c4")
         self.cc = coco.CountryConverter()
+        self.cycle = bot.loop.create_task(self.loop())
         # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
+
+    async def loop(self):
+        await self.bot.wait_until_ready()
+        try:
+            await asyncio.sleep(15)  # Temps de mise en route
+            while True:
+                now = datetime.now()
+                for i in self.sys["FOOT_SUB"]:
+                    warn = datetime.strptime(self.sys["FOOT_SUB"][i]["WARNING"], "%d/%m/%Y %H:%M")
+                    if warn >= now:
+                        match = self.sys["FOOT_SUB"][i]
+                        txt = "Votre match commence vers `{}`".format(warn.strftime("%Hh%M"))
+                        em = discord.Embed(title="{} *{}* — {} *{}*".format(match["HOME_FLAG"], match["HOME"],
+                                                                            match["AWAY_FLAG"], match["AWAY"]),
+                                           description=txt)
+                        for u in self.sys["FOOT_SUB"][i]["ABON"]:
+                            serv = self.bot.get_server(self.sys["SERV_CONV"][u][0])
+                            user = serv.get_member(u)
+                            try:
+                                await self.bot.send_message(user, embed=em)
+                            except Exception as e:
+                                print("Impossible d'envoyer une notif du match à {} : {}".format(user.name, e))
+                                pass
+                        del self.sys["FOOT_SUB"][i]
+                await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            pass
 
     def clean_chronos(self, user: discord.Member):
         jour = time.strftime("%d/%m/%Y", time.localtime())
@@ -72,11 +100,19 @@ class Labo:
     async def notif(self, ctx):
         """Permet de s'abonner à un match pour recevoir une notification avant le démarrage"""
         author = ctx.message.author
+        server = ctx.message.server
         comp = self.foot.get_competition(467)
         emojis = [s for s in "🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿"]
         if "FOOT_SUB" not in self.sys:
             self.sys["FOOT_SUB"] = {}
             fileIO("data/labo/sys.json", "save", self.sys)
+        if "SERV_CONV" not in self.sys:
+            self.sys["SERV_CONV"] = {}
+            fileIO("data/labo/sys.json", "save", self.sys)
+        if author.id not in self.sys["SERV_CONV"]:
+            self.sys["SERV_CONV"][author.id] = [server.id]
+        elif server.id not in self.sys["SERV_CONV"][author.id]:
+                self.sys["SERV_CONV"][author.id].append(server.id)
         msg = None
         while True:
             n = 0
@@ -135,24 +171,26 @@ class Labo:
                                 if self.cc.convert(names=f.home_team, to='ISO2').lower() != "not found" else ""
                             flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower()) \
                                 if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
+                            warn = localdate - timedelta(minutes=15)
                             self.sys["FOOT_SUB"][nom] = {"ABON": [],
                                                          "DATE": localdate.strftime("%d/%m/%Y %H:%M"),
                                                          "HOME": f.home_team,
                                                          "HOME_FLAG": flaghome,
                                                          "AWAY": f.away_team,
-                                                         "AWAY_FLAG": flagaway}
+                                                         "AWAY_FLAG": flagaway,
+                                                         "WARNING": warn.strftime("%d/%m/%Y %H:%M")}
                         if author.id not in self.sys["FOOT_SUB"][nom]["ABON"]:
                             self.sys["FOOT_SUB"][nom]["ABON"].append(author.id)
                             em.set_footer(text="— Vous vous êtes abonné au match {} VS {}".format(f.home_team,
                                                                                                   f.away_team))
                             await self.bot.edit_message(msg, embed=em)
-                            await asyncio.sleep(3)
+                            await asyncio.sleep(2.5)
                         else:
                             self.sys["FOOT_SUB"][nom]["ABON"].remove(author.id)
                             em.set_footer(text="— Vous vous êtes désabonné du match {} VS {}".format(f.home_team,
                                                                                                   f.away_team))
                             await self.bot.edit_message(msg, embed=em)
-                            await asyncio.sleep(3)
+                            await asyncio.sleep(2.5)
                 fileIO("data/labo/sys.json", "save", self.sys)
             else:
                 await self.bot.delete_message(msg)
