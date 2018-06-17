@@ -73,7 +73,6 @@ class Labo:
         """Permet de s'abonner à un match pour recevoir une notification avant le démarrage"""
         author = ctx.message.author
         comp = self.foot.get_competition(467)
-        txt = ""
         emojis = [s for s in "🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿"]
         if "FOOT_SUB" not in self.sys:
             self.sys["FOOT_SUB"] = {}
@@ -83,6 +82,7 @@ class Labo:
             n = 0
             emolist = []
             fbl = []
+            txt = ""
             for f in comp.get_fixtures():
                 localdate = f.date + timedelta(hours=2)
                 if not f.result:
@@ -142,13 +142,13 @@ class Labo:
                             em.set_footer(text="— Vous vous êtes abonné au match {} VS {}".format(f.home_team,
                                                                                                   f.away_team))
                             await self.bot.edit_message(msg, embed=em)
-                            await asyncio.sleep(4)
+                            await asyncio.sleep(3)
                         else:
                             self.sys["FOOT_SUB"][nom]["ABON"].remove(author.id)
                             em.set_footer(text="— Vous vous êtes désabonné du match {} VS {}".format(f.home_team,
                                                                                                   f.away_team))
                             await self.bot.edit_message(msg, embed=em)
-                            await asyncio.sleep(4)
+                            await asyncio.sleep(3)
                 fileIO("data/labo/sys.json", "save", self.sys)
             else:
                 await self.bot.delete_message(msg)
