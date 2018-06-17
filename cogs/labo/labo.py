@@ -96,8 +96,10 @@ class Labo:
                         subbed = "❎"
                     fbl.append([emojis[n], f])
                     emolist.append(emojis[n])
-                    flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
-                    flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                    flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower()) \
+                        if self.cc.convert(names=f.home_team, to='ISO2').lower() != "not found" else ""
+                    flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower()) \
+                        if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
                     txt += "{} | \{} — {} *{}* **VS** {} *{}*\n".format(subbed, emojis[n], flaghome, f.home_team,
                                                                         flagaway, f.away_team)
                     n += 1
@@ -117,7 +119,7 @@ class Labo:
             await self.bot.add_reaction(msg, "🚫")
             await asyncio.sleep(0.15)
 
-            rep = await self.bot.wait_for_reaction(emolist, message=msg, timeout=30,
+            rep = await self.bot.wait_for_reaction(emolist + ["🚫"], message=msg, timeout=30,
                                                    check=self.check, user=author)
             if rep is None or rep.reaction.emoji == "🚫":
                 await self.bot.delete_message(msg)
