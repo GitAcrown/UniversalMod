@@ -75,7 +75,7 @@ class Labo:
         comp = self.foot.get_competition(467)
         txt = ""
         emojis = [s for s in "🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿"]
-        if not "FOOT_SUB" in self.sys:
+        if "FOOT_SUB" not in self.sys:
             self.sys["FOOT_SUB"] = {}
             fileIO("data/labo/sys.json", "save", self.sys)
         msg = None
@@ -94,13 +94,15 @@ class Labo:
                             subbed = "❎"
                     else:
                         subbed = "❎"
-                    fbl.append([emojis[n], f])
+                    fbl.append([emojis[n], f.id])
                     emolist.append(emojis[n])
                     flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
                     flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
                     txt += "{} | \{} — {} *{}* **VS** {} *{}*\n".format(subbed, emojis[n], flaghome, f.home_team,
                                                                         flagaway, f.away_team)
                     n += 1
+                    if n == 7:
+                        break
 
             em = discord.Embed(title="Abonnements matchs {} | Coupe du Monde Russie 2018".format(str(author)),
                                description=txt, color=0xedb83d)
