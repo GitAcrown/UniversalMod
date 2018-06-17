@@ -94,7 +94,7 @@ class Labo:
                             subbed = "❎"
                     else:
                         subbed = "❎"
-                    fbl.append([emojis[n], f.id])
+                    fbl.append([emojis[n], f])
                     emolist.append(emojis[n])
                     flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
                     flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
