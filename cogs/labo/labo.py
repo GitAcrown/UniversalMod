@@ -6,6 +6,7 @@ import time
 from collections import namedtuple
 from datetime import datetime, timedelta
 
+import country_converter as coco
 import discord
 import pyfootball
 from discord.ext import commands
@@ -28,6 +29,7 @@ class Labo:
         self.sys_def = {"REPOST": []}
         self.msg = dataIO.load_json("data/labo/msg.json")
         self.foot = pyfootball.Football("ec9727b5fad84d18ae9bb716743b61c4")
+        self.cc = coco.CountryConverter()
         # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
 
     def clean_chronos(self, user: discord.Member):
@@ -87,7 +89,9 @@ class Labo:
                             f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(
                             f.result["away_team_goals"])
                         txt = "**LIVE :** {} — {}".format(home, away)
-                        em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
+                        flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
+                        flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                        em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
                     else:
                         n += 1
                         home = "**{}**".format(f.result["home_team_goals"]) if \
@@ -95,7 +99,9 @@ class Labo:
                         away = "**{}**".format(f.result["away_team_goals"]) if \
                             f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(f.result["away_team_goals"])
                         txt = "**Terminé :** {} — {}".format(home, away)
-                        em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
+                        flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
+                        flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                        em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
                 else:
                     n += 1
                     if f.odds:
@@ -103,7 +109,9 @@ class Labo:
                     else:
                         odds = ""
                     txt = "**{}**\n{}".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
-                    em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
+                    flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
+                    flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                    em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
             elif localdate >= today:
                 n += 1
                 if f.odds:
@@ -111,7 +119,9 @@ class Labo:
                 else:
                     odds = ""
                 txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
-                em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
+                flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
+                flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
             if n == 5:
                 break
         await self.bot.say(embed=em)
