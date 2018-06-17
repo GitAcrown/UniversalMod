@@ -88,7 +88,7 @@ class Labo:
                 else:
                     n += 1
                     if f.odds:
-                        odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
+                        odds = "{} - {} - {}".format(f.odds["home_win"], f.odds["draw"], f.odds["away_win"])
                     else:
                         odds = ""
                     txt = "**{}**\n{}".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
@@ -96,7 +96,7 @@ class Labo:
             elif localdate >= today:
                 n += 1
                 if f.odds:
-                    odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
+                    odds = "{} - {} - {}".format(f.odds["home_win"], f.odds["draw"], f.odds["away_win"])
                 else:
                     odds = ""
                 txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
