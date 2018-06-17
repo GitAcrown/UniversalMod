@@ -83,7 +83,7 @@ class Labo:
                         f.result["home_team_goals"] >= f.result["away_team_goals"] else "{}".format(f.result["home_team_goals"])
                     away = "**{}**".format(f.result["away_team_goals"]) if \
                         f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(f.result["away_team_goals"])
-                    txt = "**Terminé**\n{} — {}".format(home, away)
+                    txt = "**Terminé :** {} — {}".format(home, away)
                     em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
                 else:
                     n += 1
