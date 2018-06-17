@@ -101,7 +101,7 @@ class Labo:
                     txt += "{} | \{} — {} *{}* **VS** {} *{}*\n".format(subbed, emojis[n], flaghome, f.home_team,
                                                                         flagaway, f.away_team)
                     n += 1
-                    if n == 7:
+                    if n == 5:
                         break
 
             em = discord.Embed(title="Abonnements matchs {} | Coupe du Monde Russie 2018".format(str(author)),
@@ -129,8 +129,10 @@ class Labo:
                         localdate = f.date + timedelta(hours=2)
                         nom = "{}-{}-{}".format(f.home_team_id, f.away_team_id, localdate.strftime("%d%m%Y%H%M"))
                         if nom not in self.sys["FOOT_SUB"]:
-                            flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
-                            flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                            flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower()) \
+                                if self.cc.convert(names=f.home_team, to='ISO2').lower() != "not found" else ""
+                            flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower()) \
+                                if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
                             self.sys["FOOT_SUB"][nom] = {"ABON": [],
                                                          "DATE": localdate.strftime("%d/%m/%Y %H:%M"),
                                                          "HOME": f.home_team,
@@ -175,8 +177,10 @@ class Labo:
                             f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(
                             f.result["away_team_goals"])
                         txt = "**LIVE :** {} — {}\n".format(home, away)
-                        flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
-                        flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                        flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower()) \
+                            if self.cc.convert(names=f.home_team, to='ISO2').lower() != "not found" else ""
+                        flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower()) \
+                            if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
                         em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
                     else:
                         n += 1
@@ -185,8 +189,10 @@ class Labo:
                         away = "**{}**".format(f.result["away_team_goals"]) if \
                             f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(f.result["away_team_goals"])
                         txt = "**Terminé :** {} — {}\n".format(home, away)
-                        flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
-                        flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                        flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower()) \
+                            if self.cc.convert(names=f.home_team, to='ISO2').lower() != "not found" else ""
+                        flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower()) \
+                            if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
                         em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
                 else:
                     n += 1
@@ -195,8 +201,10 @@ class Labo:
                     else:
                         odds = ""
                     txt = "**{}**\n{}\n".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
-                    flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
-                    flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                    flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower()) \
+                        if self.cc.convert(names=f.home_team, to='ISO2').lower() != "not found" else ""
+                    flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower()) \
+                        if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
                     em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
             elif localdate >= today:
                 n += 1
@@ -205,8 +213,10 @@ class Labo:
                 else:
                     odds = ""
                 txt = "**{}**\n{}\n".format(localdate.strftime("%d/%m %H:%M"), odds)
-                flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
-                flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower()) \
+                    if self.cc.convert(names=f.home_team, to='ISO2').lower() != "not found" else ""
+                flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower()) \
+                    if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
                 em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
             if n == 5:
                 break
