@@ -41,9 +41,11 @@ class Labo:
                 now = datetime.now()
                 for i in self.sys["FOOT_SUB"]:
                     warn = datetime.strptime(self.sys["FOOT_SUB"][i]["WARNING"], "%d/%m/%Y %H:%M")
-                    if warn >= now:
+                    localtime = datetime.strptime(self.sys["FOOT_SUB"][i]["DATE"], "%d/%m/%Y %H:%M")
+                    if warn <= now:
                         match = self.sys["FOOT_SUB"][i]
-                        txt = "Votre match commence vers `{}`".format(warn.strftime("%Hh%M"))
+                        txt = "**Votre match commence bientôt !** Début du match : `{}`".format(
+                            localtime.strftime("%Hh%M"))
                         em = discord.Embed(title="{} *{}* — {} *{}*".format(match["HOME_FLAG"], match["HOME"],
                                                                             match["AWAY_FLAG"], match["AWAY"]),
                                            description=txt)
