@@ -26,7 +26,7 @@ class Labo:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/labo/sys.json")  # Pas très utile mais on le garde pour plus tard
-        self.sys_def = {"REPOST": []}
+        self.sys_def = {"REPOST": [], "FOOT_SUB": {}}
         self.msg = dataIO.load_json("data/labo/msg.json")
         self.foot = pyfootball.Football("ec9727b5fad84d18ae9bb716743b61c4")
         self.cc = coco.CountryConverter()
@@ -66,10 +66,94 @@ class Labo:
     async def _football(self, ctx):
         """Informations sur les prochains matchs de la Coupe du Monde"""
         if ctx.invoked_subcommand is None:
-            await ctx.invoke(self.show)
+            await ctx.invoke(self.next)
 
     @_football.command(pass_context=True)
-    async def show(self, ctx):
+    async def notif(self, ctx):
+        """Permet de s'abonner à un match pour recevoir une notification avant le démarrage"""
+        author = ctx.message.author
+        comp = self.foot.get_competition(467)
+        txt = ""
+        emojis = [s for s in "🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿"]
+        if not "FOOT_SUB" in self.sys:
+            self.sys["FOOT_SUB"] = {}
+            fileIO("data/labo/sys.json", "save", self.sys)
+        msg = None
+        while True:
+            n = 0
+            emolist = []
+            fbl = []
+            for f in comp.get_fixtures():
+                localdate = f.date + timedelta(hours=2)
+                if not f.result:
+                    nom = "{}-{}-{}".format(f.home_team_id, f.away_team_id, localdate.strftime("%d%m%Y%H%M"))
+                    if nom in self.sys["FOOT_SUB"]:
+                        if author.id in self.sys["FOOT_SUB"][nom]["ABON"]:
+                            subbed = "✅"
+                        else:
+                            subbed = "❎"
+                    else:
+                        subbed = "❎"
+                    fbl.append([emojis[n], f])
+                    emolist.append(emojis[n])
+                    flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
+                    flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                    txt += "{} | \{} — {} *{}* **VS** {} *{}*\n".format(subbed, emojis[n], flaghome, f.home_team,
+                                                                        flagaway, f.away_team)
+                    n += 1
+
+            em = discord.Embed(title="Abonnements matchs {} | Coupe du Monde Russie 2018".format(str(author)),
+                               description=txt, color=0xedb83d)
+            em.set_footer(text="Abonnez-vous en cliquant sur la lettre correspondante | 🚫 = Quitter")
+            if msg:
+                await self.bot.clear_reactions(msg)
+                msg = await self.bot.edit_message(msg, embed=em)
+            else:
+                msg = await self.bot.say(embed=em)
+            for e in emolist:
+                await self.bot.add_reaction(msg, e)
+            await self.bot.add_reaction(msg, "🚫")
+            await asyncio.sleep(0.15)
+
+            rep = await self.bot.wait_for_reaction(emolist, message=msg, timeout=30,
+                                                   check=self.check, user=author)
+            if rep is None or rep.reaction.emoji == "🚫":
+                await self.bot.delete_message(msg)
+                return
+            elif rep.reaction.emoji in emolist:
+                for i in fbl:
+                    if rep.reaction.emoji == i[0]:
+                        f = i[1]
+                        localdate = f.date + timedelta(hours=2)
+                        nom = "{}-{}-{}".format(f.home_team_id, f.away_team_id, localdate.strftime("%d%m%Y%H%M"))
+                        if nom not in self.sys["FOOT_SUB"]:
+                            flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
+                            flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
+                            self.sys["FOOT_SUB"][nom] = {"ABON": [],
+                                                         "DATE": localdate.strftime("%d/%m/%Y %H:%M"),
+                                                         "HOME": f.home_team,
+                                                         "HOME_FLAG": flaghome,
+                                                         "AWAY": f.away_team,
+                                                         "AWAY_FLAG": flagaway}
+                        if author.id not in self.sys["FOOT_SUB"][nom]["ABON"]:
+                            self.sys["FOOT_SUB"][nom]["ABON"].append(author.id)
+                            em.set_footer(text="— Vous vous êtes abonné au match {} VS {}".format(f.home_team,
+                                                                                                  f.away_team))
+                            await self.bot.edit_message(msg, embed=em)
+                            await asyncio.sleep(4)
+                        else:
+                            self.sys["FOOT_SUB"][nom]["ABON"].remove(author.id)
+                            em.set_footer(text="— Vous vous êtes désabonné du match {} VS {}".format(f.home_team,
+                                                                                                  f.away_team))
+                            await self.bot.edit_message(msg, embed=em)
+                            await asyncio.sleep(4)
+                fileIO("data/labo/sys.json", "save", self.sys)
+            else:
+                await self.bot.delete_message(msg)
+                return
+
+    @_football.command(pass_context=True)
+    async def next(self, ctx):
         """Affiche les matchs du moment (terminés et à venir)"""
         comp = self.foot.get_competition(467)
         today = datetime.now()
@@ -88,7 +172,7 @@ class Labo:
                         away = "**{}**".format(f.result["away_team_goals"]) if \
                             f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(
                             f.result["away_team_goals"])
-                        txt = "**LIVE :** {} — {}".format(home, away)
+                        txt = "**LIVE :** {} — {}\n".format(home, away)
                         flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
                         flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
                         em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
@@ -98,7 +182,7 @@ class Labo:
                             f.result["home_team_goals"] >= f.result["away_team_goals"] else "{}".format(f.result["home_team_goals"])
                         away = "**{}**".format(f.result["away_team_goals"]) if \
                             f.result["away_team_goals"] >= f.result["home_team_goals"] else "{}".format(f.result["away_team_goals"])
-                        txt = "**Terminé :** {} — {}".format(home, away)
+                        txt = "**Terminé :** {} — {}\n".format(home, away)
                         flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
                         flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
                         em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
@@ -108,7 +192,7 @@ class Labo:
                         odds = "{} - {} - {}".format(f.odds["home_win"], f.odds["draw"], f.odds["away_win"])
                     else:
                         odds = ""
-                    txt = "**{}**\n{}".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
+                    txt = "**{}**\n{}\n".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
                     flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
                     flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
                     em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
@@ -118,7 +202,7 @@ class Labo:
                     odds = "{} - {} - {}".format(f.odds["home_win"], f.odds["draw"], f.odds["away_win"])
                 else:
                     odds = ""
-                txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
+                txt = "**{}**\n{}\n".format(localdate.strftime("%d/%m %H:%M"), odds)
                 flaghome = ":flag_{}:".format(self.cc.convert(names=f.home_team, to='ISO2').lower())
                 flagaway = ":flag_{}:".format(self.cc.convert(names=f.away_team, to='ISO2').lower())
                 em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
