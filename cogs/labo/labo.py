@@ -72,13 +72,13 @@ class Labo:
         comp = self.foot.get_competition(467)
         today = datetime.now()
         date = lambda dt: dt.strftime("%d/%m")
-        fixt = comp.get_fixtures()
         em = discord.Embed(title="Matchs")
         n = 0
-        for f in fixt:
+        for f in comp.get_fixtures():
             localdate = f.date + timedelta(hours=2)
-            if f.date.strftime("%d/%m") == today.strftime("%d/%m"):
+            if localdate.strftime("%d/%m") == today.strftime("%d/%m"):
                 if f.result:
+                    n += 1
                     home = "**{}**".format(f.result.home_team_goals) if \
                         f.result.home_team_goals >= f.result.away_team_goals else "{}".format(f.result.home_team_goals)
                     away = "**{}**".format(f.result.awat_team_goals) if \
@@ -86,6 +86,7 @@ class Labo:
                     txt = "**Terminé**\n{} — {}".format(home, away)
                     em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
                 else:
+                    n += 1
                     if f.odds:
                         odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
                     else:
@@ -93,20 +94,13 @@ class Labo:
                     txt = "**{}**\n{}".format(localdate.strftime("Aujourd'hui à %H:%M"), odds)
                     em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
             elif localdate >= today:
+                n += 1
                 if f.odds:
                     odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
                 else:
                     odds = ""
                 txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
                 em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
-            else:
-                if f.odds:
-                    odds = "{} - {} - {}".format(f.odds.home_win, f.odds.draw, f.odds.away_win)
-                else:
-                    odds = ""
-                txt = "**{}**\n{}".format(localdate.strftime("%d/%m %H:%M"), odds)
-                em.add_field(name="{} VS {}".format(f.home_team, f.away_team), value=txt, inline=False)
-            n += 1
             if n == 5:
                 break
         await self.bot.say(embed=em)
