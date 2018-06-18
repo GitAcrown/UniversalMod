@@ -124,8 +124,11 @@ class Labo:
                        live.away_team: live.result["away_team_goals"]}
             await self.bot.say(embed=em)
             while live.status == "IN_PLAY":
-                comp = self.foot.get_competition(467)
-                live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+                try:
+                    comp = self.foot.get_competition(467)
+                    live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+                except:
+                    pass
                 new = {live.home_team: live.result["home_team_goals"], live.away_team: live.result["away_team_goals"]}
                 if current != new:
                     livedebut = live.date + timedelta(hours=2)
