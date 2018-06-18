@@ -58,6 +58,7 @@ class Labo:
                                 print("Impossible d'envoyer une notif du match à {} : {}".format(user.name, e))
                                 pass
                         del self.sys["FOOT_SUB"][i]
+
                 await asyncio.sleep(60)
         except asyncio.CancelledError:
             pass
@@ -97,6 +98,86 @@ class Labo:
         """Informations sur les prochains matchs de la Coupe du Monde"""
         if ctx.invoked_subcommand is None:
             await ctx.invoke(self.next)
+
+    @_football.command(pass_context=True)
+    async def live(self, ctx):
+        """Affiche les scores en direct du match en cours"""
+        comp = self.foot.get_competition(467)
+        live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+        if live:
+            livedebut = live.date + timedelta(hours=2)
+            now = datetime.now()
+            flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
+                if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
+            flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
+                if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
+            home = "**{}**".format(live.result["home_team_goals"]) if \
+                live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
+                live.result["home_team_goals"])
+            away = "**{}**".format(live.result["away_team_goals"]) if \
+                live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
+                live.result["away_team_goals"])
+            em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
+                               description="{} — {}".format(home, away), color=0x212223)
+            em.set_footer(text="{}' | Score en live (BETA)".format(int((now - livedebut).seconds / 60)))
+            current = {live.home_team: live.result["home_team_goals"],
+                       live.away_team: live.result["away_team_goals"]}
+            await self.bot.say(embed=em)
+            while live.status == "IN_PLAY":
+                live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+                new = {live.home_team: live.result["home_team_goals"], live.away_team: live.result["away_team_goals"]}
+                if current != new:
+                    livedebut = live.date + timedelta(hours=2)
+                    now = datetime.now()
+                    flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
+                        if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
+                    flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
+                        if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
+                    home = "**{}**".format(live.result["home_team_goals"]) if \
+                        live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
+                        live.result["home_team_goals"])
+                    away = "**{}**".format(live.result["away_team_goals"]) if \
+                        live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
+                        live.result["away_team_goals"])
+                    butteur = None
+                    if new[live.home_team] > current[live.home_team]:
+                        butteur = live.home_team
+                    else:
+                        butteur = live.away_team
+                    em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
+                                       description="{} — {}\n+ But **{}**".format(home, away, butteur), color=0x212223)
+                    em.set_footer(text="{}' | Score en live (BETA)".format(int((now - livedebut).seconds / 60)))
+                    current = {live.home_team: live.result["home_team_goals"],
+                               live.away_team: live.result["away_team_goals"]}
+                    await self.bot.say(embed=em)
+                await asyncio.sleep(30)
+
+            await asyncio.sleep(30)
+            livedebut = live.date + timedelta(hours=2)
+            now = datetime.now()
+            flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
+                if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
+            flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
+                if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
+            home = "**{}**".format(live.result["home_team_goals"]) if \
+                live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
+                live.result["home_team_goals"])
+            away = "**{}**".format(live.result["away_team_goals"]) if \
+                live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
+                live.result["away_team_goals"])
+            gagn = "Egalité"
+            if live.result["home_team_goals"] > live.result["away_team_goals"]:
+                gagn = live.home_team
+            elif live.result["away_team_goals"] > live.result["home_team_goals"]:
+                gagn = live.away_team
+            em = discord.Embed(title="FIN | {}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
+                               description="{} — {}\nGagnant : **{}**".format(home, away, gagn), color=0x212223)
+            em.set_footer(text="Fin du live".format(int((now - livedebut).seconds / 60)))
+            await self.bot.say(embed=em)
+        else:
+            await self.bot.say("**Aucun live** | Impossible de trouver un direct\n"
+                               "*Si il y a un match en cours, patientez quelques secondes et réessayez.*")
+
 
     @_football.command(pass_context=True)
     async def notif(self, ctx):
