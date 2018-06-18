@@ -119,11 +119,12 @@ class Labo:
                 live.result["away_team_goals"])
             em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
                                description="{} — {}".format(home, away), color=0x212223)
-            em.set_footer(text="{}' | Score en live (BETA)".format(int((now - livedebut).seconds / 60)))
+            em.set_footer(text="Score en live (BETA)")
             current = {live.home_team: live.result["home_team_goals"],
                        live.away_team: live.result["away_team_goals"]}
             await self.bot.say(embed=em)
             while live.status == "IN_PLAY":
+                comp = self.foot.get_competition(467)
                 live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
                 new = {live.home_team: live.result["home_team_goals"], live.away_team: live.result["away_team_goals"]}
                 if current != new:
@@ -146,7 +147,7 @@ class Labo:
                         butteur = live.away_team
                     em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
                                        description="{} — {}\n+ But **{}**".format(home, away, butteur), color=0x212223)
-                    em.set_footer(text="{}' | Score en live (BETA)".format(int((now - livedebut).seconds / 60)))
+                    em.set_footer(text="Score en live (BETA)")
                     current = {live.home_team: live.result["home_team_goals"],
                                live.away_team: live.result["away_team_goals"]}
                     await self.bot.say(embed=em)
