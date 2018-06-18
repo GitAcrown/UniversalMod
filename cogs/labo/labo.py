@@ -128,7 +128,7 @@ class Labo:
             current = {live.home_team: live.result["home_team_goals"],
                        live.away_team: live.result["away_team_goals"]}
             await self.bot.say(embed=em)
-            while live.status == "IN_PLAY" or self.reset == True:
+            while live.status == "IN_PLAY" or self.reset:
                 try:
                     comp = self.foot.get_competition(467)
                     live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
@@ -159,9 +159,9 @@ class Labo:
                     current = {live.home_team: live.result["home_team_goals"],
                                live.away_team: live.result["away_team_goals"]}
                     await self.bot.say(embed=em)
-                await asyncio.sleep(30)
+                await asyncio.sleep(45)
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(5)
             self.reset = False
             livedebut = live.date + timedelta(hours=2)
             now = datetime.now()
