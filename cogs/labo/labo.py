@@ -31,6 +31,7 @@ class Labo:
         self.foot = pyfootball.Football("ec9727b5fad84d18ae9bb716743b61c4")
         self.cc = coco.CountryConverter()
         self.cycle = bot.loop.create_task(self.loop())
+        self.reset = False
         # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
 
     async def loop(self):
@@ -100,10 +101,14 @@ class Labo:
             await ctx.invoke(self.next)
 
     @_football.command(pass_context=True)
-    async def live(self, ctx):
+    async def live(self, ctx, reset: bool=False):
         """Affiche les scores en direct du match en cours"""
         comp = self.foot.get_competition(467)
         live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+        if reset:
+            self.reset = True
+            await self.bot.say("**Arrêt** | Le score live va s'aarrêter dans quelques instants...")
+            return
         if live:
             livedebut = live.date + timedelta(hours=2)
             now = datetime.now()
@@ -123,7 +128,7 @@ class Labo:
             current = {live.home_team: live.result["home_team_goals"],
                        live.away_team: live.result["away_team_goals"]}
             await self.bot.say(embed=em)
-            while live.status == "IN_PLAY":
+            while live.status == "IN_PLAY" or self.reset == True:
                 try:
                     comp = self.foot.get_competition(467)
                     live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
@@ -157,6 +162,7 @@ class Labo:
                 await asyncio.sleep(30)
 
             await asyncio.sleep(30)
+            self.reset = False
             livedebut = live.date + timedelta(hours=2)
             now = datetime.now()
             flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
