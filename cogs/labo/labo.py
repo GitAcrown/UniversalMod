@@ -104,7 +104,12 @@ class Labo:
     async def live(self, ctx, reset: bool=False):
         """Affiche les scores en direct du match en cours"""
         comp = self.foot.get_competition(467)
-        live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+        try:
+            live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+        except:
+            await self.bot.say("**Aucun live** | Impossible de trouver un direct\n"
+                               "*Si il y a un match en cours, patientez quelques secondes et réessayez.*")
+            return
         if reset:
             self.reset = True
             await self.bot.say("**Arrêt** | Le score live va s'aarrêter dans quelques instants...")
@@ -131,7 +136,12 @@ class Labo:
             while live.status == "IN_PLAY" or self.reset:
                 try:
                     comp = self.foot.get_competition(467)
-                    live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+                    for f in comp.get_fixtures():
+                        if f.status == "IN_PLAY":
+                            live = f
+                    else:
+                        if not live:
+                            self.reset = True
                 except:
                     pass
                 new = {live.home_team: live.result["home_team_goals"], live.away_team: live.result["away_team_goals"]}
