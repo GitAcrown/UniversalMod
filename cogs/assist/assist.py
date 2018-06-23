@@ -222,6 +222,7 @@ class Assist:
         if not hasattr(channel, 'server'):
             return
         server = channel.server
+        selfcolor = server.get_member(self.bot.user.id).color
         author = message.author
         if author.bot:
             return
@@ -242,7 +243,7 @@ class Assist:
                 uc = "m"
                 conv = round(conv / 100, 2)
             txt = "**{}** *pouce·s* = **{}** *{}*".format(unit, conv, uc)
-            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em = discord.Embed(description=txt, color=selfcolor)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
             m = await self.bot.send_message(channel, embed=em)
@@ -258,7 +259,7 @@ class Assist:
                 uc = "m"
                 conv = round(conv / 100, 2)
             txt = "**{}** *pied·s* = **{}** *{}*".format(unit, conv, uc)
-            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em = discord.Embed(description=txt, color=selfcolor)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
             m = await self.bot.send_message(channel, embed=em)
@@ -274,7 +275,7 @@ class Assist:
                 uc = "m"
                 conv = round(conv / 100, 2)
             txt = "**{}** *yard·s* = **{}** *{}*".format(unit, conv, uc)
-            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em = discord.Embed(description=txt, color=selfcolor)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
             m = await self.bot.send_message(channel, embed=em)
@@ -290,7 +291,7 @@ class Assist:
                 uc = "kg"
                 conv = round(conv / 1000, 2)
             txt = "**{}** *livre·s* = **{}** *{}*".format(unit, conv, uc)
-            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em = discord.Embed(description=txt, color=selfcolor)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
             m = await self.bot.send_message(channel, embed=em)
@@ -306,7 +307,7 @@ class Assist:
                 uc = "kg"
                 conv = round(conv / 1000, 2)
             txt = "**{}** *once·s* = **{}** *{}*".format(unit, conv, uc)
-            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em = discord.Embed(description=txt, color=selfcolor)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
             m = await self.bot.send_message(channel, embed=em)
