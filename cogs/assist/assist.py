@@ -245,7 +245,7 @@ class Assist:
             em = discord.Embed(description=txt, color=self.bot.user.color)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
-            m = await self.bot.say(embed=em)
+            m = await self.bot.send_message(channel, embed=em)
             await asyncio.sleep(10)
             await self.bot.delete_message(m)
 
@@ -261,7 +261,7 @@ class Assist:
             em = discord.Embed(description=txt, color=self.bot.user.color)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
-            m = await self.bot.say(embed=em)
+            m = await self.bot.send_message(channel, embed=em)
             await asyncio.sleep(10)
             await self.bot.delete_message(m)
 
@@ -277,7 +277,7 @@ class Assist:
             em = discord.Embed(description=txt, color=self.bot.user.color)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
-            m = await self.bot.say(embed=em)
+            m = await self.bot.send_message(channel, embed=em)
             await asyncio.sleep(10)
             await self.bot.delete_message(m)
 
@@ -293,7 +293,7 @@ class Assist:
             em = discord.Embed(description=txt, color=self.bot.user.color)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
-            m = await self.bot.say(embed=em)
+            m = await self.bot.send_message(channel, embed=em)
             await asyncio.sleep(10)
             await self.bot.delete_message(m)
 
@@ -309,7 +309,7 @@ class Assist:
             em = discord.Embed(description=txt, color=self.bot.user.color)
             em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
                           icon_url=self.bot.user.avatar_url)
-            m = await self.bot.say(embed=em)
+            m = await self.bot.send_message(channel, embed=em)
             await asyncio.sleep(10)
             await self.bot.delete_message(m)
 
