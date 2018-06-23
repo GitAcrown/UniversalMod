@@ -234,7 +234,7 @@ class Assist:
             self.sys[server.id] = self.def_sys
             fileIO("data/assist/sys.json", "save", self.sys)
 
-        output = re.compile(r'(\d+)\s?(?=inchs?|pouces?|''|")', re.IGNORECASE | re.DOTALL).findall(content)
+        output = re.compile(r'(\d+)\s?(?=inchs?|pouces?|")', re.IGNORECASE | re.DOTALL).findall(content)
         if output: # POUCES > CM
             unit = int(output[0])
             conv = round(unit * 2.54, 2)
