@@ -235,7 +235,7 @@ class Assist:
 
         output = re.compile(r'(\d+)\s?(?=inchs?|pouces?|''|")', re.IGNORECASE | re.DOTALL).findall(content)
         if output: # POUCES > CM
-            unit = output[0]
+            unit = output[0][0]
             conv = round(unit * 2.54, 2)
             uc = "cm"
             if conv > 100:
@@ -251,7 +251,7 @@ class Assist:
 
         output = re.compile(r'(\d+)\s?(?=feet|foot|pieds?)', re.IGNORECASE | re.DOTALL).findall(content)
         if output: # PIEDS > conv
-            unit = output[0]
+            unit = output[0][0]
             conv = round(unit * 30.48, 2)
             uc = "cm"
             if conv > 100:
@@ -267,7 +267,7 @@ class Assist:
 
         output = re.compile(r'(\d+)\s?(?=yards?)', re.IGNORECASE | re.DOTALL).findall(content)
         if output:  # YARDS > conv
-            unit = output[0]
+            unit = output[0][0]
             conv = round(unit * 91.44, 2)
             uc = "cm"
             if conv > 100:
@@ -283,7 +283,7 @@ class Assist:
 
         output = re.compile(r'(\d+)\s?(?=pounds?|livres?)', re.IGNORECASE | re.DOTALL).findall(content)
         if output:  # POUNDS > conv
-            unit = output[0]
+            unit = output[0][0]
             conv = round(unit * 453.592, 2)
             uc = "g"
             if conv > 1000:
@@ -299,7 +299,7 @@ class Assist:
 
         output = re.compile(r'(\d+)\s?(?=onces?)', re.IGNORECASE | re.DOTALL).findall(content)
         if output:  # POUNDS > conv
-            unit = output[0]
+            unit = output[0][0]
             conv = round(unit * 28.3495, 2)
             uc = "g"
             if conv > 1000:
