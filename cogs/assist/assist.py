@@ -1,3 +1,4 @@
+import asyncio
 import os
 import random
 import re
@@ -27,84 +28,7 @@ class Assist:
     def __unload(self):
         self.session.close()
 
-    """@commands.group(name="mkr", pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(manage_messages=True)
-    async def _maker(self, ctx):
-        if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
-
-    @_maker.command(pass_context=True)
-    async def new(self, ctx, nom: str):
-        server = ctx.message.server
-        if server.id not in self.mkr:
-            self.mkr[server.id] = {}
-            fileIO("data/assist/mkr.json", "save", self.mkr)
-        if nom not in self.mkr[server.id]:"""
-
-
-
-    @commands.group(name="assist", pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(ban_members=True)
-    async def _assist(self, ctx):
-        """Paramètres du module Assist"""
-        if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
-
-    @_assist.command(pass_context=True)
-    async def toggle(self, ctx):
-        """Active/désactive l'Assistant sur le serveur (ne désactive pas les fonctionnalités annexes)"""
-        server = ctx.message.server
-        if server.id not in self.sys:
-            self.sys[server.id] = self.def_sys
-        if self.sys[server.id]["ASSIST"]:
-            self.sys[server.id]["ASSIST"] = False
-            await self.bot.say("**Succès** | L'assistant à été désactivé sur ce serveur")
-        else:
-            self.sys[server.id]["ASSIST"] = True
-            await self.bot.say("**Succès** | L'assistant à été activé sur ce serveur")
-        fileIO("data/assist/sys.json", "save", self.sys)
-
-    @_assist.command(pass_context=True)
-    async def balise(self, ctx, balise: str =None):
-        """Permet de changer la balise d'invocation (Par défaut la mention du bot)"""
-        server = ctx.message.server
-        if server.id not in self.sys:
-            self.sys[server.id] = self.def_sys
-        if balise:
-            self.sys[server.id]["ASSIST_BALISE"] = balise
-            await self.bot.say("**Changée** | La balise est désormais `{}`".format(balise))
-        else:
-            self.sys[server.id]["ASSIST_BALISE"] = False
-            await self.bot.say("**Retirée** | La balise par défaut est la mention du bot")
-        fileIO("data/assist/sys.json", "save", self.sys)
-
-    @_assist.command(pass_context=True)
-    async def antispoil(self, ctx):
-        """Active/désactive l'anti-spoil §"""
-        server = ctx.message.server
-        if server.id not in self.sys:
-            self.sys[server.id] = self.def_sys
-        if self.sys[server.id]["ANTI-SPOIL"]:
-            self.sys[server.id]["ANTI-SPOIL"] = False
-            await self.bot.say("**Succès** | La balise spoil  été désactivée")
-        else:
-            self.sys[server.id]["ANTI-SPOIL"] = True
-            await self.bot.say("**Succès** | La balise spoil est active (§)")
-        fileIO("data/assist/sys.json", "save", self.sys)
-
-    @_assist.command(pass_context=True)
-    async def afk(self, ctx):
-        """Active/désactive la détection d'AFK"""
-        server = ctx.message.server
-        if server.id not in self.sys:
-            self.sys[server.id] = self.def_sys
-        if type(self.sys[server.id]["AFK"]) is list:
-            self.sys[server.id]["AFK"] = False
-            await self.bot.say("**Succès** | La fonction \"AFK\" est désactivée")
-        else:
-            self.sys[server.id]["AFK"] = []
-            await self.bot.say("**Succès** | La fonction \"AFK\" est activée")
-        fileIO("data/assist/sys.json", "save", self.sys)
+# DEFS  --------------------------------
 
     def redux(self, string: str, separateur: str = ".", limite: int = 2000):
         n = -1
@@ -164,7 +88,7 @@ class Assist:
                 else:
                     return self.wiki(recherche, "fr", False)
 
-    #========== COMMANDES-FONCTIONS ============
+# ========== COMMANDES-FONCTIONS ============
 
     @commands.command(pass_context=True)
     async def calcule(self, ctx, *calcul):
@@ -185,6 +109,73 @@ class Assist:
                 await self.bot.say(embed=r)
             except:
                 await self.bot.say("**Erreur** | La ressource demandée est indisponible")
+
+# PARAMETRES =====================================
+
+    @commands.group(name="assist", pass_context=True, no_pm=True)
+    @checks.admin_or_permissions(ban_members=True)
+    async def _assist(self, ctx):
+        """Paramètres du module Assist"""
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+    @_assist.command(pass_context=True)
+    async def toggle(self, ctx):
+        """Active/désactive l'Assistant sur le serveur (ne désactive pas les fonctionnalités annexes)"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.def_sys
+        if self.sys[server.id]["ASSIST"]:
+            self.sys[server.id]["ASSIST"] = False
+            await self.bot.say("**Succès** | L'assistant à été désactivé sur ce serveur")
+        else:
+            self.sys[server.id]["ASSIST"] = True
+            await self.bot.say("**Succès** | L'assistant à été activé sur ce serveur")
+        fileIO("data/assist/sys.json", "save", self.sys)
+
+    @_assist.command(pass_context=True)
+    async def balise(self, ctx, balise: str = None):
+        """Permet de changer la balise d'invocation (Par défaut la mention du bot)"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.def_sys
+        if balise:
+            self.sys[server.id]["ASSIST_BALISE"] = balise
+            await self.bot.say("**Changée** | La balise est désormais `{}`".format(balise))
+        else:
+            self.sys[server.id]["ASSIST_BALISE"] = False
+            await self.bot.say("**Retirée** | La balise par défaut est la mention du bot")
+        fileIO("data/assist/sys.json", "save", self.sys)
+
+    @_assist.command(pass_context=True)
+    async def antispoil(self, ctx):
+        """Active/désactive l'anti-spoil §"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.def_sys
+        if self.sys[server.id]["ANTI-SPOIL"]:
+            self.sys[server.id]["ANTI-SPOIL"] = False
+            await self.bot.say("**Succès** | La balise spoil  été désactivée")
+        else:
+            self.sys[server.id]["ANTI-SPOIL"] = True
+            await self.bot.say("**Succès** | La balise spoil est active (§)")
+        fileIO("data/assist/sys.json", "save", self.sys)
+
+    @_assist.command(pass_context=True)
+    async def afk(self, ctx):
+        """Active/désactive la détection d'AFK"""
+        server = ctx.message.server
+        if server.id not in self.sys:
+            self.sys[server.id] = self.def_sys
+        if type(self.sys[server.id]["AFK"]) is list:
+            self.sys[server.id]["AFK"] = False
+            await self.bot.say("**Succès** | La fonction \"AFK\" est désactivée")
+        else:
+            self.sys[server.id]["AFK"] = []
+            await self.bot.say("**Succès** | La fonction \"AFK\" est activée")
+        fileIO("data/assist/sys.json", "save", self.sys)
+
+# DEFS ----------------------------------------
 
     def _decode(self, message: discord.Message, regex):
         """Décode un regex et le transforme en arguments (str)"""
@@ -242,7 +233,87 @@ class Assist:
             self.sys[server.id] = self.def_sys
             fileIO("data/assist/sys.json", "save", self.sys)
 
-        if type(self.sys[server.id]["AFK"]) is list:  # SYSTEME AFK
+        output = re.compile(r'(\d+)\s?(?=inchs?|pouces?|''|")', re.IGNORECASE | re.DOTALL).findall(content)
+        if output: # POUCES > CM
+            unit = output[0]
+            conv = round(unit * 2.54, 2)
+            uc = "cm"
+            if conv > 100:
+                uc = "m"
+                conv = round(conv / 100, 2)
+            txt = "**{}** *pouce·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.say(embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=feet|foot|pieds?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output: # PIEDS > conv
+            unit = output[0]
+            conv = round(unit * 30.48, 2)
+            uc = "cm"
+            if conv > 100:
+                uc = "m"
+                conv = round(conv / 100, 2)
+            txt = "**{}** *pied·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.say(embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=yards?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # YARDS > conv
+            unit = output[0]
+            conv = round(unit * 91.44, 2)
+            uc = "cm"
+            if conv > 100:
+                uc = "m"
+                conv = round(conv / 100, 2)
+            txt = "**{}** *yard·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.say(embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=pounds?|livres?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # POUNDS > conv
+            unit = output[0]
+            conv = round(unit * 453.592, 2)
+            uc = "g"
+            if conv > 1000:
+                uc = "kg"
+                conv = round(conv / 1000, 2)
+            txt = "**{}** *livre·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.say(embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=onces?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # POUNDS > conv
+            unit = output[0]
+            conv = round(unit * 28.3495, 2)
+            uc = "g"
+            if conv > 1000:
+                uc = "kg"
+                conv = round(conv / 1000, 2)
+            txt = "**{}** *once·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=self.bot.user.color)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.say(embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        if type(self.sys[server.id]["AFK"]) is list:  # SYSTEME AFK <<<<<<<<<<<<<<<<<<<<<<<<
             for afk in self.sys[server.id]["AFK"]:
                 if author.id == afk[0]:
                     self.sys[server.id]["AFK"].remove([afk[0], afk[1], afk[2]])
@@ -264,7 +335,7 @@ class Assist:
                                 await self.bot.send_message(channel, "**__{}__ est AFK** | "
                                                                      "Ce membre sera de retour sous peu".format(afk[1]))
 
-        if self.sys[server.id]["ANTI-SPOIL"]:
+        if self.sys[server.id]["ANTI-SPOIL"]: # BALISE SPOIL <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             if content.startswith("§") or content.lower().startswith("spoil:"):
                 rs = lambda: random.randint(0, 255)
                 color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
@@ -280,7 +351,7 @@ class Assist:
                 await self.bot.add_reaction(msg, "👁")
                 return
 
-        if self.sys[server.id]["ASSIST"]:  # SYSTEME ASSISTANT
+        if self.sys[server.id]["ASSIST"]:  # SYSTEME ASSISTANT <<<<<<<<<<<<<<<<<<<<<<<<<
             balise = self.sys[server.id]["ASSIST_BALISE"] if self.sys[
                 server.id]["ASSIST_BALISE"] else "<@{}>".format(self.bot.user.id)
             if content.startswith(balise):
