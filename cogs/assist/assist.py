@@ -356,7 +356,7 @@ class Assist:
                 server.id]["ASSIST_BALISE"] else "<@{}>".format(self.bot.user.id)
             if content.startswith(balise):
                 bal = balise
-            elif self.bot.user.name in content:
+            elif self.bot.user.name.lower() in content.lower().split():
                 bal = self.bot.user.name
             if bal:
                 content = content.replace(bal, "")
