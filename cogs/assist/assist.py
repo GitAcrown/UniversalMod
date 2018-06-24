@@ -218,6 +218,191 @@ class Assist:
             return False
 
     async def read(self, message):
+        """Nouvelle version 'Always Listening'"""
+        channel = message.channel
+        if not hasattr(channel, 'server'):
+            return
+        server = channel.server
+        author = message.author
+        selfcolor = server.get_member(self.bot.user.id).color
+        if author.bot:
+            return
+        content = message.content.lower()
+        if "@everyone" in content or "@here" in content:  # Pour les petits malins
+            content = content.replace("@everyone", "everyone")
+            content = content.replace("@here", "here")
+        if server.id not in self.sys:
+            self.sys[server.id] = self.def_sys
+            fileIO("data/assist/sys.json", "save", self.sys)
+
+        output = re.compile(r'(\d+)\s?(?=inchs?|pouces?|")', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # POUCES > CM
+            unit = int(output[0])
+            conv = round(unit * 2.54, 2)
+            uc = "cm"
+            if conv > 100:
+                uc = "m"
+                conv = round(conv / 100, 2)
+            txt = "**{}** *pouce·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=selfcolor)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.send_message(channel, embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=feet|foot|pieds?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # PIEDS > conv
+            unit = int(output[0])
+            conv = round(unit * 30.48, 2)
+            uc = "cm"
+            if conv > 100:
+                uc = "m"
+                conv = round(conv / 100, 2)
+            txt = "**{}** *pied·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=selfcolor)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.send_message(channel, embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=yards?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # YARDS > conv
+            unit = int(output[0])
+            conv = round(unit * 91.44, 2)
+            uc = "cm"
+            if conv > 100:
+                uc = "m"
+                conv = round(conv / 100, 2)
+            txt = "**{}** *yard·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=selfcolor)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.send_message(channel, embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=pounds?|livres?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # POUNDS > conv
+            unit = int(output[0])
+            conv = round(unit * 453.592, 2)
+            uc = "g"
+            if conv > 1000:
+                uc = "kg"
+                conv = round(conv / 1000, 2)
+            txt = "**{}** *livre·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=selfcolor)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.send_message(channel, embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        output = re.compile(r'(\d+)\s?(?=onces?)', re.IGNORECASE | re.DOTALL).findall(content)
+        if output:  # POUNDS > conv
+            unit = int(output[0])
+            conv = round(unit * 28.3495, 2)
+            uc = "g"
+            if conv > 1000:
+                uc = "kg"
+                conv = round(conv / 1000, 2)
+            txt = "**{}** *once·s* = **{}** *{}*".format(unit, conv, uc)
+            em = discord.Embed(description=txt, color=selfcolor)
+            em.set_author(name="Assistant {} — Conversion".format(self.bot.user.name),
+                          icon_url=self.bot.user.avatar_url)
+            m = await self.bot.send_message(channel, embed=em)
+            await asyncio.sleep(10)
+            await self.bot.delete_message(m)
+
+        if type(self.sys[server.id]["AFK"]) is list:  # SYSTEME AFK <<<<<<<<<<<<<<<<<<<<<<<<
+            for afk in self.sys[server.id]["AFK"]:
+                if author.id == afk[0]:
+                    self.sys[server.id]["AFK"].remove([afk[0], afk[1], afk[2]])
+            if "afk" in content.lower():
+                if content.lower().startswith("j'afk"):
+                    raison = content.lower().replace("j'afk", "", 1)
+                else:
+                    raison = content.lower().replace("afk", "", 1)
+                if raison.startswith(" "):
+                    raison = raison[1:]
+                self.sys[server.id]["AFK"].append([author.id, author.name, raison])
+            if message.mentions:
+                for m in message.mentions:
+                    for afk in self.sys[server.id]["AFK"]:
+                        if m.id == afk[0]:
+                            if afk[2] != "":
+                                await self.bot.send_message(channel, "**__{}__ est AFK** | *{}*".format(afk[1], afk[2]))
+                            else:
+                                await self.bot.send_message(channel, "**__{}__ est AFK** | "
+                                                                     "Ce membre sera de retour sous peu".format(afk[1]))
+
+        if self.sys[server.id]["ANTI-SPOIL"]:  # BALISE SPOIL <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            if content.startswith("§") or content.lower().startswith("spoil:"):
+                rs = lambda: random.randint(0, 255)
+                color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
+                balise = "spoil:" if content.lower().startswith("spoil:") else "§"
+                await self.bot.delete_message(message)
+                em = discord.Embed(color=color)
+                em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                em.set_footer(text="👁 ─ Voir le spoil")
+                msg = await self.bot.send_message(channel, embed=em)
+                self.sys[server.id]["SPOILS"][msg.id] = {"TEXTE": content.replace(balise, ""),
+                                                         "AUTEUR": message.author.name,
+                                                         "AUTEURIMG": message.author.avatar_url}
+                await self.bot.add_reaction(msg, "👁")
+                return
+
+        bal = None
+        if self.sys[server.id]["ASSIST"]:  # SYSTEME ASSISTANT <<<<<<<<<<<<<<<<<<<<<<<<<
+            balise = self.sys[server.id]["ASSIST_BALISE"] if self.sys[
+                server.id]["ASSIST_BALISE"] else "<@{}>".format(self.bot.user.id)
+            if content.startswith(balise):
+                bal = balise
+            elif self.bot.user.name in content:
+                bal = self.bot.user.name
+            content = content.replace(bal, "")
+            if content.startswith(" "):
+                content = content[1:]
+            once = False
+            while True:
+                if await self.execute(message, "ban {}", r"ban <@(.\d+)>"):
+                    return  # Ban un membre
+                if await self.execute(message, "kick {}", r"kick <@(.\d+)>"):
+                    return  # Kick un membre
+                if await self.execute(message, "calcule {}", r"(?:combien|calcule*) (?:font|fait)?(.*)"):
+                    return  # Calcule un truc (Simpy)
+                if await self.execute(message, "wikipedia {}", r"(?:re)?cherche (.*)"):
+                    return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
+                if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
+                    return  # Propose une aide sur la commande
+                output = re.compile(
+                    r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) <@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?",
+                    re.IGNORECASE | re.DOTALL).findall(message.content)
+                if output:
+                    u = output[0]
+                    plus = " {}".format(u[1]) if u[1] else ""
+                    new_message = deepcopy(message)
+                    prefix = self.bot.settings.get_prefixes(server)[0]
+                    txt = "p <@{}>{}".format(u[0], plus)
+                    new_message.content = prefix + txt
+                    await self.bot.process_commands(new_message)
+                    return
+
+                if not once:
+                    await self.bot.send_typing(channel)
+                    msg = await self.bot.wait_for_message(channel=channel, author=author, timeout=15)
+                    if msg is None:
+                        return
+                    else:
+                        message = msg
+                        continue
+                else:
+                    return
+
+
+
+    """async def read(self, message):
         channel = message.channel
         if not hasattr(channel, 'server'):
             return
@@ -375,7 +560,7 @@ class Assist:
                     txt = "p <@{}>{}".format(u[0], plus)
                     new_message.content = prefix + txt
                     await self.bot.process_commands(new_message)
-                    return
+                    return"""
 
     async def react(self, reaction, user):
         message = reaction.message
