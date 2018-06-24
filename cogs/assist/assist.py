@@ -396,7 +396,7 @@ class Assist:
                         return
                     else:
                         message = msg
-                        continue
+                        once = True
                 else:
                     return
 
