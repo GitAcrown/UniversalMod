@@ -361,44 +361,45 @@ class Assist:
                 bal = balise
             elif self.bot.user.name in content:
                 bal = self.bot.user.name
-            content = content.replace(bal, "")
-            if content.startswith(" "):
-                content = content[1:]
-            once = False
-            while True:
-                if await self.execute(message, "ban {}", r"ban <@(.\d+)>"):
-                    return  # Ban un membre
-                if await self.execute(message, "kick {}", r"kick <@(.\d+)>"):
-                    return  # Kick un membre
-                if await self.execute(message, "calcule {}", r"(?:combien|calcule*) (?:font|fait)?(.*)"):
-                    return  # Calcule un truc (Simpy)
-                if await self.execute(message, "wikipedia {}", r"(?:re)?cherche (.*)"):
-                    return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
-                if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
-                    return  # Propose une aide sur la commande
-                output = re.compile(
-                    r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) <@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?",
-                    re.IGNORECASE | re.DOTALL).findall(message.content)
-                if output:
-                    u = output[0]
-                    plus = " {}".format(u[1]) if u[1] else ""
-                    new_message = deepcopy(message)
-                    prefix = self.bot.settings.get_prefixes(server)[0]
-                    txt = "p <@{}>{}".format(u[0], plus)
-                    new_message.content = prefix + txt
-                    await self.bot.process_commands(new_message)
-                    return
-
-                if not once:
-                    await self.bot.send_typing(channel)
-                    msg = await self.bot.wait_for_message(channel=channel, author=author, timeout=15)
-                    if msg is None:
+            if bal:
+                content = content.replace(bal, "")
+                if content.startswith(" "):
+                    content = content[1:]
+                once = False
+                while True:
+                    if await self.execute(message, "ban {}", r"ban <@(.\d+)>"):
+                        return  # Ban un membre
+                    if await self.execute(message, "kick {}", r"kick <@(.\d+)>"):
+                        return  # Kick un membre
+                    if await self.execute(message, "calcule {}", r"(?:combien|calcule*) (?:font|fait)?(.*)"):
+                        return  # Calcule un truc (Simpy)
+                    if await self.execute(message, "wikipedia {}", r"(?:re)?cherche (.*)"):
+                        return  # Recherche sur Wikipedia en FR puis en EN si nécessaire
+                    if await self.execute(message, "help {}", r"(?:aide|explique|help) (.*)"):
+                        return  # Propose une aide sur la commande
+                    output = re.compile(
+                        r"(?:emprisonnes*|lib[èe]res*|met en prison|jail|isole|sort) <@(.\d+)>(?:\s?\w*?\s)?([0-9]*[jhms])?",
+                        re.IGNORECASE | re.DOTALL).findall(message.content)
+                    if output:
+                        u = output[0]
+                        plus = " {}".format(u[1]) if u[1] else ""
+                        new_message = deepcopy(message)
+                        prefix = self.bot.settings.get_prefixes(server)[0]
+                        txt = "p <@{}>{}".format(u[0], plus)
+                        new_message.content = prefix + txt
+                        await self.bot.process_commands(new_message)
                         return
+
+                    if not once:
+                        await self.bot.send_typing(channel)
+                        msg = await self.bot.wait_for_message(channel=channel, author=author, timeout=15)
+                        if msg is None:
+                            return
+                        else:
+                            message = msg
+                            once = True
                     else:
-                        message = msg
-                        once = True
-                else:
-                    return
+                        return
 
 
 
