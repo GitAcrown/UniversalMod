@@ -184,6 +184,8 @@ class Assist:
             self.sys[server.id] = self.def_sys
         if not self.sys[server.id]["ASSIST_BALISE"]:
             msg = " ".join(message.content.split()[1:])
+        elif self.bot.user.name in message.content:
+            msg = message.content.replace(self.bot.user.name, "", 1)
         else:
             msg = message.content.replace(self.sys[server.id]["ASSIST_BALISE"], "", 1)
         msg = msg.replace("`", "")
