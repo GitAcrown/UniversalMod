@@ -182,32 +182,29 @@ class Labo:
                 await self.bot.say(embed=em)
             await asyncio.sleep(31)
 
-            await asyncio.sleep(5)
-            self.reset = False
-            livedebut = live.date + timedelta(hours=2)
-            now = datetime.now()
-            flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
-                if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
-            flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
-                if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
-            home = "**{}**".format(live.result["home_team_goals"]) if \
-                live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
-                live.result["home_team_goals"])
-            away = "**{}**".format(live.result["away_team_goals"]) if \
-                live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
-                live.result["away_team_goals"])
-            gagn = "Egalité"
-            if live.result["home_team_goals"] > live.result["away_team_goals"]:
-                gagn = live.home_team
-            elif live.result["away_team_goals"] > live.result["home_team_goals"]:
-                gagn = live.away_team
-            em = discord.Embed(title="FIN | {}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
-                               description="{} — {}\nGagnant : **{}**".format(home, away, gagn), color=0x212223)
-            em.set_footer(text="Fin du live".format(int((now - livedebut).seconds / 60)))
-            await self.bot.say(embed=em)
-        else:
-            await self.bot.say("**Aucun live** | Impossible de trouver un direct\n"
-                               "*Si il y a un match en cours, patientez quelques secondes et réessayez.*")
+        await asyncio.sleep(5)
+        self.reset = False
+        livedebut = live.date + timedelta(hours=2)
+        now = datetime.now()
+        flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
+            if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
+        flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
+            if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
+        home = "**{}**".format(live.result["home_team_goals"]) if \
+            live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
+            live.result["home_team_goals"])
+        away = "**{}**".format(live.result["away_team_goals"]) if \
+            live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
+            live.result["away_team_goals"])
+        gagn = "Egalité"
+        if live.result["home_team_goals"] > live.result["away_team_goals"]:
+            gagn = live.home_team
+        elif live.result["away_team_goals"] > live.result["home_team_goals"]:
+            gagn = live.away_team
+        em = discord.Embed(title="FIN | {}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
+                           description="{} — {}\nGagnant : **{}**".format(home, away, gagn), color=0x212223)
+        em.set_footer(text="Fin du live".format(int((now - livedebut).seconds / 60)))
+        await self.bot.say(embed=em)
 
 
     @_football.command(pass_context=True)
