@@ -122,6 +122,7 @@ class Labo:
         else:
             await self.bot.say("**Aucun live** | Il semblerait que vous ayez déjà démarré une session de Scores en "
                                "live pour les matchs en cours")
+            return
 
         nom = "{}-{}".format(live.home_team, live.away_team)
         self.fb_mem.append(nom)
