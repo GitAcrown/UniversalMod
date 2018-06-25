@@ -58,6 +58,24 @@ class Tech:
                                "Le fichier est probablement trop lourd pour être téléchargé depuis Discord.")
 
     @commands.command(pass_context=True)
+    async def check(self, ctx, suggestion_id, *message):
+        """Permet de répondre à une suggestion"""
+        basemsg = ctx.message
+        try:
+            sug = await self.bot.get_message(ctx.message.channel, suggestion_id)
+        except:
+            rep = await self.bot.say("**Impossible** | La suggestion est introuvable")
+            await asyncio.sleep(4)
+            await self.bot.delete_message(rep)
+            return
+        sugem = sug.embeds[0]
+        desc = "{}\n\n**Message de {}** — {}".format(sugem.description, str(ctx.message.author), " ".join(message))
+        em = discord.Embed(description=desc, color=sugem.color)
+        em.set_footer(text=sugem.footer)
+        await self.bot.edit_message(sug, embed=em)
+        await self.bot.delete_message(basemsg)
+
+    @commands.command(pass_context=True)
     async def suggest(self, ctx, *description):
         """Suggérer une idée au développeur
 

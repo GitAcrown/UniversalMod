@@ -741,7 +741,7 @@ class Capital:
         user = ctx.message.author
         server = ctx.message.server
         date = time.strftime("%d/%m/%Y", time.localtime())
-        hier =  time.strftime("%d/%m/%Y", time.localtime(time.mktime(time.strptime(date, "%d/%m/%Y")) - 86400))
+        hier = time.strftime("%d/%m/%Y", time.localtime(time.mktime(time.strptime(date, "%d/%m/%Y")) - 86400))
         data = self.api.get_account(user, True)
         if not self.api.get_account(user):
             done = await self.api.inscription(ctx)
