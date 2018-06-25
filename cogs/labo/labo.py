@@ -32,7 +32,7 @@ class Labo:
         self.cc = coco.CountryConverter()
         self.cycle = bot.loop.create_task(self.loop())
         self.reset = False
-        self.fb_mem = {}
+        self.fb_mem = []
         # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
 
     async def loop(self):
@@ -112,65 +112,74 @@ class Labo:
             return
         if reset:
             self.reset = True
+            self.fb_mem = []
             await self.bot.say("**Arrêt** | Le score live va s'aarrêter dans quelques instants...")
             return
         for live in lives:
             nom = "{}-{}".format(live.home_team, live.away_team)
-            livedebut = live.date + timedelta(hours=2)
-            now = datetime.now()
-            flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
-                if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
-            flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
-                if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
-            home = "**{}**".format(live.result["home_team_goals"]) if \
-                live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
-                live.result["home_team_goals"])
-            away = "**{}**".format(live.result["away_team_goals"]) if \
-                live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
-                live.result["away_team_goals"])
-            em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
-                               description="{} — {}".format(home, away), color=0x212223)
-            em.set_footer(text="Score en live (BETA)")
-            current = {live.home_team: live.result["home_team_goals"],
-                       live.away_team: live.result["away_team_goals"]}
-            await self.bot.say(embed=em)
-            while live.status == "IN_PLAY" or self.reset is False:
-                try:
-                    comp = self.foot.get_competition(467)
-                    for f in comp.get_fixtures():
-                        vn = "{}-{}".format(f.home_team, f.away_team)
-                        if vn == nom:
-                            if f.status == "IN_PLAY":
-                                live = f
-                    else:
-                        if not live:
-                            self.reset = True
-                            continue
-                except:
-                    pass
-                new = {live.home_team: live.result["home_team_goals"], live.away_team: live.result["away_team_goals"]}
-                if current != new:
-                    flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
-                        if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
-                    flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
-                        if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
-                    home = "**{}**".format(live.result["home_team_goals"]) if \
-                        live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
-                        live.result["home_team_goals"])
-                    away = "**{}**".format(live.result["away_team_goals"]) if \
-                        live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
-                        live.result["away_team_goals"])
-                    if new[live.home_team] > current[live.home_team]:
-                        butteur = live.home_team
-                    else:
-                        butteur = live.away_team
-                    em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
-                                       description="{} — {}\n+ But **{}**".format(home, away, butteur), color=0x212223)
-                    em.set_footer(text="Score en live (BETA)")
-                    current = {live.home_team: live.result["home_team_goals"],
-                               live.away_team: live.result["away_team_goals"]}
-                    await self.bot.say(embed=em)
-                await asyncio.sleep(45)
+            if nom not in self.fb_mem:
+                break
+        else:
+            await self.bot.say("**Aucun live** | Il semblerait que vous ayez déjà démarré une session de Scores en "
+                               "live pour les matchs en cours")
+
+        nom = "{}-{}".format(live.home_team, live.away_team)
+        self.fb_mem.append(nom)
+        livedebut = live.date + timedelta(hours=2)
+        now = datetime.now()
+        flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
+            if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
+        flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
+            if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
+        home = "**{}**".format(live.result["home_team_goals"]) if \
+            live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
+            live.result["home_team_goals"])
+        away = "**{}**".format(live.result["away_team_goals"]) if \
+            live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
+            live.result["away_team_goals"])
+        em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
+                           description="{} — {}".format(home, away), color=0x212223)
+        em.set_footer(text="Score en live (BETA)")
+        current = {live.home_team: live.result["home_team_goals"],
+                   live.away_team: live.result["away_team_goals"]}
+        await self.bot.say(embed=em)
+        while live.status == "IN_PLAY" or self.reset is False:
+            try:
+                comp = self.foot.get_competition(467)
+                for f in comp.get_fixtures():
+                    vn = "{}-{}".format(f.home_team, f.away_team)
+                    if vn == nom:
+                        if f.status == "IN_PLAY":
+                            live = f
+                else:
+                    if not live:
+                        self.reset = True
+                        continue
+            except:
+                pass
+            new = {live.home_team: live.result["home_team_goals"], live.away_team: live.result["away_team_goals"]}
+            if current != new:
+                flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
+                    if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
+                flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
+                    if self.cc.convert(names=live.away_team, to='ISO2').lower() != "not found" else ""
+                home = "**{}**".format(live.result["home_team_goals"]) if \
+                    live.result["home_team_goals"] >= live.result["away_team_goals"] else "{}".format(
+                    live.result["home_team_goals"])
+                away = "**{}**".format(live.result["away_team_goals"]) if \
+                    live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
+                    live.result["away_team_goals"])
+                if new[live.home_team] > current[live.home_team]:
+                    butteur = live.home_team
+                else:
+                    butteur = live.away_team
+                em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
+                                   description="{} — {}\n+ But **{}**".format(home, away, butteur), color=0x212223)
+                em.set_footer(text="Score en live (BETA)")
+                current = {live.home_team: live.result["home_team_goals"],
+                           live.away_team: live.result["away_team_goals"]}
+                await self.bot.say(embed=em)
+            await asyncio.sleep(31)
 
             await asyncio.sleep(5)
             self.reset = False
