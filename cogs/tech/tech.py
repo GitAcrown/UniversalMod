@@ -71,7 +71,11 @@ class Tech:
         sugem = sug.embeds[0]
         desc = "{}\n\n**Message de {}** — {}".format(sugem["description"], str(ctx.message.author), " ".join(message))
         em = discord.Embed(description=desc, color=sugem["color"])
-        em.set_footer(text=sugem["footer"]["text"])
+        ftx = sugem["footer"]["text"]
+        output = re.compile(r"{'text':\s?'(.*)'}", re.IGNORECASE | re.DOTALL).findall(ftx)
+        if output:
+            ftx = output[0]
+        em.set_footer(text=ftx)
         await self.bot.edit_message(sug, embed=em)
         await self.bot.delete_message(basemsg)
 
