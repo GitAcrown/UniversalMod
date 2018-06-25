@@ -779,7 +779,7 @@ class Capital:
                     self.api.depot_credits(user, rj, "Revenus")
                 em = discord.Embed(title="Revenu{}".format("s" if delta > 1 else ""),
                                    description="• Revenu journalier ─ **+{} {}**{}{}".format(
-                                       rj, self.api.get_money(server, rj, True), mult, btxt),
+                                       rj - 10, self.api.get_money(server, rj - 10, True), mult, btxt),
                                    color=ctx.message.author.color)
                 em.set_footer(text="Vous avez désormais {} {}".format(self.api.get_account(user).solde,
                                                                       self.api.get_money(server, rj)))
