@@ -94,7 +94,6 @@ class Labo:
         await self.bot.say(embed=em)
 
     @commands.group(name="football", aliases=["fb"], pass_context=True)
-    @checks.admin_or_permissions(ban_members=True)
     async def _football(self, ctx):
         """Informations sur les prochains matchs de la Coupe du Monde"""
         if ctx.invoked_subcommand is None:
