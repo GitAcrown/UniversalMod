@@ -741,6 +741,7 @@ class Capital:
         user = ctx.message.author
         server = ctx.message.server
         date = time.strftime("%d/%m/%Y", time.localtime())
+        hier =  time.strftime("%d/%m/%Y", time.localtime(time.mktime(time.strptime(date, "%d/%m/%Y")) - 86400))
         data = self.api.get_account(user, True)
         if not self.api.get_account(user):
             done = await self.api.inscription(ctx)
@@ -756,20 +757,29 @@ class Capital:
                         back, "%d/%m/%Y"))) / 86400)
                 else:
                     delta = 1
+                bonus = False
+                if hier == data["EXTRA"]["REVENU_JOURNALIER"]:
+                    bonus = True
                 data["EXTRA"]["REVENU_JOURNALIER"] = date
                 rj = delta * 50
                 if delta > 1:
                     mult = " ({}j x 50)".format(delta)
                 else:
                     mult = ""
+                btxt = ""
+                if bonus:
+                    btxt = "\n• Jour consécutif ─ **+10 {}**".format(self.api.get_money(server, 10, True))
                 if rj + self.api.get_account(user).solde <= 10000:
+                    if bonus: rj += 10
                     self.api.depot_credits(user, rj, "Revenus journaliers")
                 else:
                     delta = int((10000 - self.api.get_account(user).solde)/rj)
                     rj = delta * 50
+                    if bonus: rj += 10
                     self.api.depot_credits(user, rj, "Revenus journaliers")
                 em = discord.Embed(title="Revenu{}".format("s" if delta > 1 else ""),
-                                   description="Votre revenu ─ **+{} {}**{}".format(rj, self.api.get_money(server, rj), mult),
+                                   description="• Revenu journalier ─ **+{} {}**{}{}".format(
+                                       rj, self.api.get_money(server, rj, True), mult, btxt),
                                    color=ctx.message.author.color)
                 em.set_footer(text="Vous avez désormais {} {}".format(self.api.get_account(user).solde,
                                                                       self.api.get_money(server, rj)))
