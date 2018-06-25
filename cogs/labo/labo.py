@@ -104,6 +104,7 @@ class Labo:
     async def live(self, ctx, reset: bool=False):
         """Affiche les scores en direct du match en cours"""
         comp = self.foot.get_competition(467)
+        furl = "http://www.ohda.org/imgs/soccer-roll-logo.gif"
         try:
             lives = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"]
         except:
@@ -140,7 +141,7 @@ class Labo:
             live.result["away_team_goals"])
         em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
                            description="{} — {}".format(home, away), color=0x212223)
-        em.set_footer(text="Score en live (BETA)")
+        em.set_footer(text="Score en live (BETA)", icon_url=furl)
         current = {live.home_team: live.result["home_team_goals"],
                    live.away_team: live.result["away_team_goals"]}
         await self.bot.say(embed=em)
@@ -176,7 +177,7 @@ class Labo:
                     butteur = live.away_team
                 em = discord.Embed(title="{}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
                                    description="{} — {}\n+ But **{}**".format(home, away, butteur), color=0x212223)
-                em.set_footer(text="Score en live (BETA)")
+                em.set_footer(text="Score en live (BETA)", icon_url=furl)
                 current = {live.home_team: live.result["home_team_goals"],
                            live.away_team: live.result["away_team_goals"]}
                 await self.bot.say(embed=em)
@@ -203,7 +204,7 @@ class Labo:
             gagn = live.away_team
         em = discord.Embed(title="FIN | {}{} / {}{}".format(flaghome, live.home_team, flagaway, live.away_team),
                            description="{} — {}\nGagnant : **{}**".format(home, away, gagn), color=0x212223)
-        em.set_footer(text="Fin du live".format(int((now - livedebut).seconds / 60)))
+        em.set_footer(text="Fin du live".format(int((now - livedebut).seconds / 60)), icon_url=furl)
         await self.bot.say(embed=em)
 
 
@@ -311,6 +312,7 @@ class Labo:
     async def next(self, ctx):
         """Affiche les matchs du moment (terminés et à venir)"""
         comp = self.foot.get_competition(467)
+        furl = "http://www.ohda.org/imgs/soccer-roll-logo.gif"
         today = datetime.now()
         date = lambda dt: dt.strftime("%d/%m")
         em = discord.Embed(title="Matchs")
@@ -371,6 +373,7 @@ class Labo:
                 em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
             if n == 5:
                 break
+        em.set_footer(text="Coupe du Monde 2018 en Russie", icon_url=furl)
         await self.bot.say(embed=em)
 
     def normalize(self, texte: str):
