@@ -32,6 +32,7 @@ class Labo:
         self.cc = coco.CountryConverter()
         self.cycle = bot.loop.create_task(self.loop())
         self.reset = False
+        self.fb_mem = {}
         # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
 
     async def loop(self):
@@ -104,7 +105,7 @@ class Labo:
         """Affiche les scores en direct du match en cours"""
         comp = self.foot.get_competition(467)
         try:
-            live = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"][0]
+            lives = [f for f in comp.get_fixtures() if f.status == "IN_PLAY"]
         except:
             await self.bot.say("**Aucun live** | Impossible de trouver un direct\n"
                                "*Si il y a un match en cours, patientez quelques secondes et réessayez.*")
@@ -113,7 +114,8 @@ class Labo:
             self.reset = True
             await self.bot.say("**Arrêt** | Le score live va s'aarrêter dans quelques instants...")
             return
-        if live:
+        for live in lives:
+            nom = "{}-{}".format(live.home_team, live.away_team)
             livedebut = live.date + timedelta(hours=2)
             now = datetime.now()
             flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
@@ -132,21 +134,22 @@ class Labo:
             current = {live.home_team: live.result["home_team_goals"],
                        live.away_team: live.result["away_team_goals"]}
             await self.bot.say(embed=em)
-            while live.status == "IN_PLAY" or self.reset:
+            while live.status == "IN_PLAY" or self.reset is False:
                 try:
                     comp = self.foot.get_competition(467)
                     for f in comp.get_fixtures():
-                        if f.status == "IN_PLAY":
-                            live = f
+                        vn = "{}-{}".format(f.home_team, f.away_team)
+                        if vn == nom:
+                            if f.status == "IN_PLAY":
+                                live = f
                     else:
                         if not live:
                             self.reset = True
+                            continue
                 except:
                     pass
                 new = {live.home_team: live.result["home_team_goals"], live.away_team: live.result["away_team_goals"]}
                 if current != new:
-                    livedebut = live.date + timedelta(hours=2)
-                    now = datetime.now()
                     flaghome = ":flag_{}: ".format(self.cc.convert(names=live.home_team, to='ISO2').lower()) \
                         if self.cc.convert(names=live.home_team, to='ISO2').lower() != "not found" else ""
                     flagaway = ":flag_{}: ".format(self.cc.convert(names=live.away_team, to='ISO2').lower()) \
@@ -157,7 +160,6 @@ class Labo:
                     away = "**{}**".format(live.result["away_team_goals"]) if \
                         live.result["away_team_goals"] >= live.result["home_team_goals"] else "{}".format(
                         live.result["away_team_goals"])
-                    butteur = None
                     if new[live.home_team] > current[live.home_team]:
                         butteur = live.home_team
                     else:
