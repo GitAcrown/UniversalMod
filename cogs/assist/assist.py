@@ -359,6 +359,7 @@ class Assist:
             elif self.bot.user.name.lower() in content.lower().split():
                 bal = self.bot.user.name
             if bal:
+
                 content = content.replace(bal, "")
                 if content.startswith(" "):
                     content = content[1:]

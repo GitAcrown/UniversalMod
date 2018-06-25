@@ -771,12 +771,12 @@ class Capital:
                     btxt = "\n• Jour consécutif ─ **+10 {}**".format(self.api.get_money(server, 10, True))
                 if rj + self.api.get_account(user).solde <= 10000:
                     if bonus: rj += 10
-                    self.api.depot_credits(user, rj, "Revenus journaliers")
+                    self.api.depot_credits(user, rj, "Revenus")
                 else:
                     delta = int((10000 - self.api.get_account(user).solde)/rj)
                     rj = delta * 50
                     if bonus: rj += 10
-                    self.api.depot_credits(user, rj, "Revenus journaliers")
+                    self.api.depot_credits(user, rj, "Revenus")
                 em = discord.Embed(title="Revenu{}".format("s" if delta > 1 else ""),
                                    description="• Revenu journalier ─ **+{} {}**{}{}".format(
                                        rj, self.api.get_money(server, rj, True), mult, btxt),
