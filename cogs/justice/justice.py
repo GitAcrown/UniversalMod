@@ -528,7 +528,7 @@ class Justice:
                             await self.bot.send_message(user, embed=em)
                         except:
                             if prisonchan:
-                                await self.bot.send_message(prisonchan, embed=em)
+                                await self.bot.send_message(self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]), embed=em)
                     else:
                         await self.bot.say("**Symbole non reconnu** | `+` = Ajouter / `-` = Réduire")
                         return
@@ -595,8 +595,8 @@ class Justice:
                     await self.bot.send_message(user, embed=em)
                 except:
                     if prisonchan:
-                        await self.bot.send_message(prisonchan, "{}".format(user.mention))
-                        await self.bot.send_message(prisonchan, embed=em)
+                        await self.bot.send_message(self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]), "{}".format(user.mention))
+                        await self.bot.send_message(self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]), embed=em)
 
                 em = discord.Embed(description=msg, color=apply.color)
                 em.set_footer(text=estim_txt)
@@ -621,8 +621,8 @@ class Justice:
                             await self.bot.send_message(user, embed=em)
                         except:
                             if prisonchan:
-                                await self.bot.send_message(prisonchan, "{}".format(user.mention))
-                                await self.bot.send_message(prisonchan, embed=em)
+                                await self.bot.send_message(self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]), "{}".format(user.mention))
+                                await self.bot.send_message(self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]), embed=em)
                         rand = random.choice(["est désormais libre", "regagne sa liberté", "est sorti de prison",
                                               "profite à nouveau de l'air frais"])
                         em = discord.Embed(description="{} {}".format(user.mention, rand), color=apply.color)
@@ -653,8 +653,8 @@ class Justice:
                     await self.bot.send_message(user, embed=em)
                 except:
                     if prisonchan:
-                        await self.bot.send_message(prisonchan, "{}".format(user.mention))
-                        await self.bot.send_message(prisonchan, embed=em)
+                        await self.bot.send_message(self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]), "{}".format(user.mention))
+                        await self.bot.send_message(self.bot.get_channel(self.sys[server.id]["PRISON_SALON"]), embed=em)
                 await asyncio.sleep(7)
                 await self.bot.delete_message(notif)
 
