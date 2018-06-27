@@ -315,12 +315,9 @@ class CapitalAPI:
 
     def gen_palmares(self, server: discord.Server, nombre: int):
         if server.id in self.data:
-            liste = [[self.data[server.id]["USERS"][u]["SOLDE"], u] for u in self.data[server.id]["USERS"]]
-            propre = []
-            for u in liste:
-                if u[1] in [n.id for n in server.members]:
-                    liste.append(u)
-            sort = sorted(propre, key=operator.itemgetter(0), reverse=True)
+            mb = [n.id for n in server.members]
+            liste = [[self.data[server.id]["USERS"][u]["SOLDE"], u] for u in self.data[server.id]["USERS"] if u in mb]
+            sort = sorted(liste, key=operator.itemgetter(0), reverse=True)
             return sort[:nombre]
         else:
             return False
