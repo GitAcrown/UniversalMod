@@ -552,7 +552,7 @@ class Labo:
     async def getchans(self, ctx):
         """Récupérer les channels du serveur (TEST)"""
         server = ctx.message.server
-        channels = [channel for channel in server.channels if type(channel.type) != int]
+        channels = [channel.name for channel in server.channels if type(channel.type) != int]
         txt = "\n".join(channels)
         await self.bot.say(txt)
 
