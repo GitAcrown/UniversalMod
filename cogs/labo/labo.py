@@ -548,6 +548,14 @@ class Labo:
 
         return date
 
+    @commands.command(pass_context=True)
+    async def getchans(self, ctx):
+        """Récupérer les channels du serveur (TEST)"""
+        server = ctx.message.server
+        channels = [channel for channel in server.channels if type(channel.type) != int]
+        txt = "\n".join(channels)
+        await self.bot.say(txt)
+
     @commands.command(aliases=["hp"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def chronos(self, ctx, user: discord.Member, identifiant: str = None):
