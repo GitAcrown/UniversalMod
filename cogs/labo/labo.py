@@ -86,6 +86,29 @@ class Labo:
     def check(self, reaction, user):
         return not user.bot
 
+    @commands.command(pass_context=True, hidden=True)
+    async def asimov(self, ctx, nb: int = None):
+        """Renvoie les 4 lois d'Asimov tels que formulés dans son livre 'Terre et Fondation et Prélude à Fondation'"""
+        liste = [["Loi Zéro","Un robot ne peut pas porter atteinte à l'humanité, ni, par son inaction, permettre "
+                             "que l'humanité soit exposée au danger."],
+                 ["Première Loi", "Un robot ne peut porter atteinte à un être humain, ni, restant passif, permettre qu'un être humain "
+                 "soit exposé au danger, sauf contradiction avec la Loi Zéro."],
+                 ["Deuxième Loi","Un robot doit obéir aux ordres que lui donne un être humain, sauf si de tels ordres entrent en "
+                 "conflit avec la Première Loi ou la Loi Zéro."],
+                 ["Toisième Loi","Un robot doit protéger son existence tant que cette protection n'entre pas en conflit avec la "
+                 "Première ou la Deuxième Loi ou la Loi Zéro."]]
+        em = discord.Embed()
+        if not nb:
+            for e in liste:
+                em.add_field(name=e[0], value=e[1])
+            em.set_footer(text="Lois d'Asimov, corrigées, telle que formulées dans son livre "
+                               "'Terre et Fondation et Prélude à Fondation'")
+        else:
+            em.add_field(name=liste[nb][0], value=liste[nb][1])
+            em.set_footer(text="Loi d'Asimov, corrigée, telle que formulée dans son livre "
+                               "'Terre et Fondation et Prélude à Fondation'")
+        await self.bot.say(embed=em)
+
     @commands.command(aliases=["ge"], pass_context=True)
     async def getemoji(self, ctx, emoji: discord.Emoji):
         """Retourne l'Emoji discord"""
@@ -548,7 +571,7 @@ class Labo:
 
         return date
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, hidden=True)
     async def getchans(self, ctx):
         """Récupérer les channels du serveur (TEST)"""
         server = ctx.message.server
