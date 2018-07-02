@@ -1299,7 +1299,7 @@ class Echo:
                                         return
                                     else:
                                         await self.bot.send_message(author, "**Interdit** | Vou)s n'avez pas le droit "
-                                                                            "de faire ça."
+                                                                            "de faire ça.")
                                         continue
                                 if "c" in option:
                                     col = self.get_collection(server, racine)
