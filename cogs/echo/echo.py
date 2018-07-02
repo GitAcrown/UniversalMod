@@ -1293,7 +1293,7 @@ class Echo:
                                         for i in liste:
                                             n = self.get_sticker(server, i)
                                             if n.path:
-                                                await self.bot.send_filer(channel, n.path)
+                                                await self.bot.send_file(channel, n.path)
                                             else:
                                                 await self.bot.send_message(channel, n.url)
                                         return
