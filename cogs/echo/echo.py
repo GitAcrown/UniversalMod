@@ -1,5 +1,4 @@
 import asyncio
-import operator
 import os
 import random
 import re
@@ -1284,6 +1283,24 @@ class Echo:
                                     stk = self.get_sticker(server, racine)
                                     if not stk:
                                         continue
+                                if "m" in option:
+                                    if self.get_perms(author, "EDITER"):
+                                        col = self.get_collection(server, racine)
+                                        if not col:
+                                            continue
+                                        liste = [e.nom for e in col]
+                                        liste.sort()
+                                        for i in liste:
+                                            n = self.get_sticker(server, i)
+                                            if n.path:
+                                                await self.bot.send_filer(channel, n.path)
+                                            else:
+                                                await self.bot.send_message(channel, n.url)
+                                        return
+                                    else:
+                                        await self.bot.send_message(author, "**Interdit** | Vou)s n'avez pas le droit "
+                                                                            "de faire ça."
+                                        continue
                                 if "c" in option:
                                     col = self.get_collection(server, racine)
                                     if not col:
@@ -1331,37 +1348,6 @@ class Echo:
                                     await self.bot.delete_message(message)
                                 if "p" in option:
                                     await self.bot.send_message(author, stk.url)
-                                    continue
-                                if "s" in option:
-                                    if type(self.data[server.id][s]["STATS"]["COMPTE"]) is int:
-                                        self.data[server.id][s]["STATS"] = {"COMPTE": {}, "LIKE": [], "DISLIKE": []}
-                                    listec = []
-                                    listel = []
-                                    for s in self.data[server.id]:
-                                        listec.append([self.data[server.id][s]["NOM"],
-                                                       self.data[server.id][s]["STATS"]["COMPTE"][semaine]])
-                                        listel.append([self.data[server.id][s]["NOM"],
-                                                       len(self.data[server.id][s]["STATS"]["LIKE"]) - len(
-                                                           self.data[server.id][s]["STATS"]["DISLIKE"])])
-                                    sortc = sorted(listec, key=operator.itemgetter(1), reverse=True)
-                                    searchc = [stk.nom, self.data[server.id][stk.id]["STATS"]["COMPTE"][semaine]]
-                                    sortl = sorted(listel, key=operator.itemgetter(1), reverse=True)
-                                    searchl = [stk.nom, len(self.data[server.id][stk.id]["STATS"]["LIKE"]) - len(
-                                        self.data[server.id][stk.id]["STATS"]["DISLIKE"])]
-
-                                    sts = "**Invocations cette semaine** ─ {}\n" \
-                                          "**Classement utilisation** ─ {}e\*\n" \
-                                          "**Likes** ─ {}\n" \
-                                          "**Dislikes** ─ {}\n" \
-                                          "**Classement général** ─ {}e\*\n".format(stk.stats.compte[semaine],
-                                                                                    sortc.index(searchc) + 1,
-                                                                                    len(stk.stats.like),
-                                                                                    len(stk.stats.dislike),
-                                                                                    sortl.index(searchl) + 1)
-                                    em = discord.Embed(title="Statistiques sur :{}:".format(stk.nom),
-                                                       description=sts, color=author.color)
-                                    em.set_footer(text="(*) sur {} stickers au total".format(len(stickers_list)))
-                                    await self.bot.send_message(author, embed=em)
                                     continue
 
                             await self.bot.send_typing(channel)
