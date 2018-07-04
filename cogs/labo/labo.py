@@ -194,14 +194,14 @@ class Labo:
             self.sys["ETUDES_STATS"] = {}
         nom = nom.upper()
         today = time.strftime("%d/%m/%Y à %H:%M", time.localtime())
-        txt = "NOM\tNOMBRE\tPOURCENTAGE\n\n"
+        txt = "EMOJI\tNOMBRE\tPOURCENTAGE\n\n"
         datxt = "NOM\tNOMBRE\tPREM.APPAR.\tPOURCENTAGE\n\n"
         if nom in self.sys["ETUDES_STATS"]:
             await self.bot.say("**Patientez SVP.** | J'organise les statistiques pour qu'elles soient lisibles.")
             data = self.sys["ETUDES_STATS"][nom]
             total = sum([data[i]["NB"] for i in data])
             for e in data:
-                txt += ":{}:\t{}\t{}\n".format(e, data[e]["NB"], round((data[e]["NB"] / total) * 100, 2))
+                txt += "**{}**\t{}\t{}\n".format(e, data[e]["NB"], round((data[e]["NB"] / total) * 100, 2))
                 datxt += "{}\t{}\t{}\t{}\n".format(e, data[e]["NB"], data[e]["FIRST"],
                                                    round((data[e]["NB"] / total) * 100, 2))
             datxt += "\n\n- Résultats générés le {}\n-- Seuls les emojis présents sur le serveur au moment de la " \
