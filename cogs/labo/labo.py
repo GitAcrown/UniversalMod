@@ -111,10 +111,10 @@ class Labo:
         if nom not in self.sys["ETUDES_STATS"]:
             self.sys["ETUDES_STATS"][nom] = {}
             fileIO("data/labo/sys.json", "save", self.sys)
-            await self.bot.say("**Nouvelle étude** | Votre étude **{}** à été créée avec succès.")
+            await self.bot.say("**Nouvelle étude** | Votre étude **{}** à été créée avec succès.".format(nom))
         else:
             await self.bot.say("**Chargement d'étude** | Votre étude **{}** à été chargée avec succès. "
-                               "Les données récoltées seront fusionnées à cette étude.")
+                               "Les données récoltées seront fusionnées à cette étude.".format(nom))
         data = self.sys["ETUDES_STATS"][nom]
         maxnb = 1000000000
         nbjour = 0
@@ -138,6 +138,8 @@ class Labo:
             output = re.compile(':(.*?):', re.DOTALL | re.IGNORECASE).findall(msg.content)
             if reacts:  # En réaction
                 for e in reacts:
+                    if type(e.emoji) is str:
+                        continue
                     if e.emoji.name in servemo:
                         if e.emoji.name not in data:
                             data[e.emoji.name] = {"NB": 1, "FIRST": day}
