@@ -101,6 +101,7 @@ class Labo:
                     return
         if nom in self.sys["ETUDES_STATS"]:
             del self.sys["ETUDES_STATS"][nom]
+            fileIO("data/labo/sys.json", "save", self.sys)
             await self.bot.say("**Etude supprimée avec succès**")
         else:
             await self.bot.say("**Inexistante** | Aucune étude ne porte ce nom")
@@ -180,6 +181,7 @@ class Labo:
                "faire ça ne vous empêche pas ensuite de continuer votre étude sur d'autres salons".format(
             ctx.prefix, nom)
         em = discord.Embed(title="Etude {} | Récolte terminée".format(nom), description=txt)
+        fileIO("data/labo/sys.json", "save", self.sys)
         await self.bot.say(embed=em)
 
     @commands.command(aliases=["sr", "emostatresult"], pass_context=True)
