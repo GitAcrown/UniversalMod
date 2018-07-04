@@ -87,6 +87,24 @@ class Labo:
     def check(self, reaction, user):
         return not user.bot
 
+    @commands.command(aliases=["sd", "emostatdel"], pass_context=True)
+    @checks.admin_or_permissions(ban_members=True)
+    async def scrapdelete(self, ctx, nom: str, force: bool= False):
+        """Supprime une étude d'Emojis"""
+        if "ETUDES_STATS" not in self.sys:
+            self.sys["ETUDES_STATS"] = {}
+        nom = nom.upper()
+        if not force:
+            if nom in self.analyse_avt:
+                if self.analyse_avt[nom]:
+                    await self.bot.say("**Impossible** | Attendez la fin de l'étude pour la supprimer")
+                    return
+        if nom in self.sys["ETUDES_STATS"]:
+            del self.sys["ETUDES_STATS"][nom]
+            await self.bot.say("**Etude supprimée avec succès**")
+        else:
+            await self.bot.say("**Inexistante** | Aucune étude ne porte ce nom")
+
     @commands.command(aliases=["se", "emostat"], pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
     async def scrapemoji(self, ctx, nom: str, date: str, channel: discord.Channel = None):
@@ -207,6 +225,8 @@ class Labo:
     @checks.admin_or_permissions(ban_members=True)
     async def scrapavancemt(self, ctx, nom: str):
         """Affiche l'avancement de la récolte pour une Etude donnée"""
+        if "ETUDES_STATS" not in self.sys:
+            self.sys["ETUDES_STATS"] = {}
         nom = nom.upper()
         if nom in self.analyse_avt:
             if self.analyse_avt[nom]:
