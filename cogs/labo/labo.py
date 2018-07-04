@@ -215,7 +215,7 @@ class Labo:
                 pass
             filename = "StatsEmojiEtude_{}".format(nom)
             file = open("data/labo/{}.txt".format(filename), "w", encoding="utf-8")
-            file.write(txt)
+            file.write(datxt)
             file.close()
             try:
                 await self.bot.send_file(ctx.message.channel, "data/labo/{}.txt".format(filename))
