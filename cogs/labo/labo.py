@@ -174,7 +174,7 @@ class Labo:
                             data[e]["FIRST"] = day
         self.analyse_avt[nom] = None
         txt = "─ **La prolonger**\nVous pouvez la prolonger si vous le désirez en faisant " \
-              "`{}se {} {}` sur un autre salon écrit. Les données ainsi récoltées seront fusionnées.".format(
+              "`{}se {} {}` sur un autre salon écrit. Les données ainsi récoltées seront fusionnées.\n\n".format(
             ctx.prefix, nom, origin)
         txt += "─ **Voir les résultats**\nVous pouvez voir les résultats avec `{}sr {}`. Sachez que " \
                "faire ça ne vous empêche pas ensuite de continuer votre étude sur d'autres salons".format(
@@ -200,7 +200,7 @@ class Labo:
             total = sum([data[i]["NB"] for i in data])
             for e in data:
                 txt += ":{}:\t{}\t{}\n".format(e, data[e]["NB"], round((data[e]["NB"] / total) * 100, 2))
-                datxt += "{}\t{}\t{}\t{}\n".format(e, data[e]["NB"], data[e]["FIRST]"],
+                datxt += "{}\t{}\t{}\t{}\n".format(e, data[e]["NB"], data[e]["FIRST"],
                                                    round((data[e]["NB"] / total) * 100, 2))
             datxt += "\n\n- Résultats générés le {}\n-- Seuls les emojis présents sur le serveur au moment de la " \
                      "récolte des données ont été pris en compte\n--- Si ces résultats vous semblent louches," \
