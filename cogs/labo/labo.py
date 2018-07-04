@@ -194,8 +194,8 @@ class Labo:
             self.sys["ETUDES_STATS"] = {}
         nom = nom.upper()
         today = time.strftime("%d/%m/%Y à %H:%M", time.localtime())
-        txt = "NOM\tNOMBRE\tPOURCENTAGE"
-        datxt = "NOM\tNOMBRE\tPREM.APPAR.\tPOURCENTAGE"
+        txt = "NOM\tNOMBRE\tPOURCENTAGE\n\n"
+        datxt = "NOM\tNOMBRE\tPREM.APPAR.\tPOURCENTAGE\n\n"
         if nom in self.sys["ETUDES_STATS"]:
             await self.bot.say("**Patientez SVP.** | J'organise les statistiques pour qu'elles soient lisibles.")
             data = self.sys["ETUDES_STATS"][nom]
