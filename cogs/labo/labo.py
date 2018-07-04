@@ -26,13 +26,14 @@ class Labo:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/labo/sys.json")  # Pas très utile mais on le garde pour plus tard
-        self.sys_def = {"REPOST": [], "FOOT_SUB": {}, "SERV_CONV": {}}
+        self.sys_def = {"REPOST": [], "FOOT_SUB": {}, "SERV_CONV": {}, "ETUDES_STATS": {}}
         self.msg = dataIO.load_json("data/labo/msg.json")
         self.foot = pyfootball.Football("ec9727b5fad84d18ae9bb716743b61c4")
         self.cc = coco.CountryConverter()
         self.cycle = bot.loop.create_task(self.loop())
         self.reset = False
         self.fb_mem = []
+        self.analyse_avt = {}
         # Chronos modele : [jour, heure, type (EDIT/SUPPR), MSGID, M_avant, M_après (NONE SI SUPPR)]
 
     async def loop(self):
@@ -85,6 +86,134 @@ class Labo:
 
     def check(self, reaction, user):
         return not user.bot
+
+    @commands.command(aliases=["se", "emostat"], pass_context=True)
+    @checks.admin_or_permissions(ban_members=True)
+    async def scrapemoji(self, ctx, nom: str, date: str, channel: discord.Channel = None):
+        """Récolte un ensemble de statistiques sur les Emojis du serveur, réactions comprises.
+
+        -- Pour chaque emoji:
+        - Nombre d'apparition
+        - Première apparition
+        - Ratio apparitions/jour"""
+        origin = date
+        nom = nom.upper()
+        if not channel:
+            channel = ctx.message.channel
+        if "/" in date and len(date) == 10:
+            date = datetime.strptime(date, "%d/%m/%Y")
+        else:
+            await self.bot.say("**Date invalide** | La date doit être au format JJ/MM/AAAA")
+            return
+        server = channel.server
+        if "ETUDES_STATS" not in self.sys:
+            self.sys["ETUDES_STATS"] = {}
+        if nom not in self.sys["ETUDES_STATS"]:
+            self.sys["ETUDES_STATS"][nom] = {}
+            fileIO("data/labo/sys.json", "save", self.sys)
+            await self.bot.say("**Nouvelle étude** | Votre étude **{}** à été créée avec succès.")
+        else:
+            await self.bot.say("**Chargement d'étude** | Votre étude **{}** à été chargée avec succès. "
+                               "Les données récoltées seront fusionnées à cette étude.")
+        data = self.sys["ETUDES_STATS"][nom]
+        maxnb = 1000000000
+        nbjour = 0
+        if nom not in self.analyse_avt:
+            self.analyse_avt[nom] = origin
+        else:
+            if self.analyse_avt[nom]:
+                await self.bot.say("**Etude en cours** | Désolé mais il m'est impossible "
+                                   "de faire deux récoltes à la fois sur la même étude.")
+                return
+        servemo = [i.name for i in server.emojis]
+        await asyncio.sleep(2)
+        await self.bot.say("**Récolte de statistiques sur les Emojis** | Cela peut prendre beaucoup de temps si "
+                           "l'échantillon est important (> 30j).\n"
+                           "Sachez que vous pouvez consulter l'avancement avec `{}sa {}`.".format(ctx.prefix, nom))
+        async for msg in self.bot.logs_from(channel, limit=maxnb, after=date):
+            nbjour += 1
+            day = msg.timestamp.strftime("%d/%m/%Y à %H:%M")
+            self.analyse_avt[nom] = day
+            reacts = msg.reactions
+            output = re.compile(':(.*?):', re.DOTALL | re.IGNORECASE).findall(msg.content)
+            if reacts:  # En réaction
+                for e in reacts:
+                    if e.emoji.name in servemo:
+                        if e.emoji.name not in data:
+                            data[e.emoji.name] = {"NB": 1, "FIRST": day}
+                        else:
+                            data[e.emoji.name]["NB"] += 1
+                            data[e.emoji.name]["FIRST"] = day
+            if output:  # En message
+                for e in output:
+                    if e in servemo:
+                        if e not in data:
+                            data[e] = {"NB": 1, "FIRST": day}
+                        else:
+                            data[e]["NB"] += 1
+                            data[e]["FIRST"] = day
+        self.analyse_avt[nom] = None
+        txt = "─ **La prolonger**\nVous pouvez la prolonger si vous le désirez en faisant " \
+              "`{}se {} {}` sur un autre salon écrit. Les données ainsi récoltées seront fusionnées.".format(
+            ctx.prefix, nom, origin)
+        txt += "─ **Voir les résultats**\nVous pouvez voir les résultats avec `{}sr {}`. Sachez que " \
+               "faire ça ne vous empêche pas ensuite de continuer votre étude sur d'autres salons".format(
+            ctx.prefix, nom)
+        em = discord.Embed(title="Etude {} | Récolte terminée".format(nom), description=txt)
+        await self.bot.say(embed=em)
+
+    @commands.command(aliases=["sr", "emostatresult"], pass_context=True)
+    @checks.admin_or_permissions(ban_members=True)
+    async def scrapresult(self, ctx, nom: str):
+        """Consulter les résultats d'une étude.
+
+        Si les données sont trop importantes, ne renvoie qu'un fichier txt contenant ces données récoltées."""
+        if "ETUDES_STATS" not in self.sys:
+            self.sys["ETUDES_STATS"] = {}
+        nom = nom.upper()
+        today = time.strftime("%d/%m/%Y à %H:%M", time.localtime())
+        txt = "NOM\tNOMBRE\tPOURCENTAGE"
+        datxt = "NOM\tNOMBRE\tPREM.APPAR.\tPOURCENTAGE"
+        if nom in self.sys["ETUDES_STATS"]:
+            await self.bot.say("**Patientez SVP.** | J'organise les statistiques pour qu'elles soient lisibles.")
+            data = self.sys["ETUDES_STATS"][nom]
+            total = sum([data[i]["NB"] for i in data])
+            for e in data:
+                txt += ":{}:\t{}\t{}\n".format(e, data[e]["NB"], round((data[e]["NB"] / total) * 100, 2))
+                datxt += "{}\t{}\t{}\t{}\n".format(e, data[e]["NB"], data[e]["FIRST]"],
+                                                   round((data[e]["NB"] / total) * 100, 2))
+            datxt += "\n\n- Résultats générés le {}\n-- Seuls les emojis présents sur le serveur au moment de la " \
+                     "récolte des données ont été pris en compte\n--- Si ces résultats vous semblent louches," \
+                     " contactez Acrown#4424\n---- Ce fichier à été formatté de façon à ce que vous puissiez faire " \
+                     "un Copier/Coller directement dans un tableau Excel"
+            em = discord.Embed(title="Résultats de l'étude {}".format(nom), description=txt)
+            try:
+                await self.bot.say(embed=em)
+            except:
+                pass
+            filename = "StatsEmojiEtude_{}".format(nom)
+            file = open("data/labo/{}.txt".format(filename), "w", encoding="utf-8")
+            file.write(txt)
+            file.close()
+            try:
+                await self.bot.send_file(ctx.message.channel, "data/labo/{}.txt".format(filename))
+                os.remove("data/labo/{}.txt".format(filename))
+            except:
+                await self.bot.say("**Erreur** | Je n'arrive pas à upload le fichier.")
+
+    @commands.command(aliases=["sa", "emostatavancemt"], pass_context=True)
+    @checks.admin_or_permissions(ban_members=True)
+    async def scrapavancemt(self, ctx, nom: str):
+        """Affiche l'avancement de la récolte pour une Etude donnée"""
+        nom = nom.upper()
+        if nom in self.analyse_avt:
+            if self.analyse_avt[nom]:
+                await self.bot.say("**Avancement {}** ─ J'ai analysé pour le moment tous les messages postés avant le "
+                                   "{}".format(nom, self.analyse_avt[nom]))
+            else:
+                await self.bot.say("**Avancement {}** ─ Cette étude est à l'arrêt.".format(nom))
+        else:
+            await self.bot.say("**Erreur** | Cette étude n'existe pas")
 
     @commands.command(pass_context=True, hidden=True)
     async def asimov(self, ctx, nb: int = None):
