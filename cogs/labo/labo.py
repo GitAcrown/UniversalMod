@@ -90,14 +90,14 @@ class Labo:
     @commands.command(pass_context=True)
     async def dtype(self, ctx, objet):
         """Détecte le type de l'objet soumis"""
-        if type(objet) == discord.Channel:
-            await self.bot.say("Salon")
-        elif type(objet) == discord.Member:
+        if objet.startswith("<@&"):
+            await self.bot.say("Rôle")
+        elif objet.startswith("<@"):
             await self.bot.say("Membre")
-        elif type(objet) == str:
-            await self.bot.say("Texte")
+        elif objet.startswith("<#"):
+            await self.bot.say("Salon")
         else:
-            await self.bot.say("Inconnu")
+            await self.bot.say("Texte quelconque")
 
     @commands.command(aliases=["sd", "emostatdel"], pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
