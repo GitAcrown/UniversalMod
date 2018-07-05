@@ -87,6 +87,18 @@ class Labo:
     def check(self, reaction, user):
         return not user.bot
 
+    @commands.command(pass_context=True)
+    async def dtype(self, ctx, objet):
+        """Détecte le type de l'objet soumis"""
+        if type(objet) == discord.Channel:
+            await self.bot.say("Salon")
+        elif type(objet) == discord.Member:
+            await self.bot.say("Membre")
+        elif type(objet) == str:
+            await self.bot.say("Texte")
+        else:
+            await self.bot.say("Inconnu")
+
     @commands.command(aliases=["sd", "emostatdel"], pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
     async def scrapdelete(self, ctx, nom: str, force: bool= False):
