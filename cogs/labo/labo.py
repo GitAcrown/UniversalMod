@@ -115,6 +115,11 @@ class Labo:
             for role in server.roles:
                 if role.name.lower() == obj.lower():
                     return role
+            for member in server.members:
+                if member.name.lower() == obj.lower():
+                    return member
+                if member.display_name.lower() == obj.lower():
+                    return member
             return None
 
     @commands.command(pass_context=True)
@@ -122,11 +127,11 @@ class Labo:
         """Détecte le type de l'objet soumis"""
         obj = self.discord_detect(ctx.message.server, objet)
         if type(obj) == discord.Channel:
-            await self.bot.say("Channel")
+            await self.bot.say("Channel: {}".format(obj.mention))
         elif type(obj) == discord.Role:
-            await self.bot.say("Rôle")
+            await self.bot.say("Rôle: {}".format(obj.mention))
         elif type(obj) == discord.Member:
-            await self.bot.say("Membre")
+            await self.bot.say("Membre: {}".format(obj.mention))
         else:
             await self.bot.say("Inconnu")
 
