@@ -87,17 +87,48 @@ class Labo:
     def check(self, reaction, user):
         return not user.bot
 
+    def discord_detect(self, server, obj):
+        """Détecte le type de l'objet Discord"""
+        if obj.startswith("<@&"):
+            obj = obj.replace("<@&", "")
+            obj = obj.replace(">", "")
+            for role in server.roles:
+                if role.id == obj:
+                    return role
+        elif obj.startswith("<@"):
+            obj = obj.replace("<@", "")
+            obj = obj.replace(">", "")
+            return server.get_member(obj)
+        elif obj.startswith("<#"):
+            obj = obj.replace("<#", "")
+            obj = obj.replace(">", "")
+            for channel in server.channels:
+                if channel.id == obj:
+                    return channel
+        else:
+            user = server.get_member_named(obj)
+            if user:
+                return user
+            for channel in server.channels:
+                if channel.name.lower() == obj.lower():
+                    return channel
+            for role in server.roles:
+                if role.name.lower() == obj.lower():
+                    return role
+            return None
+
     @commands.command(pass_context=True)
     async def dtype(self, ctx, objet):
         """Détecte le type de l'objet soumis"""
-        if objet.startswith("<@&"):
+        obj = self.discord_detect(ctx.message.server, objet)
+        if type(obj) == discord.Channel:
+            await self.bot.say("Channel")
+        elif type(obj) == discord.Role:
             await self.bot.say("Rôle")
-        elif objet.startswith("<@"):
+        elif type(obj) == discord.Member:
             await self.bot.say("Membre")
-        elif objet.startswith("<#"):
-            await self.bot.say("Salon")
         else:
-            await self.bot.say("Texte quelconque")
+            await self.bot.say("Inconnu")
 
     @commands.command(aliases=["sd", "emostatdel"], pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
