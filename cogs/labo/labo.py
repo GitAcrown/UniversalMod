@@ -161,9 +161,9 @@ class Labo:
                 day = msg.timestamp.strftime("%d/%m/%Y")
                 nbjour += 1
             author = msg.author
-            mots = len(msg.split())
+            mots = len(msg.content.split())
             nbmots += mots
-            lettres = len(msg)
+            lettres = len(msg.content)
             nblets += lettres
             if day not in userdata:
                 userdata[day] = {}
