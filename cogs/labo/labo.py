@@ -123,6 +123,7 @@ class Labo:
             return None
 
     @commands.command(pass_context=True)
+    @checks.admin_or_permissions(ban_members=True)
     async def msgstats(self, ctx, maxnb: int = 10000000, channel: discord.Channel = None):
         """Réalise des statistiques sur les messages d'un channel
 
