@@ -196,9 +196,10 @@ class Labo:
                 ud[u]["NB_MOTS"] += userdata[d][u]["NB_MOTS"]
                 ud[u]["NB_LETS"] += userdata[d][u]["NB_LETS"]
         txt = "STATS GENERALES\n\n" \
+              "Nb jours analyses\t{}\n" \
               "Nb msg analyses\t{}\n" \
               "Nb mots\t{}\n" \
-              "Nb lettres\t{}\n".format(nbmsg, nbmots, nblets, )
+              "Nb lettres\t{}\n".format(nbjour, nbmsg, nbmots, nblets)
         txt += "\nSTATS PAR JOUR\nDate / Nb. msg / Nb. mots / Nb. lettres\n"
         for d in daydata:
             txt += "{}\t{}\t{}\t{}\n".format(d, daydata[d]["NB_MSG"], daydata[d]["NB_MOTS"], daydata[d]["NB_LETS"])
