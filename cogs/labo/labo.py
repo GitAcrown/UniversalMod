@@ -123,6 +123,107 @@ class Labo:
             return None
 
     @commands.command(pass_context=True)
+    async def msgstats(self, ctx, maxnb: int = 10000000, channel: discord.Channel = None):
+        """Réalise des statistiques sur les messages d'un channel
+
+        Si un message est illisible (expiré ou buggué) il est ignoré."""
+        if not channel:
+            channel = ctx.message.channel
+        server = channel.server
+        await self.bot.say("**Récolte de statistiques sur les Messages** | Cela peut prendre beaucoup de temps si "
+                           "l'échantillon est important (> 30j).")
+        nbjour = nbmsg = nbmots = nblets = 0
+        userdata = {}
+        day = ""
+        async for msg in self.bot.logs_from(channel, limit=maxnb):
+            if nbmsg == (0.05 * maxnb):
+                await self.bot.say("**Analyse** | Env. 5%")
+            if nbmsg == (0.15 * maxnb):
+                await self.bot.say("**Analyse** | Env. 15%")
+            if nbmsg == (0.25 * maxnb):
+                await self.bot.say("**Analyse** | Env. 25%")
+            if nbmsg == (0.35 * maxnb):
+                await self.bot.say("**Analyse** | Env. 35%")
+            if nbmsg == (0.45 * maxnb):
+                await self.bot.say("**Analyse** | Env. 45%")
+            if nbmsg == (0.55 * maxnb):
+                await self.bot.say("**Analyse** | Env. 55%")
+            if nbmsg == (0.65 * maxnb):
+                await self.bot.say("**Analyse** | Env. 65%")
+            if nbmsg == (0.75 * maxnb):
+                await self.bot.say("**Analyse** | Env. 75%")
+            if nbmsg == (0.85 * maxnb):
+                await self.bot.say("**Analyse** | Env. 85%")
+            if nbmsg == (0.95 * maxnb):
+                await self.bot.say("**Analyse** | Env. 95% - Bientôt terminée")
+            nbmsg += 1
+            if day != msg.timestamp.strftime("%d/%m/%Y"):
+                day = msg.timestamp.strftime("%d/%m/%Y")
+                nbjour += 1
+            author = msg.author
+            mots = len(msg.split())
+            nbmots += mots
+            lettres = len(msg)
+            nblets += lettres
+            if day not in userdata:
+                userdata[day] = {}
+            if author.id not in userdata[day]:
+                userdata[day][author.id] = {"NB_MSG": 0,
+                                            "NB_MOTS": 0,
+                                            "NB_LETS": 0}
+            userdata[day][author.id]["NB_MSG"] += 1
+            userdata[day][author.id]["NB_MOTS"] += mots
+            userdata[day][author.id]["NB_LETS"] += lettres
+        await self.bot.say("**Analyse terminée** | Patientez pendant que j'imprime et upload les résultats...")
+        daydata = {}
+        for d in userdata:
+            if d not in daydata:
+                daydata[d] = {"NB_MSG": 0,
+                              "NB_MOTS": 0,
+                              "NB_LETS": 0}
+            daydata[d]["NB_MSG"] = sum([userdata[d][a]["NB_MSG"] for a in userdata[d]])
+            daydata[d]["NB_MOTS"] = sum([userdata[d][a]["NB_MOTS"] for a in userdata[d]])
+            daydata[d]["NB_LETS"] = sum([userdata[d][a]["NB_LETS"] for a in userdata[d]])
+        ud = {}
+        for d in userdata:
+            for u in userdata[d]:
+                if u not in ud:
+                    ud[u] = {"NB_MSG": 0,
+                             "NB_MOTS": 0,
+                             "NB_LETS": 0}
+                ud[u]["NB_MSG"] += userdata[d][u]["NB_MSG"]
+                ud[u]["NB_MOTS"] += userdata[d][u]["NB_MOTS"]
+                ud[u]["NB_LETS"] += userdata[d][u]["NB_LETS"]
+        txt = "STATS GENERALES\n\n" \
+              "Nb msg analysés\t{}\n" \
+              "Nb mots\t{}\n" \
+              "Nb lettres\t{}\n".format(nbmsg, nbmots, nblets, )
+        txt += "\nSTATS PAR JOUR\n-- Date -- Nb. msg -- Nb. mots -- Nb. lettres\n"
+        for d in daydata:
+            txt += "{}\t{}\t{}\t{}\n".format(d, daydata[d]["NB_MSG"], daydata[d]["NB_MOTS"], daydata[d]["NB_LETS"])
+        txt += "\nSTATS PAR MEMBRE\n-- Membre -- Nb. msg -- Nb. mots -- Nb. lettres\n"
+        for u in ud:
+            try:
+                user = server.get_member(u)
+            except:
+                user = u
+            txt += "{}\t{}\t{}\t{}\n".format(str(user), ud[u]["NB_MSG"], ud[u]["NB_MOTS"],
+                                             ud[u]["NB_LETS"])
+        txt += "\n\n# Il est possible de Copier/Coller directement chacune de ces catégories dans un tableur\n" \
+               "# Certains messages peuvent devenir inaccessibles si ils datent de plus d'un an, ce qui peut fausser " \
+               "les résultats\n" \
+               ""
+        filename = "STATSMessages_Juillet2018"
+        file = open("data/labo/{}.txt".format(filename), "w", encoding="utf-8")
+        file.write(txt)
+        file.close()
+        try:
+            await self.bot.send_file(ctx.message.channel, "data/labo/{}.txt".format(filename))
+            os.remove("data/labo/{}.txt".format(filename))
+        except:
+            await self.bot.say("**Erreur** | Je n'arrive pas à upload le fichier.")
+
+    @commands.command(pass_context=True)
     async def dtype(self, ctx, objet):
         """Détecte le type de l'objet soumis"""
         obj = self.discord_detect(ctx.message.server, objet)
