@@ -195,23 +195,23 @@ class Labo:
                 ud[u]["NB_MOTS"] += userdata[d][u]["NB_MOTS"]
                 ud[u]["NB_LETS"] += userdata[d][u]["NB_LETS"]
         txt = "STATS GENERALES\n\n" \
-              "Nb msg analysés\t{}\n" \
+              "Nb msg analyses\t{}\n" \
               "Nb mots\t{}\n" \
               "Nb lettres\t{}\n".format(nbmsg, nbmots, nblets, )
-        txt += "\nSTATS PAR JOUR\n-- Date -- Nb. msg -- Nb. mots -- Nb. lettres\n"
+        txt += "\nSTATS PAR JOUR\nDate / Nb. msg / Nb. mots / Nb. lettres\n"
         for d in daydata:
             txt += "{}\t{}\t{}\t{}\n".format(d, daydata[d]["NB_MSG"], daydata[d]["NB_MOTS"], daydata[d]["NB_LETS"])
-        txt += "\nSTATS PAR MEMBRE\n-- Membre -- Nb. msg -- Nb. mots -- Nb. lettres\n"
+        txt += "\nSTATS PAR MEMBRE\nMembre / Nb. msg / Nb. mots / Nb. lettres\n"
         for u in ud:
-            try:
-                user = server.get_member(u)
-            except:
+            if u in [i.id for i in server.members]:
+                user = server.get_member(u).name
+            else:
                 user = u
-            txt += "{}\t{}\t{}\t{}\n".format(str(user), ud[u]["NB_MSG"], ud[u]["NB_MOTS"],
+            txt += "{}\t{}\t{}\t{}\n".format(user, ud[u]["NB_MSG"], ud[u]["NB_MOTS"],
                                              ud[u]["NB_LETS"])
-        txt += "\n\n# Il est possible de Copier/Coller directement chacune de ces catégories dans un tableur\n" \
+        txt += "\n\n# Il est possible de Copier/Coller directement chacune de ces categories dans un tableur\n" \
                "# Certains messages peuvent devenir inaccessibles si ils datent de plus d'un an, ce qui peut fausser " \
-               "les résultats\n" \
+               "les resultats\n" \
                ""
         filename = "STATSMessages_Juillet2018"
         file = open("data/labo/{}.txt".format(filename), "w", encoding="utf-8")
