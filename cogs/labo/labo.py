@@ -129,9 +129,13 @@ class Labo:
         s = []
         char = [i for i in "abcdefghijklmnopqrstuvwxyz"]
         for t in texte:
-            shuffle = ''.join(random.sample(t, len(t)))
-            rdn = random.randint(0, len(t) - 1)
-            shuffle = shuffle.replace(shuffle[rdn], random.choice(char), 1)
+            if random.randint(0, 1) == 1:
+                shuffle = ''.join(random.sample(t, len(t)))
+                rdn = random.randint(0, len(t) - 1)
+                shuffle = shuffle.replace(shuffle[rdn], random.choice(char), 1)
+            else:
+                t += random.choice(char)
+                shuffle = ''.join(random.sample(t, len(t)))
             s.append(shuffle.lower())
         await self.bot.say(" ".join(s))
 
