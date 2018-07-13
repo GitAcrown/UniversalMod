@@ -3,6 +3,7 @@ import asyncio
 import os
 import re
 import time
+import random
 from collections import namedtuple
 from datetime import datetime, timedelta
 
@@ -121,6 +122,18 @@ class Labo:
                 if member.display_name.lower() == obj.lower():
                     return member
             return None
+
+    @commands.command(aliases=["triso"], pass_context=True)
+    async def trisomize(self, ctx, *texte):
+        """Trisomise le texte donné, basé sur le délire chelou de Koala et Francis"""
+        s = []
+        char = [i for i in "abcdefghijklmnopqrstuvwxyz"]
+        for t in texte:
+            shuffle = ''.join(random.sample(t, len(t)))
+            rdn = random.randint(0, len(t) - 1)
+            shuffle = shuffle.replace(shuffle[rdn], random.choice(char), 1)
+            s.append(shuffle.lower())
+        await self.bot.say(" ".join(s))
 
     @commands.command(pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
