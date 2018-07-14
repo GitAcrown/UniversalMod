@@ -130,7 +130,7 @@ class Labo:
         opts = [r for r in texte if r.startswith("-")]
         # avl = ["-mix", "-shuffle", "-melange", "-ajout", "-add", "-plus", "-moins", "-retirer", "-remove",
         # "-replace", "-remplace", "-s", "-p", "-m", "-r", "-nolower", "-nl"]
-        if not opts:
+        if not opts or "-nl" in opts or "-nolower" in opts:
             opts = ["-s"]
             opts.append(random.choice(["-m", "-p", "-r"]))
         for i in opts:
