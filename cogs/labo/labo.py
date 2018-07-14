@@ -126,6 +126,7 @@ class Labo:
     @commands.command(aliases=["triso"], pass_context=True)
     async def trisomize(self, ctx, *texte):
         """Trisomise le texte donné, basé sur le délire chelou de Koala et Francis"""
+        texte = list(texte)
         opts = [r for r in texte if r.startswith("-")]
         # avl = ["-mix", "-shuffle", "-melange", "-ajout", "-add", "-plus", "-moins", "-retirer", "-remove",
         # "-replace", "-remplace", "-s", "-p", "-m", "-r", "-nolower", "-nl"]
