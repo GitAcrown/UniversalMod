@@ -131,7 +131,7 @@ class Labo:
         # avl = ["-mix", "-shuffle", "-melange", "-ajout", "-add", "-plus", "-moins", "-retirer", "-remove",
         # "-replace", "-remplace", "-s", "-p", "-m", "-r", "-nolower", "-nl"]
         if not opts or opts == ["-nl"] or opts == ["-nolower"]:
-            opts = ["-s"]
+            opts.append("-s")
             opts.append(random.choice(["-m", "-p", "-r"]))
         for i in opts:
             if i in texte:
