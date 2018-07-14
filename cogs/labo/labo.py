@@ -157,7 +157,7 @@ class Labo:
                 rdn = random.randint(0, len(t) - 1)
                 t = t.replace(t[rdn], random.choice(char), 1)
             if comparelist(opts, ["-moins", "-retirer", "-remove", "-m"]):
-                t.replace(random.choice([_ for _ in t]), random.choice(char))
+                t.replace(random.choice([_ for _ in t]), "", 1)
             if comparelist(opts, ["-ajout", "-add", "-plus", "-p"]):
                 place = random.randint(0, len(t) - 1)
                 t = t[:place] + random.choice(char) + t[place:]
