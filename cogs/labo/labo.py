@@ -126,17 +126,37 @@ class Labo:
     @commands.command(aliases=["triso"], pass_context=True)
     async def trisomize(self, ctx, *texte):
         """Trisomise le texte donné, basé sur le délire chelou de Koala et Francis"""
+        opts = [r for r in texte if r.startswith("-")]
+        # avl = ["-mix", "-shuffle", "-melange", "-ajout", "-add", "-plus", "-moins", "-retirer", "-remove",
+        # "-replace", "-remplace", "-s", "-p", "-m", "-r", "-nolower", "-nl"]
+        if not opts:
+            opts = ["-s"]
+            opts.append(random.choice(["-m", "-p", "-r"]))
+        for i in opts:
+            if i in texte:
+                texte.remove(i)
         s = []
         char = [i for i in "abcdefghijklmnopqrstuvwxyz"]
+
+        def comparelist(l1: list, l2: list):
+            for _ in l1:
+                if _ in l2:
+                    return _
+            return False
+
         for t in texte:
-            if random.randint(0, 1) == 1:
-                shuffle = ''.join(random.sample(t, len(t)))
+            if comparelist(opts, ["-replace", "-remplace", "-r"]):
                 rdn = random.randint(0, len(t) - 1)
-                shuffle = shuffle.replace(shuffle[rdn], random.choice(char), 1)
-            else:
-                t += random.choice(char)
-                shuffle = ''.join(random.sample(t, len(t)))
-            s.append(shuffle.lower())
+                t = t.replace(t[rdn], random.choice(char), 1)
+            if comparelist(opts, ["-moins", "-retirer", "-remove", "-m"]):
+                t.replace(random.choice([_ for _ in t]), random.choice(char))
+            if comparelist(opts, ["-ajout", "-add", "-plus", "-p"]):
+                place = random.randint(0, len(t) - 1)
+                t = t[:place] + random.choice[char] + t[place:]
+            if comparelist(opts, ["-mix", "-shuffle", "-melange", "-s"]):
+                t = ''.join(random.sample(t, len(t)))
+            if not comparelist(opts, ["-nolower", "-nl"]):
+                s.append(t.lower())
         await self.bot.say(" ".join(s))
 
     @commands.command(pass_context=True)
