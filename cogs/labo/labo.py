@@ -152,7 +152,7 @@ class Labo:
                 t.replace(random.choice([_ for _ in t]), random.choice(char))
             if comparelist(opts, ["-ajout", "-add", "-plus", "-p"]):
                 place = random.randint(0, len(t) - 1)
-                t = t[:place] + random.choice[char] + t[place:]
+                t = t[:place] + random.choice(char) + t[place:]
             if comparelist(opts, ["-mix", "-shuffle", "-melange", "-s"]):
                 t = ''.join(random.sample(t, len(t)))
             if not comparelist(opts, ["-nolower", "-nl"]):
