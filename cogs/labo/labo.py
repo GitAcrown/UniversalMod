@@ -158,6 +158,8 @@ class Labo:
                 t = ''.join(random.sample(t, len(t)))
             if not comparelist(opts, ["-nolower", "-nl"]):
                 s.append(t.lower())
+            else:
+                s.append(t)
         await self.bot.say(" ".join(s))
 
     @commands.command(pass_context=True)
