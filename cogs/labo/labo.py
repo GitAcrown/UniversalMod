@@ -160,7 +160,13 @@ class Labo:
                 s.append(t.lower())
             else:
                 s.append(t)
-        await self.bot.say(" ".join(s))
+        if s:
+            await self.bot.say(" ".join(s))
+        else:
+            await self.bot.say(random.choice(["Ce ne serait pas vous le triso qui ne sait pas utiliser cette commande ?",
+                                              "Vous oubliez pas quelque chose ?", "Oui d'accord, mais pour quel texte ?",
+                                              "Il n'y a pas que les options dans la vie.", "C'est bien beau de me donner les options mais pour quel texte ?",
+                                              "Hey, c'est toi le triso, c'est sur quel texte que je dois appliquer ces options ?"]))
 
     @commands.command(pass_context=True)
     @checks.admin_or_permissions(ban_members=True)
