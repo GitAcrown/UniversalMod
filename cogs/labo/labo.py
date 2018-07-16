@@ -123,6 +123,7 @@ class Labo:
                     return member
             return None
 
+
     @commands.command(aliases=["triso"], pass_context=True)
     async def trisomize(self, ctx, *texte):
         """Trisomise le texte donné, basé sur le délire chelou de Koala et Francis
@@ -695,9 +696,8 @@ class Labo:
         furl = "http://www.ohda.org/imgs/soccer-roll-logo.gif"
         today = datetime.now()
         date = lambda dt: dt.strftime("%d/%m")
-        em = discord.Embed(title="Matchs")
         n = 0
-        for f in comp.get_fixtures():
+        """for f in comp.get_fixtures():
             localdate = f.date + timedelta(hours=2)
             if localdate.strftime("%d/%m") == today.strftime("%d/%m"):
                 if f.result:
@@ -752,7 +752,10 @@ class Labo:
                     if self.cc.convert(names=f.away_team, to='ISO2').lower() != "not found" else ""
                 em.add_field(name="{} {} VS {} {}".format(flaghome, f.home_team, flagaway, f.away_team), value=txt, inline=False)
             if n == 5:
-                break
+                break"""
+        em = discord.Embed(title="Résultat", description="Vainqueur : **France**\n"
+                                                       "La France est championne du monde de "
+                                                       "football 2018 ! Bravo à eux !")
         em.set_footer(text="Coupe du Monde 2018 en Russie", icon_url=furl)
         await self.bot.say(embed=em)
 
