@@ -175,6 +175,9 @@ class Labo:
                             txtl.append(i.upper())
                             n += 1
                             continue
+                        else:
+                            txtl.append(i)
+                            continue
                     txtl.append(i)
                     n += 1
                 t = "".join(txtl)
