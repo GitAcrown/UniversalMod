@@ -133,6 +133,7 @@ class Labo:
         Retirer une lettre : -retirer -remove -moins -m
         Mixer les lettres : -mix -shuffle -melange -s
         Remplacer une lettre : -replace -remplace -r
+        Alterner Maj/Min : -alterner -majmin -a
         Ne pas mettre en minuscule : -nolower -nl"""
         texte = list(texte)
         opts = [r for r in texte if r.startswith("-")]
@@ -164,10 +165,22 @@ class Labo:
                 t = t[:place] + random.choice(char) + t[place:]
             if comparelist(opts, ["-mix", "-shuffle", "-melange", "-s"]):
                 t = ''.join(random.sample(t, len(t)))
-            if not comparelist(opts, ["-nolower", "-nl"]):
-                s.append(t.lower())
+            if comparelist(opts, ["-majmin", "-alterner", "-a"]):
+                t = t if comparelist(opts, ["-nolower", "-nl"]) else t.lower()
+                n = 0
+                txtl = []
+                for i in t:
+                    if n % 2 == 0:
+                        if i != "i":
+                            txtl.append(i.upper())
+                            continue
+                    txtl.append(i)
+                    n += 1
+                t = "".join(txtl)
             else:
-                s.append(t)
+                if not comparelist(opts, ["-nolower", "-nl"]):
+                    t = t.lower()
+            s.append(t)
         if s:
             await self.bot.say(" ".join(s))
         else:
