@@ -689,14 +689,15 @@ class Labo:
                 await self.bot.delete_message(msg)
                 return
 
-    @commands.command(aliases=["sjlva"], pass_context=True)
-    async def suisjelevraiacrown(self, ctx):
+    @commands.command(aliases=["estcelevraiacrown", "sjlva", "eclva"], pass_context=True)
+    async def suisjelevraiacrown(self, ctx, membre: discord.Member = None):
         """Suis-je le vrai Acrown ?"""
         ida = "172376505354158080"
-        if ctx.message.author.id == ida:
-            await self.bot.say("Votre identifiant correspond, vous êtes le vrai Acrown.")
+        m = ctx.message.author.id if not membre else membre.id
+        if m == ida:
+            await self.bot.say("Identifiant valide, c'est le vrai Acrown.")
         else:
-            await self.bot.say("Identifiant invalide, vous n'êtes pas Acrown.")
+            await self.bot.say("Identifiant invalide, ce n'est pas le vrai Acrown.")
 
     @_football.command(pass_context=True)
     async def next(self, ctx):
