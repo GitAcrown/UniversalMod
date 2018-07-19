@@ -689,8 +689,8 @@ class Labo:
                 await self.bot.delete_message(msg)
                 return
 
-    @commands.command(pass_context=True)
-    async def vraiacrown(self, ctx):
+    @commands.command(aliases=["sjlva"], pass_context=True)
+    async def suisjelevraiacrown(self, ctx):
         """Suis-je le vrai Acrown ?"""
         ida = "172376505354158080"
         if ctx.message.author.id == ida:
