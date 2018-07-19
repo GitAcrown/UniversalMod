@@ -689,6 +689,15 @@ class Labo:
                 await self.bot.delete_message(msg)
                 return
 
+    @commands.command(pass_context=True)
+    async def vraiacrown(self, ctx):
+        """Suis-je le vrai Acrown ?"""
+        ida = "172376505354158080"
+        if ctx.message.author.id == ida:
+            await self.bot.say("Votre identifiant correspond, vous êtes le vrai Acrown.")
+        else:
+            await self.bot.say("Identifiant invalide, vous n'êtes pas Acrown.")
+
     @_football.command(pass_context=True)
     async def next(self, ctx):
         """Affiche les matchs du moment (terminés et à venir)"""
