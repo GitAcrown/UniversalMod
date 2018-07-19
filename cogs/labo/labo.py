@@ -173,6 +173,7 @@ class Labo:
                     if n % 2 == 0:
                         if i != "i":
                             txtl.append(i.upper())
+                            n += 1
                             continue
                     txtl.append(i)
                     n += 1
