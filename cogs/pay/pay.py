@@ -564,7 +564,7 @@ class Pay:
     async def historique(self, ctx, user: discord.Member = None):
         """Affiche les 20 dernières transactions du membre"""
         user = user if user else ctx.message.author
-        data = self.api.get_account(user, ignore_close=True)
+        data = self.pay.get_account(user, ignore_close=True)
         server = ctx.message.server
         if data:
             jour = time.strftime("%d/%m/%Y", time.localtime())
