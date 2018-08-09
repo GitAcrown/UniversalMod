@@ -666,7 +666,7 @@ class Pay:
             n += 1
         em = discord.Embed(title="Palmares", description=txt, color=0xff4971)
         total = self.pay.total_server_credits(server)
-        em.set_footer(text="Serveur {} | Total = {} {}".format(server.name, total, symb))
+        em.set_footer(text="Serveur {} | Total = {} {}".format(server.name, total,self.pay.get_money(server, total)))
         try:
             await self.bot.say(embed=em)
         except:
@@ -692,7 +692,7 @@ class Pay:
                     then = datetime.strptime(data["PLUS"]["RJ"]["last"], "%d/%m/%Y")
                     delta_jour = (datetime.now() - then).days if (datetime.now() - then).days <= 7 else 7
                 else:
-                    delta_jour = 0
+                    delta_jour = 1
                 data["PLUS"]["RJ"]["last"] = today
                 if hier not in data["PLUS"]["RJ"]["suite"]:
                     data["PLUS"]["RJ"]["suite"] = [today]
