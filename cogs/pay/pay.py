@@ -227,10 +227,8 @@ class PayAPI:
             trs_list = []
             for user in self.data[serv]["USERS"]:
                 for trs in self.data[serv]["USERS"][user]["TRSAC"]:
-                    trs_list.append(trs)
-            trs = [t for t in trs_list if t[0] == trs_id][0]
-            if trs:
-                return self._transaction_obj(trs) if not w else trs
+                    if trs[0] == trs_id:
+                        return self._transaction_obj(trs) if not w else trs
         return False
 
     def ajt_transaction(self, user: discord.Member, type_t: str, somme: int, reason: str):
