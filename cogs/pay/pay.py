@@ -679,13 +679,13 @@ class Pay:
         server = ctx.message.server
         today = datetime.now().strftime("%d/%m/%Y")
         hier = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
-        data = self.pay.get_account(user, True)
-        if "RJ" not in data["PLUS"]:
-            data["PLUS"]["RJ"] = {"last": None,
-                                  "suite": []}
         base_rj = 20
         base_jc = 5
         if self.pay.verify(ctx):
+            data = self.pay.get_account(user, True)
+            if "RJ" not in data["PLUS"]:
+                data["PLUS"]["RJ"] = {"last": None,
+                                      "suite": []}
             if today != data["PLUS"]["RJ"]["last"]:
                 money = self.pay.get_money_name(server, symbole=True)
                 if data["PLUS"]["RJ"]["last"]:
