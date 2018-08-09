@@ -554,7 +554,7 @@ class Pay:
                         desc = i.desc if len(i.desc) <= 40 else i.desc[:40] + "..."
                         txt += "**{}** ─ *{}* `#{}`\n".format(somme, desc, i.id)
                     em.add_field(name="Historique", value=txt)
-                em.footer(text="Iota Pay | {0}pay histo ─ Voir historique".format(ctx.prefix))
+                em.set_footer(text="Iota Pay | {0}pay histo ─ Voir historique".format(ctx.prefix))
                 await self.bot.say(embed=em)
             return
         else:
