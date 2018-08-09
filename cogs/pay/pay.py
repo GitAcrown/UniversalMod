@@ -224,9 +224,13 @@ class PayAPI:
     def id_to_transaction(self, trs_id: str, w: bool = False):
         """Retrouve la transaction liée à l'identifiant"""
         for serv in self.data:
-            trs_list = [self.data[serv]["USERS"][user]["TRSAC"] for user in self.data[serv]["USERS"]]
-            trs = [t for t in trs_list if t[0] == trs_id]
-            if trs: return self._transaction_obj(trs) if not w else trs
+            trs_list = []
+            for user in self.data[serv]["USERS"]:
+                for trs in self.data[serv]["USERS"][user]["TRSAC"]:
+                    trs_list.append(trs)
+            trs = [t for t in trs_list if t[0] == trs_id][0]
+            if trs:
+                return self._transaction_obj(trs) if not w else trs
         return False
 
     def ajt_transaction(self, user: discord.Member, type_t: str, somme: int, reason: str):
