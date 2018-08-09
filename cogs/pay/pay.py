@@ -688,8 +688,11 @@ class Pay:
         if self.pay.verify(ctx):
             if today != data["PLUS"]["RJ"]["last"]:
                 money = self.pay.get_money_name(server, symbole=True)
-                then = datetime.strptime(data["PLUS"]["RJ"]["last"], "%d/%m/%Y")
-                delta_jour = (datetime.now() - then).days if (datetime.now() - then).days <= 7 else 7
+                if data["PLUS"]["RJ"]["last"]:
+                    then = datetime.strptime(data["PLUS"]["RJ"]["last"], "%d/%m/%Y")
+                    delta_jour = (datetime.now() - then).days if (datetime.now() - then).days <= 7 else 7
+                else:
+                    delta_jour = 0
                 data["PLUS"]["RJ"]["last"] = today
                 if hier not in data["PLUS"]["RJ"]["suite"]:
                     data["PLUS"]["RJ"]["suite"] = [today]
