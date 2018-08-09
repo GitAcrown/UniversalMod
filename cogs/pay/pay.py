@@ -714,13 +714,13 @@ class Pay:
                 else:
                     bonus_txt = "• **Bonus** \"Jours consécutif\" ─ **{}**{}".format(bonus_jc, money) if \
                         bonus_jc > 0 else ""
+                self.pay.gain_credits(user, rj + bonus_jc, "Revenus")
                 em = discord.Embed(title="Revenus",
                                    description="• **Revenu journalier** ─ **{}**{}{}{}".format(
                                        rj, money, save_txt, bonus_txt),
                                    color= user.color)
                 em.set_footer(text="Iota Pay | Tu as désormais {} {}".format(self.pay.get_account(user).solde,
                                                                              self.pay.get_money_name(server, rj)))
-                self.pay.gain_credits(user, rj + bonus_jc, "Revenus")
                 await self.bot.say(embed=em)
             else:
                 await self.bot.say("**Refusé** ─ Tu as déjà pris ton revenu aujourd'hui")
