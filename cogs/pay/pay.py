@@ -571,7 +571,7 @@ class Pay:
         if data:
             jour = time.strftime("%d/%m/%Y", time.localtime())
             heure = time.strftime("%H:%M", time.localtime())
-            txt = "*Consultez une transaction en détail avec* `{}pay show`\n\n"
+            txt = "*Consultez une transaction en détail avec* `{}pay show`\n\n".format(ctx.prefix)
             n = 1
             for t in self.pay.get_lasts_transactions(user, 0):
                 temps = t.ts_jour
@@ -613,12 +613,12 @@ class Pay:
         else:
             await self.bot.say("**Erreur** ─ Identifiant invalide (composé de 4 lettres et/ou chiffres)")
 
-    @pay_account.command(aliases=["don"], pass_context=True)
+    @commands.command(aliases=["don"], pass_context=True)
     async def give(self, ctx, user: discord.Member, somme: int, *raison):
         """Transférer de l'argent à un autre membre"""
         server = ctx.message.server
         raison = " ".join(raison) if raison else "Don de {} pour {}".format(ctx.message.author.name, user.name)
-        if somme < 0:
+        if somme > 0:
             if self.pay.get_account(user):
                 if await self.pay.verify(ctx):
                     if self.pay.enough_credits(ctx.message.author.name, somme):
