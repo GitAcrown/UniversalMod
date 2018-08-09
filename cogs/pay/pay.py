@@ -621,7 +621,7 @@ class Pay:
         if somme > 0:
             if self.pay.get_account(user):
                 if await self.pay.verify(ctx):
-                    if self.pay.enough_credits(ctx.message.author.name, somme):
+                    if self.pay.enough_credits(ctx.message.author, somme):
                         cool = self.pay.get_cooldown(ctx.message.author, "give")
                         if not cool:
                             if self.pay.transfert_credits(ctx.message.author, user, somme, raison):
