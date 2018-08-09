@@ -826,7 +826,7 @@ class Pay:
                         gain = offre - base
                         self.pay.gain_credits(user, gain, "Gain machine à sous")
                         em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp,
-                                           color=0xff4971)
+                                           color=0x49ff6a)
                     else:
                         self.pay.perte_credits(user, base, "Perte machine à sous")
                         em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp,
