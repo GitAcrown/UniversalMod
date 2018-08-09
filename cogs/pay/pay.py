@@ -532,7 +532,7 @@ class Pay:
         data = self.pay.get_account(user, ignore_close=True)
         server = ctx.message.server
         if same or data:
-            if await self.pay.verify(user):
+            if await self.pay.verify(ctx, user):
                 blocktxt = " [Suspendu]" if not data.open else ""
                 money, symb = self.pay.get_money_name(server, data.solde), self.pay.get_money_name(server, symbole=True)
                 gains = self.pay.get_total_day_gain(user)
