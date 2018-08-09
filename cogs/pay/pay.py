@@ -189,12 +189,12 @@ class PayAPI:
         await self.bot.say("**Erreur** ─ Je n'ai pas compris ...")
         return False
 
-    async def verify(self, ctx, user: discord.Member = None):
+    async def verify(self, ctx, user: discord.Member = None, ignore_close: bool=False):
         """Vérifie si le membre possède un compte et lui demande automatiquement sa création en cas de besoin"""
         user = user if user else ctx.message.author
         data = self.get_account(user=user, ignore_close=True)
         if data:
-            if data.open:
+            if data.open or ignore_close:
                 return True
             await self.bot.say("**Compte bloqué** ─ Il semblerait que ton compte soit bloqué. "
                                "Consulte un modérateur pour en savoir plus.")
@@ -258,7 +258,7 @@ class PayAPI:
 
     def get_lasts_transactions(self, user: discord.Member, nb: int = 1):
         """Renvoie les dernières transactions du membre"""
-        user = self.get_account(user, True)
+        user = self.get_account(user, True, ignore_close=True)
         if user:
             if nb >= 1:
                 h = user['TRSAC'][-nb:]
@@ -534,7 +534,7 @@ class Pay:
         data = self.pay.get_account(user, ignore_close=True)
         server = ctx.message.server
         if same or data:
-            if await self.pay.verify(ctx, user):
+            if await self.pay.verify(ctx, user, True):
                 data = self.pay.get_account(user, ignore_close=True)
                 blocktxt = " [Suspendu]" if not data.open else ""
                 money, symb = self.pay.get_money_name(server, data.solde), self.pay.get_money_name(server, symbole=True)
@@ -916,10 +916,10 @@ class Pay:
         """Bloque le compte d'un membre"""
         data = self.pay.get_account(user, ignore_close=True)
         if data.open:
-            self.pay.get_account(user, True)["OPEN"] = False
+            self.pay.get_account(user, True, ignore_close=True)["OPEN"] = False
             await self.bot.say("**Compte fermé** ─ Ce membre ne pourra plus utiliser son compte")
         else:
-            self.pay.get_account(user, True)["OPEN"] = True
+            self.pay.get_account(user, True, ignore_close=True)["OPEN"] = True
             await self.bot.say("**Compte rouvert** ─ Ce membre peut de nouveau utiliser son compte")
         self.pay.forcesave()
 
