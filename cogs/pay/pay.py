@@ -832,7 +832,8 @@ class Pay:
                         em = discord.Embed(title="Machine à sous ─ {}".format(user.name), description=disp,
                                            color=0xff4971)
                     em.set_footer(text=gaintxt.format(offre, self.pay.get_money_name(server, symbole=True)))
-                    await self.bot.edit_message(msg, embed=em)
+                    await self.bot.delete_message(msg)
+                    await self.bot.say(embed=em)
                 else:
                     await self.bot.say("**Cooldown** ─ Patientez encore {}s".format(cool))
             else:
