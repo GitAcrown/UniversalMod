@@ -835,7 +835,7 @@ class Pay:
                     await self.bot.delete_message(msg)
                     await self.bot.say(embed=em)
                 else:
-                    await self.bot.say("**Cooldown** ─ Patientez encore {}s".format(cool))
+                    await self.bot.say("**Cooldown** ─ Patientez encore {}s".format(cool.string))
             else:
                 await self.bot.say("**Solde insuffisant** ─ Réduisez votre offre si possible")
         else:
