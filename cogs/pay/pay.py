@@ -620,7 +620,7 @@ class Pay:
         raison = " ".join(raison) if raison else "Don de {} pour {}".format(ctx.message.author.name, user.name)
         if somme < 0:
             if self.pay.get_account(user):
-                if self.pay.verify(ctx):
+                if await self.pay.verify(ctx):
                     if self.pay.enough_credits(ctx.message.author.name, somme):
                         cool = self.pay.get_cooldown(ctx.message.author, "give")
                         if not cool:
@@ -683,7 +683,7 @@ class Pay:
         hier = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
         base_rj = 20
         base_jc = 5
-        if self.pay.verify(ctx):
+        if await self.pay.verify(ctx):
             data = self.pay.get_account(user, True)
             if "RJ" not in data["PLUS"]:
                 data["PLUS"]["RJ"] = {"last": None,
@@ -751,7 +751,7 @@ class Pay:
             await self.bot.say("**Offre invalide** | Elle doit être comprise entre 10 et 300.")
             return
         base = offre
-        if self.pay.verify(ctx):
+        if await self.pay.verify(ctx):
             if self.pay.enough_credits(user, offre):
                 cool = self.pay.get_cooldown(user, "slot")
                 if not cool:
