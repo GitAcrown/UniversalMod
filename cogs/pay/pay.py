@@ -681,7 +681,7 @@ class Pay:
         hier = (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
         data = self.pay.get_account(user, True)
         if "RJ" not in data["PLUS"]:
-            data["PLUS"]["RJ"] = {"last": today,
+            data["PLUS"]["RJ"] = {"last": None,
                                   "suite": []}
         base_rj = 20
         base_jc = 5
