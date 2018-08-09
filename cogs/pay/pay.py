@@ -710,9 +710,9 @@ class Pay:
                 bonus_jc = (len(data["PLUS"]["RJ"]["suite"]) - 1) * base_jc
                 if self.pay.get_account(user).solde >= 10000:
                     bonus_jc = 0
-                    bonus_txt = "• **Bonus** \"Jours consécutif\" ─ Non percevable (+ 10 000)"
+                    bonus_txt = "\n• **Bonus** \"Jours consécutif\" ─ Non percevable (+ 10 000)"
                 else:
-                    bonus_txt = "• **Bonus** \"Jours consécutif\" ─ **{}**{}".format(bonus_jc, money) if \
+                    bonus_txt = "\n• **Bonus** \"Jours consécutif\" ─ **{}**{}".format(bonus_jc, money) if \
                         bonus_jc > 0 else ""
                 self.pay.gain_credits(user, rj + bonus_jc, "Revenus")
                 em = discord.Embed(title="Revenus",
