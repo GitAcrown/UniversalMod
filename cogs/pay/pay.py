@@ -31,6 +31,9 @@ class PayAPI:
         fileIO("data/pay/data.json", "save", self.data)
         return True
 
+    def api_pong(self):
+        """Renvoie un pong signifiant que l'API est connectée"""
+        return True
 
     def backup_capitalAPI(self, server: discord.Server):
         """Backup les données de l'ancien module Capital"""
@@ -202,7 +205,6 @@ class PayAPI:
         done = await self.sign_up(ctx)
         if done:
             return True
-        await self.bot.say("**Impossible** ─ Tu as besoin d'un compte *Pay*")
         return False
 
     # HISTORIQUE ------------------------
@@ -500,7 +502,8 @@ class Pay:
     """Système monétaire virtuel et systèmes divers exploitant celle-ci"""
     def __init__(self, bot):
         self.bot = bot
-        self.pay = PayAPI(bot, "data/pay/data.json")  # Pour importer l'API 'Pay' ci-dessus
+        self.pay = PayAPI(bot, "data/pay/data.json")
+        # Pour importer l'API : self.bot.get_cog("Pay").pay
 
     def check(self, reaction, user):
         return not user.bot
