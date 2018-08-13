@@ -127,9 +127,9 @@ class Labo:
         return user.name
 
     @commands.command(pass_context=True)
-    async def supinfo(self, ctx):
+    async def supinfo(self, ctx, user: discord.Member):
         """Retrouve les informations du membre"""
-        await self.bot.say(self.get_info(ctx.message.author))
+        await self.bot.say(self.get_info(user))
 
     @commands.command(aliases=["triso"], pass_context=True)
     async def trisomize(self, ctx, *texte):
