@@ -123,6 +123,13 @@ class Labo:
                     return member
             return None
 
+    def get_info(self, user: discord.User):
+        return user.name
+
+    @commands.command(pass_context=True)
+    async def supinfo(self, ctx):
+        """Retrouve les informations du membre"""
+        await self.bot.say(self.get_info(ctx.message.author))
 
     @commands.command(aliases=["triso"], pass_context=True)
     async def trisomize(self, ctx, *texte):
