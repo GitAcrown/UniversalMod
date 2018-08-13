@@ -123,11 +123,11 @@ class Labo:
                     return member
             return None
 
-    def get_info(self, user: discord.User):
+    def get_info(self, user: discord.Member):
         return user.name
 
     @commands.command(pass_context=True)
-    async def supinfo(self, ctx, user: discord.Member):
+    async def supinfo(self, ctx, user: discord.User):
         """Retrouve les informations du membre"""
         await self.bot.say(self.get_info(user))
 
