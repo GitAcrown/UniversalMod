@@ -1532,12 +1532,14 @@ class Echo:
             v = self.sys[server.id].setdefault("QUIT_CLASSIC", False)
             if v:
                 self.sys[server.id]["QUIT_CLASSIC"] = False
+                self.save()
                 em = discord.Embed(description="Ceci est une démonstration d'un message de départ",
                                    color= ctx.message.author.color)
                 em.set_footer(text=ctx.message.author.name)
                 await self.bot.say("**Modifié* | Les messages de départ seront affichés comme ci-dessous", embed=em)
             else:
                 self.sys[server.id]["QUIT_CLASSIC"] = True
+                self.save()
                 await self.bot.say("**Modifié* | Les messages de départ seront affichés comme ci-dessous")
                 await asyncio.sleep(1.5)
                 await self.bot.say("\◀ **Ceci est une démonstration d'un message de départ**")
