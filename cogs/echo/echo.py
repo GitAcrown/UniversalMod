@@ -1525,6 +1525,27 @@ class Echo:
         await self.bot.say("**Restaurés** | Les messages par défaut ont été restaurés")
 
     @_departmsg.command(pass_context=True)
+    async def classic(self, ctx):
+        """Active ou désactive le format 'Classique' des messages de départ"""
+        server = ctx.message.server:
+        if self.sys[server.id]["QUIT"]:
+            v = self.sys[server.id].setdefault("QUIT_CLASSIC", False)
+            if v:
+                self.sys[server.id]["QUIT_CLASSIC"] = False
+                em = discord.Embed(description="Ceci est une démonstration d'un message de départ",
+                                   color= ctx.message.author.color)
+                em.set_footer(text=ctx.message.author.name)
+                await self.bot.say("**Modifié* | Les messages de départ seront affichés comme ci-dessous", embed=em)
+            else:
+                self.sys[server.id]["QUIT_CLASSIC"] = True
+                await self.bot.say("**Modifié* | Les messages de départ seront affichés comme ci-dessous")
+                await asyncio.sleep(1.5)
+                await self.bot.say("\◀ **Ceci est une démonstration d'un message de départ**")
+        else:
+            await self.bot.say("**Erreur** | Vous devez d'abord définir un channel de départ avec "
+                               "`{}dpm channel`".format(ctx.prefix))
+
+    @_departmsg.command(pass_context=True)
     async def remove(self, ctx):
         """Supprimer un message de départ (Interface)"""
         server = ctx.message.server
@@ -1598,12 +1619,16 @@ class Echo:
         server = user.server
         self._set_server(server)
         if self.sys[server.id]["QUIT"]:
+            classic = self.sys[server.id].get("QUIT_CLASSIC", False)
             channel = self.bot.get_channel(self.sys[server.id]["QUIT"])
             msg = random.choice(self.sys[server.id]["QUIT_MSG"])
             msg = msg.format(user=user, channel=channel, server=server)
-            em = discord.Embed(description=msg, color=user.color)
-            em.set_footer(text=user.display_name)
-            await self.bot.send_message(channel, embed=em)
+            if classic:
+                await self.bot.send_message(channel, "\◀ {}".format(msg))
+            else:
+                em = discord.Embed(description=msg, color=user.color)
+                em.set_footer(text=user.display_name)
+                await self.bot.send_message(channel, embed=em)
 
 def check_folders():
     if not os.path.exists("data/echo"):
