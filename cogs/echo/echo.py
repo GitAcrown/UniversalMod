@@ -1623,11 +1623,15 @@ class Echo:
         if self.sys[server.id]["QUIT"]:
             classic = self.sys[server.id].get("QUIT_CLASSIC", False)
             channel = self.bot.get_channel(self.sys[server.id]["QUIT"])
-            msg = random.choice(self.sys[server.id]["QUIT_MSG"])
-            msg = msg.format(user=user, channel=channel, server=server)
             if classic:
+                msg = random.choice(self.sys[server.id]["QUIT_MSG"])
+                if "{user.mention}" in msg:
+                    msg = msg.replace("{user.mention}", "**{user.name}**")
+                msg = msg.format(user=user, channel=channel, server=server)
                 await self.bot.send_message(channel, "\◀ {}".format(msg))
             else:
+                msg = random.choice(self.sys[server.id]["QUIT_MSG"])
+                msg = msg.format(user=user, channel=channel, server=server)
                 em = discord.Embed(description=msg, color=user.color)
                 em.set_footer(text=user.display_name)
                 await self.bot.send_message(channel, embed=em)
