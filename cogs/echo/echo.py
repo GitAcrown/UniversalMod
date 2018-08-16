@@ -1527,7 +1527,7 @@ class Echo:
     @_departmsg.command(pass_context=True)
     async def classic(self, ctx):
         """Active ou désactive le format 'Classique' des messages de départ"""
-        server = ctx.message.server:
+        server = ctx.message.server
         if self.sys[server.id]["QUIT"]:
             v = self.sys[server.id].setdefault("QUIT_CLASSIC", False)
             if v:
