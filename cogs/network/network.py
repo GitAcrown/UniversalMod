@@ -169,11 +169,11 @@ class NetworkApp:
         """Retourne l'image liée au status"""
         if user.bot:
             return "https://i.imgur.com/VDJrha7.png"
-        elif user.status.online:
+        elif user.status == discord.Status.online:
             return "https://i.imgur.com/Cm8FC8L.png"
-        elif user.status.idle:
+        elif user.status == discord.Status.idle:
             return "https://i.imgur.com/tN5cDMU.png"
-        elif user.status.dnd:
+        elif user.status == discord.Status.dnd:
             return "https://i.imgur.com/gug7ZZv.png"
         else:
             return "https://i.imgur.com/HdrpmyE.png"
