@@ -204,7 +204,7 @@ class NetworkApp:
             return l
         return False
 
-    async def display_card(self, user: discord.Member, mini: bool = False):
+    async def display_card(self, user: discord.Member, mini: bool = False, brut: bool = False):
         """Affiche le profil d'un membre"""
         today = time.strftime("%d/%m/%Y", time.localtime())
         soc = self.get_account(user, "SOCIAL")
@@ -253,6 +253,8 @@ class NetworkApp:
             em.add_field(name="Changements", value=psetxt)
         rx = " | {}".format(user.game.name) if user.game else ""
         em.set_footer(text="ID — {}{}".format(user.id, rx), icon_url=self.get_status_img(user))
+        if brut:
+            return em
         await self.bot.say(embed=em)
 
 
@@ -325,7 +327,7 @@ class Network:
         """Affiche la carte Iota Network du membre"""
         membre = membre if membre else ctx.message.author
         if self.app.get_account(membre):
-            await self.bot.say(embed=await self.app.display_card(membre))
+            await self.app.display_card(membre)
         else:
             await self.bot.say("**Erreur** — Vous n'avez pas de compte Network")
 
@@ -569,7 +571,7 @@ class Network:
             miniemote = miniemote["minicard_emoji"]
             if type(reaction.emoji) == str:
                 if reaction.emoji == miniemote:
-                    await self.bot.send_message(author, await self.app.display_card(message.author, True))
+                    await self.bot.send_message(author, await self.app.display_card(message.author, True, True))
 
             server = message.server
             p = self.app.get_account(author)
