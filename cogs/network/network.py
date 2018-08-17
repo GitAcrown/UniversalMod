@@ -1,10 +1,7 @@
 # Ce module est volontairement très commenté afin d'aider ceux qui s'intéresseraient au code
 import os
-import random
 import re
-import string
 import time
-import asyncio
 from collections import namedtuple
 from datetime import datetime, timedelta
 
@@ -34,6 +31,10 @@ class NetworkApp:
         if self.session["SAVETICK"] == 100:
             fileIO("data/network/data.json", "save", self.data)
             self.session["SAVETICK"] = 0
+        return True
+
+    def reset(self):
+        fileIO("data/network/data.json", "save", {})
         return True
 
     def get_server_raw_data(self, server: discord.Server, sub: str = None):
@@ -218,7 +219,7 @@ class NetworkApp:
         val = "**Création** — {} · **{}**j\n".format(crea_date, crea_jours)
         val += "**Arrivée** — {} · **{}**j\n".format(ariv_date, ariv_jours)
         val += "**1ère trace** — {} · **{}**j\n".format(old_date, old_jours)
-        val += "\🔥{} — {}".format(len(flammes), flammes[0])
+        val += "\🔥{} — {}".format(len(flammes), flammes[0]) if flammes else "\🔥0 — {}".format(today)
         vtxt = "\n‣ Connecté sur {}".format(user.voice.voice_channel.name) if user.voice.voice_channel else ""
         if not mini:
             logs = self.get_account(user, "LOGS")[-3:]
@@ -284,6 +285,12 @@ class Network:
         """Force l'API Network à sauvegarder les données"""
         self.app.save(force=True)
         await self.bot.say("**Sauvegarde effectuée avec succès**")
+
+    @netsys.command(pass_context=True, hidden=True)
+    async def resetall(self, ctx):
+        """Reset les données de Network"""
+        self.app.reset()
+        await self.bot.say("**Reset effectué avec succès**")
 
     @netsys.command(pass_context=True)
     async def miniemoji(self, ctx, emoji: str = None):
@@ -527,7 +534,7 @@ class Network:
     async def network_msgadd(self, message):
         """Détection des nouveaux messages"""
         if hasattr(message, "server"):
-            date, hier = datetime.now().strftime("%d%m%Y"), (datetime.now() - timedelta(days=1)).strftime("%d%m%Y")
+            date, hier = datetime.now().strftime("%d/%m/%Y"), (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
             author, server = message.author, message.server
             p = self.app.get_account(author)
             p["STATS"]["msg_total"] += 1
