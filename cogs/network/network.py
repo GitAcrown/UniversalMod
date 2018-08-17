@@ -325,7 +325,8 @@ class Network:
         """Active/Désactive la synchonisation de la carte avec les autres serveurs
 
         Sens: ICI >>> sync >>> Autres serveurs"""
-        u = self.app.get_account(ctx.message.author)["SYS"]
+        u = self.app.get_account(ctx.message.author)
+        u = u["SYS"]
         if u["sync"]:
             u["sync"] = False
             await self.bot.say("**Synchronisation désactivée** — "
@@ -340,7 +341,8 @@ class Network:
     @_carte.command(pass_context=True)
     async def bio(self, ctx, *texte):
         """Modifie la bio de sa carte Network"""
-        u = self.app.get_account(ctx.message.author)["SOCIAL"]
+        u = self.app.get_account(ctx.message.author)
+        u = u["SOCIAL"]
         if texte:
             u["bio"] = " ".join(texte)
             await self.bot.say("**Bio ajoutée** — Votre bio s'affichera en haut de votre carte")
@@ -356,7 +358,8 @@ class Network:
         """Modifier sa vitrine
 
         Ne supporte que des URL, ne pas en mettre retire l'image de votre carte"""
-        u = self.app.get_account(ctx.message.author)["SOCIAL"]
+        u = self.app.get_account(ctx.message.author)
+        u = u["SOCIAL"]
         if url:
             if u["image"]:
                 await self.bot.say("**Image modifiée** — Elle s'affichera en bas de votre carte")
@@ -374,7 +377,8 @@ class Network:
         """Changer la couleur du bord gauche de sa carte
 
         Ne pas mettre de couleur affichera la couleur de votre pseudo sur le serveur"""
-        u = self.app.get_account(ctx.message.author)["SOCIAL"]
+        u = self.app.get_account(ctx.message.author)
+        u = u["SOCIAL"]
         col = couleur_hex
         if col:
             if "#" in col:
@@ -530,11 +534,11 @@ class Network:
             p = self.app.get_account(author)
             p["STATS"]["msg_total"] += 1
 
-            if p["SOCIAL"]["flammes"].get(hier, False):
+            if p["STATS"]["flammes"].get(hier, False):
                 if date not in p["SOCIAL"]["flammes"]:
-                    p["SOCIAL"]["flammes"].append(date)
+                    p["STATS"]["flammes"].append(date)
             elif date not in p["SOCIAL"]["flammes"]:
-                p["SOCIAL"]["flammes"] = [date]
+                p["STATS"]["flammes"] = [date]
 
             if ":" in message.content:
                 output = re.compile(':(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
@@ -600,6 +604,7 @@ class Network:
 
     async def network_perso(self, before, after):
         """Détection des changements sur un profil d'un membre"""
+        p = self.app.get_account(after)
         if after.name != before.name:
             self.app.add_log(after, "Changement de pseudo pour *{}*".format(after.name))
         if after.display_name != before.display_name:
@@ -619,7 +624,7 @@ class Network:
                     self.app.add_log(after, "A perdu le rôle *{}*".format(before.top_role.name))
                 else:
                     self.app.add_log(after, "Ne possède plus de rôles")
-        p = self.app.get_account(after)["SYS"]["_cache_games"]
+        p = p["SYS"]["_cache_games"]
         genp = self.app.get_all_cache_games()
         if after.game:
             if after.game.name:
