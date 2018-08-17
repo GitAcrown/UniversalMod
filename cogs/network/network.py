@@ -36,19 +36,18 @@ class NetworkApp:
             self.session["SAVETICK"] = 0
         return True
 
-    def get_server_raw_data(self, server: discord.Server):
+    def get_server_raw_data(self, server: discord.Server, sub: str = None):
         """Retourne les données Network brut d'un serveur"""
         if server.id not in self.data:
             sysdef = {"minicard_emoji": "👤"}
             self.data[server.id] = {"SYS": sysdef,
                                     "USERS": {}}
             self.save(True)
-        return self.data[server.id]
+        return self.data[server.id][sub] if sub else self.data[server.id]
 
-    def get_account(self, user: discord.Member):
+    def get_account(self, user: discord.Member, sub: str = None):
         """Retourne les données Network d'un membre"""
-        data = self.get_server_raw_data(user.server)
-        data = data["USERS"]
+        data = self.get_server_raw_data(user.server, "USERS")
         if user.id not in data:
             sys = {"sync": True,
                    "_cache_games": [],
@@ -70,7 +69,7 @@ class NetworkApp:
                              "OLDEST": time.time()}
             self.backup(user)
             self.save()
-        return data[user.id]
+        return data[user.id][sub] if sub else data[user.id]
 
     def backup(self, user: discord.Member):
         """Backup les données SOCIAL d'un membre"""
@@ -112,10 +111,10 @@ class NetworkApp:
     def add_log(self, user: discord.Member, event: str, universal=False):
         jour = time.strftime("%d/%m/%Y", time.localtime())
         heure = time.strftime("%H:%M", time.localtime())
-        p = self.get_account(user)["LOGS"]
+        p = self.get_account(user, "LOGS")
         p.append([heure, jour, event])
         if universal:
-            if self.get_account(user)["SYS"]["sync"]:
+            if self.get_account(user, "SYS")["sync"]:
                 for s in self.data:
                     if user.id in self.data[s]:
                         self.data[s][user.id]["LOGS"].append([heure, jour, event])
@@ -123,7 +122,7 @@ class NetworkApp:
 
     def sync_account(self, user: discord.Member, to_sync:str, sub_sync:str = False, force: bool = False):
         """Synchronise certains champs entre tous les serveurs du membre"""
-        if self.get_account(user)["SYS"]["sync"] or force:
+        if self.get_account(user, "SYS")["sync"] or force:
             base = self.data[user.server.id][user.id].get(to_sync, False)
             if base:
                 for serv in self.data:
@@ -158,7 +157,7 @@ class NetworkApp:
         total = []
         for server in self.data:
             for user in self.data[server]:
-                for g in self.data[server][user]["SYS"]["_cache_games"]:
+                for g in self.data[server]["USERS"][user]["SYS"]["_cache_games"]:
                     if g not in total:
                         total.append(g)
         return total
@@ -193,7 +192,7 @@ class NetworkApp:
         bank = pay.sum_pay_data(user)
         net = self.sum_network_data(user)
         # TODO: Ajouter plus d'add-ons en champs (Network, Karma, Assistant...)
-        soc = self.get_account(user)["SOCIAL"]
+        soc = self.get_account(user, "SOCIAL")
         l = []
         if soc["plus"]:
             for i in soc["plus"]:
@@ -205,22 +204,22 @@ class NetworkApp:
     async def display_card(self, user: discord.Member, mini: bool = False):
         """Affiche le profil d'un membre"""
         today = time.strftime("%d/%m/%Y", time.localtime())
-        soc = self.get_account(user)["SOCIAL"]
+        soc = self.get_account(user, "SOCIAL")
         titlename = user.name if user.display_name == user.name else "{} «{}»".format(user.name, user.display_name)
         desc = soc["bio"] if soc["bio"] else ""
         colorset = soc["color"] if soc["color"] else user.color
         crea_date, crea_jours = user.created_at.strftime("%d/%m/%Y"), (datetime.now() - user.created_at).days
         ariv_date, ariv_jours = user.joined_at.strftime("%d/%m/%Y"), (datetime.now() - user.joined_at).days
-        old_ts = datetime.fromtimestamp(self.get_account(user)["OLDEST"])
+        old_ts = datetime.fromtimestamp(self.get_account(user, "OLDEST"))
         old_date, old_jours = old_ts.strftime("%d/%m/%Y"), (datetime.now() - old_ts).days
-        flammes = self.get_account(user)["STATS"]["flammes"]
+        flammes = self.get_account(user, "STATS")["flammes"]
         val = "**Création** — {} · **{}**j\n".format(crea_date, crea_jours)
         val += "**Arrivée** — {} · **{}**j\n".format(ariv_date, ariv_jours)
         val += "**1ère trace** — {} · **{}**j\n".format(old_date, old_jours)
         val += "\🔥{} — {}".format(len(flammes), flammes[0])
         vtxt = "\n‣ Connecté sur {}".format(user.voice.voice_channel.name) if user.voice.voice_channel else ""
         if not mini:
-            logs = self.get_account(user)["LOGS"][-3:]
+            logs = self.get_account(user, "LOGS")[-3:]
             logs.reverse()
             hist = "\n".join(["**{}** · {}".format(e[0] if e[1] == today else e[1], e[2]) for e in logs])
             psd, srn = self.namelist(user)
@@ -290,8 +289,7 @@ class Network:
 
         Par défaut = 👤"""
         defaut = "👤"
-        data = self.app.get_server_raw_data(ctx.message.server)
-        data = data["SYS"]
+        data = self.app.get_server_raw_data(ctx.message.server, "SYS")
         if emoji:
             if not emoji.startswith("\\"):
                 emoji = "\\" + emoji
@@ -327,8 +325,7 @@ class Network:
         """Active/Désactive la synchonisation de la carte avec les autres serveurs
 
         Sens: ICI >>> sync >>> Autres serveurs"""
-        u = self.app.get_account(ctx.message.author)
-        u = u["SYS"]
+        u = self.app.get_account(ctx.message.author, "SYS")
         if u["sync"]:
             u["sync"] = False
             await self.bot.say("**Synchronisation désactivée** — "
@@ -343,8 +340,7 @@ class Network:
     @_carte.command(pass_context=True)
     async def bio(self, ctx, *texte):
         """Modifie la bio de sa carte Network"""
-        u = self.app.get_account(ctx.message.author)
-        u = u["SOCIAL"]
+        u = self.app.get_account(ctx.message.author, "SOCIAL")
         if texte:
             u["bio"] = " ".join(texte)
             await self.bot.say("**Bio ajoutée** — Votre bio s'affichera en haut de votre carte")
@@ -360,8 +356,7 @@ class Network:
         """Modifier sa vitrine
 
         Ne supporte que des URL, ne pas en mettre retire l'image de votre carte"""
-        u = self.app.get_account(ctx.message.author)
-        u = u["SOCIAL"]
+        u = self.app.get_account(ctx.message.author, "SOCIAL")
         if url:
             if u["image"]:
                 await self.bot.say("**Image modifiée** — Elle s'affichera en bas de votre carte")
@@ -379,8 +374,7 @@ class Network:
         """Changer la couleur du bord gauche de sa carte
 
         Ne pas mettre de couleur affichera la couleur de votre pseudo sur le serveur"""
-        u = self.app.get_account(ctx.message.author)
-        u = u["SOCIAL"]
+        u = self.app.get_account(ctx.message.author, "SOCIAL")
         col = couleur_hex
         if col:
             if "#" in col:
@@ -536,7 +530,7 @@ class Network:
             p = self.app.get_account(author)
             p["STATS"]["msg_total"] += 1
 
-            if p["STATS"]["flammes"].get(hier, False):
+            if hier in p["STATS"]["flammes"]:
                 if date not in p["SOCIAL"]["flammes"]:
                     p["STATS"]["flammes"].append(date)
             elif date not in p["SOCIAL"]["flammes"]:
@@ -562,8 +556,8 @@ class Network:
         """Détection des réactions"""
         message = reaction.message
         if hasattr(message, "server"):
-            miniemote = self.app.get_server_raw_data(message.server)
-            miniemote = miniemote["SYS"]["minicard_emoji"]
+            miniemote = self.app.get_server_raw_data(message.server, "SYS")
+            miniemote = miniemote["minicard_emoji"]
             if type(reaction.emoji) == str:
                 if reaction.emoji == miniemote:
                     await self.bot.send_message(author, await self.app.display_card(message.author, True))
@@ -580,7 +574,7 @@ class Network:
 
     async def network_join(self, user: discord.Member):
         """Détection des arrivées sur le serveur"""
-        p = self.app.get_account(user)["STATS"]
+        p = self.app.get_account(user, "STATS")
         p["join"] += 1
         if p["quit"] > 0:
             self.app.add_log(user, "Retour sur le serveur")
