@@ -244,7 +244,7 @@ class NetworkApp:
             psd, srn = self.namelist(user)
             psd.reverse()
             srn.reverse()
-            psetxt = "\n\n• Pseudos — {}\n• Surnoms — {}".format(", ".join(psd[-3:]), ", ".join(srn[-3:]))
+            psetxt = "\n\n• **Pseudos** — {}\n• **Surnoms** — {}".format(", ".join(psd[-3:]), ", ".join(srn[-3:]))
             em = discord.Embed(color=colorset)
             em.set_author(name=titlename, icon_url=user.avatar_url)
             em.add_field(name="Infos", value=val)
