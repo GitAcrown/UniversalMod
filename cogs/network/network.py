@@ -249,7 +249,7 @@ class NetworkApp:
             em.set_author(name=titlename, icon_url=user.avatar_url)
             em.add_field(name="Infos", value=val)
             em.add_field(name="Rôles", value=", ".join(["*{}*".format(r.name) for r in user.roles if
-                                                        not r.is_everyone]))
+                                                        r.name != "@everyone"]))
             em.add_field(name="Changements", value=psetxt)
         rx = " | {}".format(user.game.name) if user.game else ""
         em.set_footer(text="ID — {}{}".format(user.id, rx), icon_url=self.get_status_img(user))
@@ -597,7 +597,7 @@ class Network:
         """Détection des départs du serveur"""
         p = self.app.get_account(user)
         p["STATS"]["quit"] += 1
-        roles = [r.id for r in user.roles if not r.is_everyone]
+        roles = [r.id for r in user.roles if r.name != "@everyone"]
         if roles:
             p["SYS"]["save_roles"] = roles
         self.app.add_log(user, "Quitte le serveur")
