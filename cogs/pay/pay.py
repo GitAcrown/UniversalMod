@@ -105,6 +105,19 @@ class PayAPI:
             return self._account_obj(user)
         return False
 
+    def sum_pay_data(self, user: discord.Member):
+        """Renvoie un pack d'informations essentielles sur le membre et son serveur
+
+        Utile pour obtenir un maximum d'information dans un unique Namedtuple"""
+        pay = self.get_account(user, ignore_close=True)
+        serv = self.get_server_sys(user.server)
+        m_auto = self.get_money_name(user.server, pay.solde)
+        open = "Valide" if pay.open else "Suspendu"
+        total = self.total_server_credits(user.server)
+        Essential = namedtuple('Essential', ['user', 'server', 'solde', 'monnaie', 'monnaie_auto', 'valide',
+                                             'timestamp', 'server_total'])
+        return Essential(user, user.server, pay.solde, serv.monnaie, m_auto, open, pay.creation, total)
+
     def get_all_accounts(self, server: discord.Server = None):
         """Renvoie une liste de tous les comptes de membre"""
         liste = []
@@ -371,8 +384,8 @@ class PayAPI:
         data = self._get_server_raw_data(server)["SYSTEM"]
         Monnaie = namedtuple('Monnaie', ['singulier', 'pluriel', 'symbole'])
         money = Monnaie(data["MONNAIE"]["SINGULIER"], data["MONNAIE"]["PLURIEL"], data["MONNAIE"]["SYMBOLE"])
-        System = namedtuple('System', ['server', 'monnaie', 'online', 'giftcodes'])
-        return System(server, money, data["ONLINE"], data["GIFTCODES"])
+        System = namedtuple('System', ['server', 'monnaie'])
+        return System(server, money)
 
     def get_server_sys(self, server: discord.Server = False, w: bool = False):
         if not server:
@@ -382,7 +395,6 @@ class PayAPI:
                 tot.append(self._system_obj(server) if not w else self.data[server.id]["SYSTEM"])
             return tot
         return self._system_obj(server) if not w else self.data[server.id]["SYSTEM"]
-
 
     def gen_palmares(self, server: discord.Server, nombre: int):
         """Génère un top des membres les plus riches du serveur"""
