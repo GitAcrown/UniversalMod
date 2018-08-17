@@ -155,9 +155,11 @@ class NetworkApp:
     def get_all_cache_games(self):
         """Retourne une liste de tous les jeux mis en cache"""
         total = []
-        for server in self.data:
-            for user in self.data[server]:
-                for g in self.data[server]["USERS"][user]["SYS"]["_cache_games"]:
+        for s in self.data:
+            server = self.bot.get_server(s)
+            data = self.get_server_raw_data(server, "USERS")
+            for user in data:
+                for g in data[user]["SYS"]["_cache_games"]:
                     if g not in total:
                         total.append(g)
         return total
@@ -531,9 +533,9 @@ class Network:
             p["STATS"]["msg_total"] += 1
 
             if hier in p["STATS"]["flammes"]:
-                if date not in p["SOCIAL"]["flammes"]:
+                if date not in p["STATS"]["flammes"]:
                     p["STATS"]["flammes"].append(date)
-            elif date not in p["SOCIAL"]["flammes"]:
+            elif date not in p["STATS"]["flammes"]:
                 p["STATS"]["flammes"] = [date]
 
             if ":" in message.content:
