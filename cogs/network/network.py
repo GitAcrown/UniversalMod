@@ -47,7 +47,8 @@ class NetworkApp:
 
     def get_account(self, user: discord.Member):
         """Retourne les données Network d'un membre"""
-        data = self.get_server_raw_data(user.server)["USERS"]
+        data = self.get_server_raw_data(user.server)
+        data = data["USERS"]
         if user.id not in data:
             sys = {"sync": True,
                    "_cache_games": [],
@@ -289,7 +290,8 @@ class Network:
 
         Par défaut = 👤"""
         defaut = "👤"
-        data = self.app.get_server_raw_data(ctx.message.server)["SYS"]
+        data = self.app.get_server_raw_data(ctx.message.server)
+        data = data["SYS"]
         if emoji:
             if not emoji.startswith("\\"):
                 emoji = "\\" + emoji
@@ -560,7 +562,8 @@ class Network:
         """Détection des réactions"""
         message = reaction.message
         if hasattr(message, "server"):
-            miniemote = self.app.get_server_raw_data(message.server)["SYS"]["minicard_emoji"]
+            miniemote = self.app.get_server_raw_data(message.server)
+            miniemote = miniemote["SYS"]["minicard_emoji"]
             if type(reaction.emoji) == str:
                 if reaction.emoji == miniemote:
                     await self.bot.send_message(author, await self.app.display_card(message.author, True))
