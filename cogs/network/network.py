@@ -228,7 +228,7 @@ class NetworkApp:
             psd, srn = self.namelist(user)
             psd.reverse()
             srn.reverse()
-            psetxt = "\n\n• Pseudos — {}\n• Surnoms — {}".format(", ".join(psd[-3:]), ", ".join(srn[-3:]))
+            psetxt = "\n• Pseudos — {}\n• Surnoms — {}".format(", ".join(psd[-3:]), ", ".join(srn[-3:]))
             em = discord.Embed(title=titlename, description=desc, color=colorset)
             em.set_thumbnail(url=user.avatar_url)
             em.add_field(name="Infos", value=val)
@@ -248,12 +248,12 @@ class NetworkApp:
             em = discord.Embed(color=colorset)
             em.set_author(name=titlename, icon_url=user.avatar_url)
             em.add_field(name="Infos", value=val)
-            em.add_field(name="Rôles", value=", ".join(["*{}*".format(r.name) for r in user.roles]))
+            em.add_field(name="Rôles", value=", ".join(["*{}*".format(r.name) for r in user.roles if
+                                                        not r.is_everyone]))
             em.add_field(name="Changements", value=psetxt)
         rx = " | {}".format(user.game.name) if user.game else ""
         em.set_footer(text="ID — {}{}".format(user.id, rx), icon_url=self.get_status_img(user))
         await self.bot.say(embed=em)
-        return True
 
 
 class Network:
