@@ -318,7 +318,7 @@ class Network:
         """Affiche la carte Iota Network du membre"""
         membre = membre if membre else ctx.message.author
         if self.app.get_account(membre):
-            await self.bot.say(embed=self.app.display_card(membre))
+            await self.bot.say(embed=await self.app.display_card(membre))
         else:
             await self.bot.say("**Erreur** — Vous n'avez pas de compte Network")
 
