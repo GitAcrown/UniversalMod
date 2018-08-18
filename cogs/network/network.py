@@ -435,8 +435,9 @@ class Network:
                 self.app.sync_account(ctx.message.author, "SOCIAL")
                 self.app.add_log(ctx.message.author, "Changement de vitrine")
                 self.app.save()
-            await self.bot.say("**Image inatteignable** — Fournissez s'il-vous-plaît un lien direct vers l'image "
-                               "(png, jpg, jpeg ou gif)")
+            else:
+                await self.bot.say("**Image inatteignable** — Fournissez s'il-vous-plaît un lien direct vers l'image "
+                                   "(png, jpg, jpeg ou gif)")
         else:
             await self.bot.say("**Image retirée** — Elle se n'affichera plus sur votre carte")
 
