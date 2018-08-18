@@ -438,7 +438,7 @@ class Network:
             contenu = " ".join(contenu)
             if 2 <= len(titre) <= 32 and 2 <= len(contenu) <= 256:
                 if titre not in [g[0] for g in greffons]:
-                    contenu = contenu.replace("\\\n", "\n")
+                    contenu = contenu.replace("\\n", "\n")
                     contenu = contenu.replace("§", "\n")
                     u["SOCIAL"]["plus"][titre] = contenu
                     em = discord.Embed(colour=colorset, title=titre, description=contenu)
@@ -495,25 +495,28 @@ class Network:
             titre = " ".join(titre)
             greffon = [g for g in greffons if g[0].lower() == titre.lower()][0]
             if greffon:
-                cmd = "\n\n**Commande** — `{}c g add \"{}\" \"{}\"`".format(ctx.prefix, greffon[0], greffon[1])
+                cmd = "\n\n**Commande** — `{}c g add \"{}\" \"{}\"`".format(ctx.prefix, greffon[0],
+                                                                            greffon[1].replace("\n", "§"))
                 em = discord.Embed(titre="Greffon \"{}\"".format(greffon[0]), description=greffon[1] + cmd,
                                    colour=user.color)
                 await self.bot.say(embed=em)
             else:
                 await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
                                    "Vous avez pensé à mettre des guillemets si le titre est composé de plus d'un mot ?")
-        elif greffons:
-            if " ".join(titre).lower() in [g[0].lower() for g in greffons]:
-                txt = ""
-                for g in greffons:
-                    txt += "• **{}** — {}\n\n".format(g[0], g[1])
-                em = discord.Embed(title="Vos greffons", description=txt, colour=user.color)
-                await self.bot.say(embed=em)
-            else:
-                await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
-                                   "Vous avez pensé à mettre des guillemets si le titre est composé de plus d'un mot ?")
         else:
-            await self.bot.say("**Aucun greffon** — Vous n'avez aucun greffon sur votre carte")
+            if greffons:
+                if " ".join(titre).lower() in [g[0].lower() for g in greffons]:
+                    txt = ""
+                    for g in greffons:
+                        txt += "• **{}** — {}\n\n".format(g[0], g[1])
+                    em = discord.Embed(title="Vos greffons", description=txt, colour=user.color)
+                    await self.bot.say(embed=em)
+                else:
+                    await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
+                                       "Vous avez pensé à mettre des guillemets si le titre "
+                                       "est composé de plus d'un mot ?")
+            else:
+                await self.bot.say("**Aucun greffon** — Vous n'avez aucun greffon sur votre carte")
 
     @commands.group(aliases=["apps"], no_pm=True, pass_context=True)
     async def jeux(self, ctx):
