@@ -268,7 +268,7 @@ class NetworkApp:
             psd, srn = self.namelist(user)
             if type(psd) is list: psd.reverse() ; psd = ", ".join(psd[-3:])
             if type(srn) is list: srn.reverse() ; srn = ", ".join(srn[-3:])
-            psetxt = "• **Pseudos** — {}\n• **Surnoms** — {}\n".format(psd, srn)
+            psetxt = "• **Pseudos** — {}\n• **Surnoms** — {}\n".format(psd if psd else "Aucun", srn if srn else "Aucun")
             em = discord.Embed(title=titlename, description=desc, color=colorset)
             em.set_thumbnail(url=user.avatar_url)
             em.add_field(name="Infos", value=val)
@@ -285,7 +285,8 @@ class NetworkApp:
             psd, srn = self.namelist(user)
             if type(psd) is list: psd.reverse() ; psd = ", ".join(psd[-3:])
             if type(srn) is list: srn.reverse() ; srn = ", ".join(srn[-3:])
-            psetxt = "\n\n• **Pseudos** — {}\n• **Surnoms** — {}".format(psd, srn)
+            psetxt = "\n\n• **Pseudos** — {}\n• **Surnoms** — {}".format(psd if psd else "Aucun",
+                                                                         srn if srn else "Aucun")
             em = discord.Embed(color=colorset)
             em.set_author(name=titlename, icon_url=user.avatar_url)
             em.add_field(name="Infos", value=val)
