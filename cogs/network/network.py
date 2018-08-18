@@ -466,7 +466,7 @@ class Network:
             for g in greffons:
                 txt += "• **{}** — {}\n\n".format(g[0], g[1])
             em = discord.Embed(title="Vos greffons", description=txt, colour=user.color)
-            em.set_footer(text="Faîtes '{}c g del' suivie du nom pour supprimer le greffon")
+            em.set_footer(text="Faîtes '{}c g del' suivie du nom pour supprimer le greffon".format(ctx.prefix))
             await self.bot.say(embed=em)
         elif titre.lower() in [g[0].lower() for g in greffons]:
             for g in u["SOCIAL"]["plus"]:
@@ -476,6 +476,7 @@ class Network:
                     self.app.add_log(user, "A retiré un greffon nommé *{}*".format(titre))
                     await self.bot.say("**Greffon supprimé** — Il n'apparaitra plus sur votre carte")
                     self.app.save()
+                    break
             await self.bot.say("**Erreur** — Je n'ai pas réussi à retirer ce greffon")
         else:
             await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
