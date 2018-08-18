@@ -202,7 +202,7 @@ class NetworkApp:
                 form = soc["plus"][i].format(me=user, server=server, pay=bank, network=net)
                 l.append([i, form])
             return l
-        return False
+        return []
 
     async def display_card(self, user: discord.Member, mini: bool = False, brut: bool = False):
         """Affiche le profil d'un membre"""
