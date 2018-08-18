@@ -48,29 +48,31 @@ class NetworkApp:
 
     def get_account(self, user: discord.Member, sub: str = None):
         """Retourne les données Network d'un membre"""
-        data = self.get_server_raw_data(user.server, "USERS")
-        if user.id not in data:
-            sys = {"sync": True,
-                   "_cache_games": [],
-                   "save_roles": []}
-            data[user.id] = {"STATS": {"msg_total": 0,
-                                       "msg_suppr": 0,
-                                       "emojis": {},
-                                       "join": 0,
-                                       "quit": 0,
-                                       "ban": 0,
-                                       "flammes": []},
-                             "LOGS": [],
-                             "SOCIAL": {"image": None,
-                                        "color": None,
-                                        "bio": None,
-                                        "plus": {},
-                                        "games": []},
-                             "SYS": sys,
-                             "OLDEST": time.time()}
-            self.backup(user)
-            self.save()
-        return data[user.id][sub] if sub else data[user.id]
+        if hasattr(user, "server"):
+            data = self.get_server_raw_data(user.server, "USERS")
+            if user.id not in data:
+                sys = {"sync": True,
+                       "_cache_games": [],
+                       "save_roles": []}
+                data[user.id] = {"STATS": {"msg_total": 0,
+                                           "msg_suppr": 0,
+                                           "emojis": {},
+                                           "join": 0,
+                                           "quit": 0,
+                                           "ban": 0,
+                                           "flammes": []},
+                                 "LOGS": [],
+                                 "SOCIAL": {"image": None,
+                                            "color": None,
+                                            "bio": None,
+                                            "plus": {},
+                                            "games": []},
+                                 "SYS": sys,
+                                 "OLDEST": time.time()}
+                self.backup(user)
+                self.save()
+            return data[user.id][sub] if sub else data[user.id]
+        return False
 
     def backup(self, user: discord.Member):
         """Backup les données SOCIAL d'un membre"""
@@ -298,7 +300,7 @@ class Network:
         self.app.reset()
         await self.bot.say("**Reset effectué avec succès**")
 
-    @netsys.command(pass_context=True)
+    @netsys.command(pass_context=True, hidden=True)
     async def miniemoji(self, ctx, emoji: str = None):
         """Change l'Emoji faisant apparaitre une version 'mini' de la carte du membre visé
 
@@ -306,8 +308,6 @@ class Network:
         defaut = "👤"
         data = self.app.get_server_raw_data(ctx.message.server, "SYS")
         if emoji:
-            if not emoji.startswith("\\"):
-                emoji = "\\" + emoji
             data["minicard_emoji"] = emoji
             await self.bot.say("**Succès** — La mini-carte s'affichera en réagissant à un message avec {}"
                                "".format(emoji[1:]))
@@ -547,29 +547,29 @@ class Network:
     # ======== TRIGGERS ==========
     async def network_msgadd(self, message):
         """Détection des nouveaux messages"""
-        if hasattr(message, "server"):
-            date, hier = datetime.now().strftime("%d/%m/%Y"), (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
-            author, server = message.author, message.server
-            p = self.app.get_account(author)
-            p["STATS"]["msg_total"] += 1
+        if hasattr(message, "server") and self.app.get_account(message.author):
+                date, hier = datetime.now().strftime("%d/%m/%Y"), (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
+                author, server = message.author, message.server
+                p = self.app.get_account(author)
+                p["STATS"]["msg_total"] += 1
 
-            if hier in p["STATS"]["flammes"]:
-                if date not in p["STATS"]["flammes"]:
-                    p["STATS"]["flammes"].append(date)
-            elif date not in p["STATS"]["flammes"]:
-                p["STATS"]["flammes"] = [date]
+                if hier in p["STATS"]["flammes"]:
+                    if date not in p["STATS"]["flammes"]:
+                        p["STATS"]["flammes"].append(date)
+                elif date not in p["STATS"]["flammes"]:
+                    p["STATS"]["flammes"] = [date]
 
-            if ":" in message.content:
-                output = re.compile(':(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
-                if output:
-                    for i in output:
-                        if i in [e.name for e in server.emojis]:
-                            p["STATS"]["emojis"][i] = p["STATS"]["emojis"][i] + 1 if i in p["STATS"]["emojis"] else 1
-            self.app.save()
+                if ":" in message.content:
+                    output = re.compile(':(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
+                    if output:
+                        for i in output:
+                            if i in [e.name for e in server.emojis]:
+                                p["STATS"]["emojis"][i] = p["STATS"]["emojis"][i] + 1 if i in p["STATS"]["emojis"] else 1
+                self.app.save()
 
     async def network_msgdel(self, message):
         """Détection des suppressions de messages"""
-        if hasattr(message, "server"):
+        if hasattr(message, "server") and self.app.get_account(message.author):
             author = message.author
             p = self.app.get_account(author)
             p["STATS"]["msg_suppr"] += 1
@@ -578,7 +578,7 @@ class Network:
     async def network_react(self, reaction, author):
         """Détection des réactions"""
         message = reaction.message
-        if hasattr(message, "server"):
+        if hasattr(message, "server") and self.app.get_account(author):
             miniemote = self.app.get_server_raw_data(message.server, "SYS")
             miniemote = miniemote["minicard_emoji"]
             if type(reaction.emoji) == str:
