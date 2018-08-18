@@ -46,11 +46,11 @@ class NetworkApp:
             self.save(True)
         return self.data[server.id][sub] if sub else self.data[server.id]
 
-    def get_account(self, user: discord.Member, sub: str = None):
+    def get_account(self, user: discord.Member, sub: str = None, reset: bool = False):
         """Retourne les données Network d'un membre"""
         if hasattr(user, "server"):
             data = self.get_server_raw_data(user.server, "USERS")
-            if user.id not in data:
+            if user.id not in data or reset:
                 sys = {"sync": True,
                        "_cache_games": [],
                        "save_roles": []}
@@ -137,11 +137,12 @@ class NetworkApp:
                                 base = self.data[user.server.id]["USERS"][user.id][to_sync].get(sub_sync, False)
                                 if base:
                                     self.data[serv]["USERS"][user.id][to_sync][sub_sync] = base
-            self.save()
-            return True
+                self.save()
+                return True
         return False
 
     def namelist(self, user: discord.Member):
+        """Renvoie une liste des anciens pseudos & surnoms d'un membre"""
         server = user.server
         names = self.past_names[user.id] if user.id in self.past_names else None
         try:
@@ -154,6 +155,32 @@ class NetworkApp:
         else:
             names = "Aucun"
         return names, nicks
+
+    def reset_past_names(self, user: discord.Member):
+        """Reset l'historique des pseudos et surnoms d'un membre
+
+        - Non synchronisé"""
+        server = user.server
+        try:
+            self.past_names[user.id] = []
+            dataIO.save_json("data/mod/past_nicknames.json", self.past_names)
+        except FileNotFoundError:
+            pass
+        try:
+            self.past_nicknames[server.id][user.id] = []
+            dataIO.save_json("data/mod/past_nicknames.json", self.past_nicknames)
+        except FileNotFoundError:
+            pass
+        return True
+
+    def reset_logs(self, user: discord.Member):
+        """Reset les logs d'un membre sur le serveur
+
+        - Non synchronisé"""
+        u = self.get_account(user)
+        u["LOGS"] = []
+        self.save()
+        return True
 
     def get_all_cache_games(self):
         """Retourne une liste de tous les jeux mis en cache"""
@@ -304,6 +331,24 @@ class Network:
         self.app.reset()
         await self.bot.say("**Reset effectué avec succès**")
 
+    @netsys.command(pass_context=True)
+    async def resetuser(self, ctx, user: discord.Member, sub: str = None):
+        """Reset un membre entièrement ou partiellement"""
+        if sub:
+            if sub.upper() == "LOGS":
+                self.app.reset_logs(user)
+                await self.bot.say("**Succès** ─ Les logs ont été reset avec succès (sur ce serveur seulement)")
+            elif sub.upper() == "NAMES":
+                self.app.reset_past_names(user)
+                await self.bot.say("**Succès** ─ Les anciens pseudos et surnoms ont été reset avec succès "
+                                   "(sur ce serveur seulement)")
+            else:
+                await self.bot.say("**Inconnu** ─ Cette subclasse n'existe pas.")
+        else:
+            self.app.get_account(user, reset=True)
+            await self.bot.say("**Succès** ─ Ce membre a été reset")
+
+
     @netsys.command(pass_context=True, hidden=True)
     async def miniemoji(self, ctx, emoji: str = None):
         """Change l'Emoji faisant apparaitre une version 'mini' de la carte du membre visé
@@ -377,14 +422,17 @@ class Network:
         Ne supporte que des URL, ne pas en mettre retire l'image de votre carte"""
         u = self.app.get_account(ctx.message.author, "SOCIAL")
         if url:
-            if u["image"]:
-                await self.bot.say("**Image modifiée** — Elle s'affichera en bas de votre carte")
-            else:
-                await self.bot.say("**Image ajoutée** — Elle s'affichera en bas de votre carte")
-            u["image"] = url
-            self.app.sync_account(ctx.message.author, "SOCIAL")
-            self.app.add_log(ctx.message.author, "Changement de vitrine")
-            self.app.save()
+            if url.endswith("gif") or url.endswith("png") or url.endswith("jpg") or url.endswith("jpeg"):
+                if u["image"]:
+                    await self.bot.say("**Image modifiée** — Elle s'affichera en bas de votre carte")
+                else:
+                    await self.bot.say("**Image ajoutée** — Elle s'affichera en bas de votre carte")
+                u["image"] = url
+                self.app.sync_account(ctx.message.author, "SOCIAL")
+                self.app.add_log(ctx.message.author, "Changement de vitrine")
+                self.app.save()
+            await self.bot.say("**Image inatteignable** — Fournissez s'il-vous-plaît un lien direct vers l'image "
+                               "(png, jpg, jpeg ou gif)")
         else:
             await self.bot.say("**Image retirée** — Elle se n'affichera plus sur votre carte")
 
@@ -400,6 +448,10 @@ class Network:
                 col = col[1:]
             elif "0x" in col:
                 col = col[2:]
+            if col == "000000":
+                await self.bot.say("**Info** — #000000 est considéré comme la valeur par défaut par Discord et ne "
+                                   "s'affichera donc pas sur votre carte même si la démonstration fonctionne.\n"
+                                   "Si vous voulez du noir, utilisez #000001.")
             if len(col) == 6:
                 col = int(col, 16)
                 u["color"] = col
@@ -640,7 +692,7 @@ class Network:
         if after.avatar_url != before.avatar_url:
             url = before.avatar_url
             url = url.split("?")[0]  # On retire le reformatage serveur Discord
-            self.app.add_log(after, "Changement d'avatar [\🖼]({})".format(url))
+            self.app.add_log(after, "Changement d'avatar [(?)]({})".format(url))
         if after.top_role != before.top_role:
             if after.top_role > before.top_role:
                 self.app.add_log(after, "A reçu le rôle *{}*".format(after.top_role.name))
