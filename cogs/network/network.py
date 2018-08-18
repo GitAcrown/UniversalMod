@@ -199,8 +199,11 @@ class NetworkApp:
         l = []
         if soc["plus"]:
             for i in soc["plus"]:
-                form = soc["plus"][i].format(me=user, server=server, pay=bank, network=net)
-                l.append([i, form])
+                try:
+                    form = soc["plus"][i].format(me=user, server=server, pay=bank, network=net)
+                    l.append([i, form])
+                except AttributeError as e:
+                    l.append([i, "Ce greffon comporte une anomalie : {}".format(e)])
             return l
         return []
 
@@ -414,14 +417,14 @@ class Network:
             await self.bot.say("**Couleur retirée** — La couleur affichée sera donc toujours celle de votre pseudo")
 
 
-    @_carte.group(aliases=["grf"], no_pm=True, pass_context=True)
+    @_carte.group(aliases=["g"], no_pm=True, pass_context=True)
     async def greffon(self, ctx):
         """Gestion des greffons de votre carte"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @greffon.command(pass_context=True)
-    async def ajout(self, ctx, titre: str, *contenu: str):
+    @greffon.command(name="add", pass_context=True)
+    async def _add(self, ctx, titre: str, *contenu: str):
         """Ajouter un greffon à sa carte
 
         titre - Nom du greffon s'affichant au haut de celui-ci (N'oubliez pas les guillemets pour des noms composés)
@@ -450,8 +453,8 @@ class Network:
         else:
             await self.bot.say("**Pleine** — Votre carte est pleine, vous n'avez le droit qu'à 3 greffons à la fois")
 
-    @greffon.command(aliases=["del"], pass_context=True)
-    async def retrait(self, ctx, titre: str = None):
+    @greffon.command(name="del", pass_context=True)
+    async def _del(self, ctx, titre: str = None):
         """Retirer un greffon de sa carte
 
         Si aucun titre n'est spécifié, renvoie la liste"""
@@ -478,8 +481,8 @@ class Network:
             await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
                                "Vous avez pensé à mettre des guillemets si le titre est composé de plus d'un mot ?")
 
-    @greffon.command(pass_context=True)
-    async def resume(self, ctx, *titre: str):
+    @greffon.command(name="liste", pass_context=True)
+    async def _list(self, ctx, *titre: str):
         """Renvoie la liste des greffons de sa carte
 
         Si un titre est donné, renvoie aussi la commande lié au greffon"""
