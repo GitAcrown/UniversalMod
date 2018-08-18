@@ -116,11 +116,15 @@ class NetworkApp:
         heure = time.strftime("%H:%M", time.localtime())
         p = self.get_account(user, "LOGS")
         p.append([heure, jour, event])
+        if len(p) > 30:
+            p = p[-30:]
         if universal:
             if self.get_account(user, "SYS")["sync"]:
                 for s in self.data:
                     if user.id in self.data[s]["USERS"]:
                         self.data[s]["USERS"][user.id]["LOGS"].append([heure, jour, event])
+                        if len(self.data[s]["USERS"][user.id]["LOGS"]) > 30:
+                            self.data[s]["USERS"][user.id]["LOGS"] = self.data[s]["USERS"][user.id]["LOGS"][-30:]
         return True
 
     def sync_account(self, user: discord.Member, to_sync:str, sub_sync:str = False, force: bool = False):
