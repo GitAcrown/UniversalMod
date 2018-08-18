@@ -496,15 +496,18 @@ class Network:
             else:
                 await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
                                    "Vous avez pensé à mettre des guillemets si le titre est composé de plus d'un mot ?")
-        elif " ".join(titre).lower() in [g[0].lower() for g in greffons]:
-            txt = ""
-            for g in greffons:
-                txt += "• **{}** — {}\n\n".format(g[0], g[1])
-            em = discord.Embed(title="Vos greffons", description=txt, colour=user.color)
-            await self.bot.say(embed=em)
+        elif greffons:
+            if " ".join(titre).lower() in [g[0].lower() for g in greffons]:
+                txt = ""
+                for g in greffons:
+                    txt += "• **{}** — {}\n\n".format(g[0], g[1])
+                em = discord.Embed(title="Vos greffons", description=txt, colour=user.color)
+                await self.bot.say(embed=em)
+            else:
+                await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
+                                   "Vous avez pensé à mettre des guillemets si le titre est composé de plus d'un mot ?")
         else:
-            await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
-                               "Vous avez pensé à mettre des guillemets si le titre est composé de plus d'un mot ?")
+            await self.bot.say("**Aucun greffon** — Vous n'avez aucun greffon sur votre carte")
 
     @commands.group(aliases=["apps"], no_pm=True, pass_context=True)
     async def jeux(self, ctx):
