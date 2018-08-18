@@ -572,7 +572,8 @@ class Network:
             miniemote = miniemote["minicard_emoji"]
             if type(reaction.emoji) == str:
                 if reaction.emoji == miniemote:
-                    await self.bot.send_message(author, await self.app.display_card(message.author, True, True))
+                    await self.bot.send_message(author,
+                                                embed=await self.app.display_card(message.author, True, True))
 
             server = message.server
             p = self.app.get_account(author)
