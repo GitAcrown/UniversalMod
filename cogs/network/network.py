@@ -497,9 +497,10 @@ class Network:
         if titre and greffons:
             greffon = [g for g in greffons if g[0].lower() == titre.lower()][0]
             if greffon:
-                greffon = self.app.get_account(user, "SOCIAL")["plus"][greffon[0]]
-                cmd = "\n\n**Commande** — `{}c g add \"{}\" \"{}\"`".format(ctx.prefix, greffon[0],
-                                                                            greffon[1].replace("\n", "§"))
+                name = greffon[0]
+                greffon = self.app.get_account(user, "SOCIAL")["plus"][name]
+                cmd = "\n\n**Commande** — `{}c g add \"{}\" \"{}\"`".format(ctx.prefix, greffon,
+                                                                            greffon.replace("\n", "§"))
                 em = discord.Embed(titre="Greffon \"{}\"".format(greffon[0]), description=greffon[1] + cmd,
                                    colour=user.color)
                 await self.bot.say(embed=em)
