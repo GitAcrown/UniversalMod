@@ -488,14 +488,13 @@ class Network:
             await self.bot.say("**Aucun greffon** — Vous n'avez aucun greffon à supprimer")
 
     @greffon.command(name="liste", pass_context=True)
-    async def _list(self, ctx, *titre: str):
+    async def _list(self, ctx, titre: str = None):
         """Renvoie la liste des greffons de sa carte
 
         Si un titre est donné, renvoie aussi la commande lié au greffon"""
         user = ctx.message.author
         greffons = self.app.get_greffons(user)
         if titre and greffons:
-            titre = " ".join(titre)
             greffon = [g for g in greffons if g[0].lower() == titre.lower()][0]
             if greffon:
                 cmd = "\n\n**Commande** — `{}c g add \"{}\" \"{}\"`".format(ctx.prefix, greffon[0],
@@ -507,16 +506,11 @@ class Network:
                 await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
                                    "Vous avez pensé à mettre des guillemets si le titre est composé de plus d'un mot ?")
         elif greffons:
-            if " ".join(titre).lower() in [g[0].lower() for g in greffons]:
-                txt = ""
-                for g in greffons:
-                    txt += "• **{}** — {}\n\n".format(g[0], g[1])
-                em = discord.Embed(title="Vos greffons", description=txt, colour=user.color)
-                await self.bot.say(embed=em)
-            else:
-                await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
-                                   "Vous avez pensé à mettre des guillemets si le titre "
-                                   "est composé de plus d'un mot ?")
+            txt = ""
+            for g in greffons:
+                txt += "• **{}** — {}\n\n".format(g[0], g[1])
+            em = discord.Embed(title="Vos greffons", description=txt, colour=user.color)
+            await self.bot.say(embed=em)
         else:
             await self.bot.say("**Aucun greffon** — Vous n'avez aucun greffon sur votre carte")
 
