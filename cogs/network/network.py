@@ -640,7 +640,7 @@ class Network:
         if after.avatar_url != before.avatar_url:
             url = before.avatar_url
             url = url.split("?")[0]  # On retire le reformatage serveur Discord
-            self.app.add_log(after, "Changement d'avatar [\❓]({})".format(url))
+            self.app.add_log(after, "Changement d'avatar [\🖼]({})".format(url))
         if after.top_role != before.top_role:
             if after.top_role > before.top_role:
                 self.app.add_log(after, "A reçu le rôle *{}*".format(after.top_role.name))
