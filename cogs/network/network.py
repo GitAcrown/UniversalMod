@@ -217,9 +217,9 @@ class NetworkApp:
         -- Similaire au 'pay.sum_pay_data' du module Pay"""
         u = self.get_account(user)
         SumNetwork = namedtuple('SumNetwork', ['user', 'server', 'total_msg', 'join_count', 'quit_count', 'ban_count',
-                                               'couleur'])
+                                               'couleur', 'image_url'])
         return SumNetwork(user, user.server, u["STATS"]["msg_total"], u["STATS"]["join"], u["STATS"]["quit"],
-                          u["STATS"]["ban"], u["SOCIAL"]["color"])
+                          u["STATS"]["ban"], u["SOCIAL"]["color"],  u["SOCIAL"]["image"])
 
     def get_greffons(self, user: discord.Member):
         """Retourne les paramètres des embeds dans une liste"""
