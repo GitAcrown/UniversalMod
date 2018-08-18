@@ -438,6 +438,8 @@ class Network:
             contenu = " ".join(contenu)
             if 2 <= len(titre) <= 32 and 2 <= len(contenu) <= 256:
                 if titre not in [g[0] for g in greffons]:
+                    contenu = contenu.replace("\\\n", "\n")
+                    contenu = contenu.replace("§", "\n")
                     u["SOCIAL"]["plus"][titre] = contenu
                     em = discord.Embed(colour=colorset, title=titre, description=contenu)
                     em.set_footer(text="Faîtes '{}carte' pour voir le greffon dans votre carte".format(ctx.prefix))
@@ -476,7 +478,7 @@ class Network:
                     self.app.add_log(user, "A retiré un greffon nommé *{}*".format(titre))
                     await self.bot.say("**Greffon supprimé** — Il n'apparaitra plus sur votre carte")
                     self.app.save()
-                    break
+                    return
             await self.bot.say("**Erreur** — Je n'ai pas réussi à retirer ce greffon")
         else:
             await self.bot.say("**Introuvable** — Ce greffon ne semble pas exister.\n"
