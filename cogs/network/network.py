@@ -194,7 +194,10 @@ class NetworkApp:
         """Retourne les paramètres des embeds dans une liste"""
         server = user.server
         pay = self.bot.get_cog("Pay").pay
-        bank = pay.sum_pay_data(user)
+        if pay.get_account(user):
+            bank = pay.sum_pay_data(user)
+        else:
+            bank = None
         net = self.sum_network_data(user)
         # TODO: Ajouter plus d'add-ons en champs (Network, Karma, Assistant...)
         soc = self.get_account(user, "SOCIAL")
