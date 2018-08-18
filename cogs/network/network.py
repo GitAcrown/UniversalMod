@@ -105,7 +105,7 @@ class NetworkApp:
         """Renvoie tous les comptes du membre"""
         liste = []
         for serverid in self.data:
-            if userid in self.data[serverid]:
+            if userid in self.data[serverid]["USERS"]:
                 liste.append(self.bot.get_server(serverid))
         return liste
 
@@ -117,24 +117,24 @@ class NetworkApp:
         if universal:
             if self.get_account(user, "SYS")["sync"]:
                 for s in self.data:
-                    if user.id in self.data[s]:
-                        self.data[s][user.id]["LOGS"].append([heure, jour, event])
+                    if user.id in self.data[s]["USERS"]:
+                        self.data[s]["USERS"][user.id]["LOGS"].append([heure, jour, event])
         return True
 
     def sync_account(self, user: discord.Member, to_sync:str, sub_sync:str = False, force: bool = False):
         """Synchronise certains champs entre tous les serveurs du membre"""
         if self.get_account(user, "SYS")["sync"] or force:
-            base = self.data[user.server.id][user.id].get(to_sync, False)
+            base = self.data[user.server.id]["USERS"][user.id].get(to_sync, False)
             if base:
                 for serv in self.data:
-                    if user.id in self.data[serv] and serv != user.server.id:
-                        if self.data[serv][user.id]["SYS"]["sync"]:
+                    if user.id in self.data[serv]["USERS"] and serv != user.server.id:
+                        if self.data[serv]["USERS"][user.id]["SYS"]["sync"]:
                             if not sub_sync:
-                                self.data[serv][user.id][to_sync] = base
+                                self.data[serv]["USERS"][user.id][to_sync] = base
                             else:
-                                base = self.data[user.server.id][user.id][to_sync].get(sub_sync, False)
+                                base = self.data[user.server.id]["USERS"][user.id][to_sync].get(sub_sync, False)
                                 if base:
-                                    self.data[serv][user.id][to_sync][sub_sync] = base
+                                    self.data[serv]["USERS"][user.id][to_sync][sub_sync] = base
             self.save()
             return True
         return False
