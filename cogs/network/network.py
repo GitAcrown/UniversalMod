@@ -394,7 +394,8 @@ class Network:
             elif "0x" in col:
                 col = col[2:]
             if len(col) == 6:
-                u["color"] = hex(int(col, 16))
+                col = int(col, 16)
+                u["color"] = col
                 em = discord.Embed(color= u["color"],
                                    description="**Succès** — Voici une démonstration de la couleur choisie")
                 em.set_footer(text="Besoin d'aide ? Allez sur http://www.color-hex.com/")
