@@ -399,7 +399,7 @@ class Network:
                                    description="**Succès** — Voici une démonstration de la couleur choisie")
                 em.set_footer(text="Besoin d'aide ? Allez sur http://www.color-hex.com/")
                 await self.bot.say(embed=em)
-                self.app.sync_account(ctx.messahe.author, "SOCIAL")
+                self.app.sync_account(ctx.message.author, "SOCIAL")
                 self.app.add_log(ctx.message.author, "Changement de couleur de barre")
                 self.app.save()
                 return
@@ -407,7 +407,7 @@ class Network:
                                "Aidez-vous avec http://www.color-hex.com/")
         else:
             u["color"] = None
-            self.app.sync_account(ctx.messahe.author, "SOCIAL")
+            self.app.sync_account(ctx.message.author, "SOCIAL")
             self.app.add_log(ctx.message.author, "Suppression de la couleur de barre")
             self.app.save()
             await self.bot.say("**Couleur retirée** — La couleur affichée sera donc toujours celle de votre pseudo")
