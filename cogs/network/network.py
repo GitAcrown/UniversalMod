@@ -228,13 +228,13 @@ class NetworkApp:
             psd, srn = self.namelist(user)
             psd.reverse()
             srn.reverse()
-            psetxt = "\n• **Pseudos** — {}\n• **Surnoms** — {}".format(", ".join(psd[-3:]), ", ".join(srn[-3:]))
+            psetxt = "• **Pseudos** — {}\n• **Surnoms** — {}\n".format(", ".join(psd[-3:]), ", ".join(srn[-3:]))
             em = discord.Embed(title=titlename, description=desc, color=colorset)
             em.set_thumbnail(url=user.avatar_url)
             em.add_field(name="Infos", value=val)
             em.add_field(name="Rôles & Présence", value=", ".join(["*{}*".format(r.name) for r in user.roles if
                                                                    r.name != "@everyone"]) + vtxt)
-            em.add_field(name="Historique", value=hist + psetxt)
+            em.add_field(name="Historique", value=psetxt + hist)
             if soc["image"]:
                 em.set_image(url=soc["image"])
             embs = self.get_greffons(user)
