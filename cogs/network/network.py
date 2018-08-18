@@ -499,7 +499,7 @@ class Network:
             if greffon:
                 name = greffon[0]
                 greffon = self.app.get_account(user, "SOCIAL")["plus"][name]
-                cmd = "\n\n**Commande** — `{}c g add \"{}\" \"{}\"`".format(ctx.prefix, greffon,
+                cmd = "\n\n**Commande** — `{}c g add \"{}\" \"{}\"`".format(ctx.prefix, name,
                                                                             greffon.replace("\n", "§"))
                 em = discord.Embed(titre="Greffon \"{}\"".format(greffon[0]), description=greffon[1] + cmd,
                                    colour=user.color)
