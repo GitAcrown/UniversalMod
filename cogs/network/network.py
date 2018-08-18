@@ -264,7 +264,7 @@ class NetworkApp:
             logs = self.get_account(user, "LOGS")[-3:]
             logs.reverse()
             hist = "• **Actions :**\n" + "\n".join(["**{}** · {}".format(e[0] if e[1] == today else e[1], e[2])
-                                                    for e in logs])
+                                                    for e in logs]) if logs else "• **Actions :** aucune\n"
             psd, srn = self.namelist(user)
             psd.reverse()
             srn.reverse()
