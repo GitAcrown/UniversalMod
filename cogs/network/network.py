@@ -168,15 +168,15 @@ class NetworkApp:
     def get_status_img(self, user: discord.Member):
         """Retourne l'image liée au status"""
         if user.bot:
-            return "https://i.imgur.com/VDJrha7.png"
+            return "https://i.imgur.com/yYs0nOp.png"
         elif user.status == discord.Status.online:
-            return "https://i.imgur.com/Cm8FC8L.png"
+            return "https://i.imgur.com/ksfM3FB.png"
         elif user.status == discord.Status.idle:
-            return "https://i.imgur.com/tN5cDMU.png"
+            return "https://i.imgur.com/5MtPQnx.png"
         elif user.status == discord.Status.dnd:
-            return "https://i.imgur.com/gug7ZZv.png"
+            return "https://i.imgur.com/lIgbA6x.png"
         else:
-            return "https://i.imgur.com/HdrpmyE.png"
+            return "https://i.imgur.com/4VwoVqY.png"
 
     def sum_network_data(self, user: discord.Member):
         """Renvoie un Namedtuple qui résume les données Network du membre & du serveur
