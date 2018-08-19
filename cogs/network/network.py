@@ -145,9 +145,15 @@ class NetworkApp:
                 return True
         return False
 
-    def namelist(self, user: discord.Member):
+    def namelist(self, user: discord.Member, debug_reverse: bool = False):
         """Renvoie une liste des anciens pseudos & surnoms d'un membre"""
         server = user.server
+        if debug_reverse:
+            self.past_nicknames.reverse()
+            dataIO.save_json("data/mod/past_nicknames.json", self.past_nicknames)
+            self.past_names.reverse()
+            dataIO.save_json("data/mod/past_names.json", self.past_names)
+            return True
         names = self.past_names[user.id] if user.id in self.past_names else None
         try:
             nicks = self.past_nicknames[server.id][user.id]
@@ -167,7 +173,7 @@ class NetworkApp:
         server = user.server
         try:
             self.past_names[user.id] = []
-            dataIO.save_json("data/mod/past_nicknames.json", self.past_names)
+            dataIO.save_json("data/mod/past_names.json", self.past_names)
         except FileNotFoundError:
             pass
         try:
@@ -258,7 +264,7 @@ class NetworkApp:
         val = "**Création** — {} · **{}**j\n".format(crea_date, crea_jours)
         val += "**Arrivée** — {} · **{}**j\n".format(ariv_date, ariv_jours)
         val += "**1ère trace** — {} · **{}**j\n".format(old_date, old_jours)
-        val += "\🔥{} — {}".format(len(flammes), flammes[0]) if flammes else "\🔥0 — {}".format(today)
+        val += "\🔥{} — {}".format(len(flammes), flammes[-1]) if flammes else "\🔥0 — {}".format(today)
         vtxt = "\n‣ Connecté sur {}".format(user.voice.voice_channel.name) if user.voice.voice_channel else ""
         if not mini:
             logs = self.get_account(user, "LOGS")[-3:]
@@ -353,6 +359,13 @@ class Network:
             self.app.get_account(user, reset=True)
             await self.bot.say("**Succès** ─ Ce membre a été reset")
 
+    @netsys.command(pass_context=True, hidden=True)
+    async def namesinv(self, ctx):
+        """Inverse le fichier de noms et surnoms pour régler un probleme récurrent..."""
+        if self.app.namelist(ctx.message.author, debug_reverse=True):
+            await self.bot.say("**Succès** - Les données ont été inversées")
+        else:
+            await self.bot.say("**Erreur** - Impossible d'inverser les valeurs")
 
     @netsys.command(pass_context=True, hidden=True)
     async def miniemoji(self, ctx, emoji: str = None):
