@@ -149,9 +149,12 @@ class NetworkApp:
         """Renvoie une liste des anciens pseudos & surnoms d'un membre"""
         server = user.server
         if debug_reverse:
-            self.past_nicknames.reverse()
+            for s in self.past_nicknames:
+                for u in self.past_nicknames[s]:
+                    self.past_nicknames[s][u].reverse()
             dataIO.save_json("data/mod/past_nicknames.json", self.past_nicknames)
-            self.past_names.reverse()
+            for u in self.past_names:
+                self.past_names[u].reverse()
             dataIO.save_json("data/mod/past_names.json", self.past_names)
             return True
         names = self.past_names[user.id] if user.id in self.past_names else None
