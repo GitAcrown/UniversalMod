@@ -192,7 +192,8 @@ class Community:
                 await asyncio.sleep(1)
 
             self.session["POLLS"][numero]["ACTIF"] = False
-            if msg.pinned: await self.bot.unpin_message(msg)
+            upmsg = await self.bot.get_message(ctx.message.channel, self.session["POLLS"][numero]["MSGID"])
+            if upmsg.pinned: await self.bot.unpin_message(upmsg)
             reptxt = statext = ""
             reps = self.get_reps(numero)
             total = sum([r.nb for r in reps])
