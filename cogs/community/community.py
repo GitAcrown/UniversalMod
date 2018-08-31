@@ -28,13 +28,11 @@ class Community:
 
     def find_user_vote(self, numero, user: discord.Member):
         """Retrouve le vote d'un membre"""
-        try:
+        if numero in self.session["POLLS"]:
             for r in self.session["POLLS"][numero]["REPS"]:
                 if user in self.session["POLLS"][numero]["REPS"][r]["users"]:
                     return r
-            return False
-        except:
-            return False
+        return False
 
     def gen_poll_embed(self, message: discord.Message):
         """Génère le message de poll mis à jour"""
