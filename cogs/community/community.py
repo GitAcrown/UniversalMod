@@ -229,7 +229,7 @@ class Community:
         else:
             txt = "**Format :** `{}sp Question ?; Réponse 1; Réponse 2; Réponse N [...]`\n\n**Remarques :**\n" \
                   "• Si aucune réponse n'est fournie, le poll se mettra automatiquement en sondage binaire OUI/NON.\n" \
-                  "• Par défaut, le vote expire après 5 minutes par défaut mais vous pouvez changer cette valeur en " \
+                  "• Le vote expire après 5 minutes par défaut mais vous pouvez changer cette valeur en " \
                   "ajoutant l'option `-exp=Xm` avec X la valeur en minute à la fin de la commande.\n" \
                   "• L'option `-souple` permet de passer le poll en mode souple, c'est-à-dire qu'il permet la " \
                   "modification de son vote.\n" \
@@ -237,6 +237,8 @@ class Community:
                   "(Vous pourrez toujours le faire vous-même ou en réagissant avec l'emoji \📌)\n" \
                   "• `-notif` permet d'activer la réception d'un MP venant confirmer la participation au vote, " \
                   "pratique lorsqu'il faut prouver qu'un membre a voté.\n" \
+                  "• `-recap` permet d'obtenir un fichier texte contenant un résumé complet des résultats à " \
+                  "la fin du poll.\n" \
                   "• Enfin, `-mobile` ajoute une réaction sur le poll permettant de recevoir un affichage simplifié du " \
                   "poll adapté aux appareils ayant de petits écrans (< 5 pouces)".format(ctx.prefix)
             em = discord.Embed(title="Aide — Créer un poll", description=txt, color=0x43c8e0)
