@@ -81,7 +81,7 @@ class Community:
         <termes> = Question ?;Réponse 1;Réponse 2;Réponse N...
 
         Options:
-        -exp=Xm => Temps en minute au bout duquel le poll aura expiré (def.= 5m)
+        -exp=X => Temps en minute au bout duquel le poll aura expiré (def.= 5m)
         -souple => Passe le poll en mode souple (les votes peuvent être modifiés)
         -nopin => N'épingle pas automatiquement le poll
         -mobile => Ajoute un mode mobile pour obtenir un affichage simplifié
@@ -89,7 +89,7 @@ class Community:
         -recap => Obtenir les résultats sur un fichier text à la fin du vote"""
         server = ctx.message.server
         souple = nopin = mobile = notif = recap = False
-        expiration = 1  # Valeur par défaut en minute
+        expiration = 5  # Valeur par défaut en minute
         lettres = [s for s in "🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯"]
         now = datetime.now()
         couleur = int("".join([random.choice(string.digits + "abcdef") for _ in range(6)]), 16)
@@ -105,10 +105,10 @@ class Community:
                                        "réaliser cette action")
                 return
             termes = " ".join(termes)
-            r = re.compile(r'-exp=(\d+)m', re.DOTALL | re.IGNORECASE).findall(termes)
+            r = re.compile(r'-exp=(\d+)', re.DOTALL | re.IGNORECASE).findall(termes)
             if r:
                 r = r[0]
-                termes = termes.replace("-exp={}m".format(r), "")
+                termes = termes.replace("-exp={}".format(r), "")
                 expiration = r
             if "-souple" in termes:
                 termes = termes.replace("-souple", "")
@@ -271,7 +271,7 @@ class Community:
                         reptxt += "\{} — **{}**\n".format(r.emoji, r.name)
                         statext += "\{} — **{}** · {}%\n".format(r.emoji, r.nb, round(pourcent * 100, 1))
                     txt = "**POLL #{}** — ***{}***\n".format(numero, poll["QUESTION"])
-                    txt += "• Réponses\n" + reptxt + "\n• Stats\n" + statext + "\n\n*Tu peux voter avec les réactions " \
+                    txt += "• Réponses\n" + reptxt + "\n• Stats\n" + statext + "\n*Tu peux voter avec les réactions " \
                                                                                "en dessous du message sur le channel*"
                     await self.bot.send_message(user, txt)
                     await self.bot.remove_reaction(message, reaction.emoji, user)
