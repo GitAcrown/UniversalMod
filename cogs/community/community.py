@@ -30,7 +30,7 @@ class Community:
         """Retrouve le vote d'un membre"""
         if numero in self.session["POLLS"]:
             for r in self.session["POLLS"][numero]["REPS"]:
-                if user in self.session["POLLS"][numero]["REPS"][r]["users"]:
+                if user.id in self.session["POLLS"][numero]["REPS"][r]["users"]:
                     return r
         return False
 
