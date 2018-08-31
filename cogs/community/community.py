@@ -207,9 +207,8 @@ class Community:
         else:
             txt = "**Format :** `{}sp Question ?; Réponse 1; Réponse 2; Réponse N [...]`\n\n**Remarques :**\n" \
                   "• Si aucune réponse n'est fournie, le poll se mettra automatiquement en sondage binaire OUI/NON.\n" \
-                  "• Par défaut, le vote expire après {} minutes mais vous pouvez changer cette valeur par défaut avec " \
-                  "`{}modcom spduree` ou en ajoutant l'option `-exp=Xm` avec X la valeur en minute à la fin de " \
-                  "la commande.\n" \
+                  "• Par défaut, le vote expire après 5 minutes par défaut mais vous pouvez changer cette valeur en " \
+                  "ajoutant l'option `-exp=Xm` avec X la valeur en minute à la fin de la commande.\n" \
                   "• L'option `-souple` permet de passer le poll en mode souple, c'est-à-dire qu'il permet la " \
                   "modification de son vote.\n" \
                   "• L'option `-nopin` indique au bot de ne pas épingler le sondage automatiquement. " \
