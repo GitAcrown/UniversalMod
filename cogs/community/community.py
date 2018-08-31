@@ -216,7 +216,7 @@ class Community:
                   "• `-notif` permet d'activer la réception d'un MP venant confirmer la participation au vote, " \
                   "pratique lorsqu'il faut prouver qu'un membre a voté.\n" \
                   "• Enfin, `-mobile` ajoute une réaction sur le poll permettant de recevoir un affichage simplifié du " \
-                  "poll adapté aux appareils ayant de petits écrans (< 5 pouces)"
+                  "poll adapté aux appareils ayant de petits écrans (< 5 pouces)".format(ctx.prefix)
             em = discord.Embed(title="Aide — Créer un poll", description=txt, color=0x43c8e0)
             await self.bot.say(embed=em)
 
