@@ -139,7 +139,10 @@ class Community:
                     reptxt += "\{} — **{}**\n".format(reps[i]["emoji"], i)
                     statext += "\{} — **0** · 0%\n".format(reps[i]["emoji"])
             emos = [reps[e]["emoji"] for e in reps]
-            numero = sorted([n for n in self.session["POLLS"]], reverse=True)[0] + 1
+            if len(self.session["POLLS"]) >= 1:
+                numero = sorted([n for n in self.session["POLLS"]], reverse=True)[0] + 1
+            else:
+                numero = 1
             consigne = "Votez avec les réactions ci-dessous"
             if souple:
                 consigne = "Votez ou changez de réponse avec les réactions ci-dessous"
