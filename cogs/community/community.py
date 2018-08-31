@@ -56,7 +56,7 @@ class Community:
             em.set_author(name=base_em["title"], icon_url=base_em.author.icon_url)
             em.add_field(name="• Réponses", value=reptxt)
             em.add_field(name="• Stats", value=statext)
-            em.set_footer(text="{} | Expire à {}".format(consigne, datedur))
+            em.set_footer(text="{} | Expire {}".format(consigne, datedur))
             return em
         except:
             return False
@@ -150,7 +150,7 @@ class Community:
             em.set_author(name="#{} — {}".format(numero, question.capitalize()), icon_url=ctx.message.author.avatar_url)
             em.add_field(name="• Réponses", value=reptxt)
             em.add_field(name="• Stats", value=statext)
-            em.set_footer(text="{} | Expire à {}".format(consigne, datedur))
+            em.set_footer(text="{} | Expire {}".format(consigne, datedur))
             msg = await self.bot.say(embed=em)
             self.session["POLLS"][numero] = {"MSGID" : msg.id,
                                              "QUESTION": question.capitalize(),
@@ -226,7 +226,7 @@ class Community:
     async def grab_reaction_add(self, reaction, user):
         message = reaction.message
         if not user.bot:
-            try:
+            if self.find_poll(message):
                 poll, numero = self.find_poll(message)
                 if reaction.emoji in [poll["REPS"][r]["emoji"] for r in poll["REPS"]]:
                     if not self.find_user_vote(numero, user):
@@ -273,11 +273,10 @@ class Community:
                     await self.bot.remove_reaction(message, reaction.emoji, user)
                 else:
                     await self.bot.remove_reaction(message, reaction.emoji, user)
-            except: pass
 
     async def grab_reaction_remove(self, reaction, user):
         message = reaction.emoji
-        try:
+        if self.find_poll(message):
             poll, numero = self.find_poll(message)
             if poll["OPTS"]["souple"]:
                 if self.find_user_vote(numero, user):
@@ -288,11 +287,9 @@ class Community:
                                 poll["REPS"][r]["users"].remove(user.id)
                                 await self.bot.edit_message(message, embed=self.gen_poll_embed(message))
                                 if poll["OPTS"]["notif"]:
-                                    await self.bot.send_message(user, "**¨POLL #{}** — Vote `{}` retiré !".format(
+                                    await self.bot.send_message(user, "**POLL #{}** — Vote `{}` retiré !".format(
                                         numero, r))
                                 return
-        except: pass  # Je sais que c'est moche et que ça se fait pas, mais c'est plus lisible
-
 
 def check_folders():
     if not os.path.exists("data/community"):
