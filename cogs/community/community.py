@@ -38,7 +38,7 @@ class Community:
 
     def gen_poll_embed(self, message: discord.Message):
         """Génère le message de poll mis à jour"""
-        try:
+        if self.find_poll(message):
             poll, numero = self.find_poll(message)
             base_em = message.embeds[0]
             reptxt = statext = ""
@@ -58,8 +58,8 @@ class Community:
             em.add_field(name="• Stats", value=statext)
             em.set_footer(text="{} | Expire {}".format(consigne, datedur))
             return em
-        except:
-            return False
+        print("Embed introuvable")
+        return False
 
 
     @commands.command(aliases=["sp"], pass_context=True)
