@@ -126,7 +126,7 @@ class Community:
                 termes = termes.replace("-recap", "")
                 recap = True
 
-            if " ou " in termes:
+            if " ou " in termes and ";" not in termes:
                 qr = [r.strip().capitalize() for r in termes.strip(" ?").split(" ou ")]
                 qr = [termes] + qr
                 question = termes
