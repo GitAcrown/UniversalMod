@@ -125,8 +125,13 @@ class Community:
             if "-recap" in termes:
                 termes = termes.replace("-recap", "")
                 recap = True
-            qr = [r.strip() for r in termes.strip(" ;").split(";")]  # on supprime les caractères qui trainent
-            question = qr[0]
+
+            if "ou" in termes.lower():
+                qr = [r.strip() for r in termes.strip(" ?").split("ou")]
+                question = termes
+            else:
+                qr = [r.strip() for r in termes.strip(" ;").split(";")]  # on supprime les caractères qui trainent
+                question = qr[0]
             reps = {}
             maxdur = (now + timedelta(minutes=int(expiration))).timestamp()
             if maxdur - time.time() >= 86400:
