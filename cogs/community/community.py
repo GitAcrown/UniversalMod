@@ -53,7 +53,7 @@ class Community:
                 reptxt += "\{} — **{}**\n".format(reps[r]["emoji"], r)
                 statext += "\{} — **{}** · {}%\n".format(reps[r]["emoji"], reps[r]["nb"], round(pourcent * 100, 1))
             em = discord.Embed(color=base_em["color"])
-            em.set_author(name=base_em["title"], icon_url=base_em.author.icon_url)
+            em.set_author(name=base_em["title"], icon_url=base_em["author"]["icon_url"])
             em.add_field(name="• Réponses", value=reptxt)
             em.add_field(name="• Stats", value=statext)
             em.set_footer(text="{} | Expire {}".format(consigne, datedur))
@@ -134,7 +134,7 @@ class Community:
                 reptxt = statext = ""
                 for i in [r.capitalize() for r in qr[1:]]:
                     reps[i] = {"nb": 0,
-                               "emoji": lettres[qr[1:].index(r)],
+                               "emoji": lettres[qr[1:].index(i)],
                                "users": []}
                     reptxt += "\{} — **{}**\n".format(reps[i]["emoji"], i)
                     statext += "\{} — **0** · 0%\n".format(reps[i]["emoji"])
