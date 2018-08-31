@@ -77,7 +77,7 @@ class Community:
         -recap => Obtenir les résultats sur un fichier text à la fin du vote"""
         server = ctx.message.server
         souple = nopin = mobile = notif = recap = False
-        expiration = 5  # Valeur par défaut en minute
+        expiration = 1  # Valeur par défaut en minute
         lettres = [s for s in "🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯"]
         now = datetime.now()
         couleur = int("".join([random.choice(string.digits + "abcdef") for _ in range(6)]), 16)
