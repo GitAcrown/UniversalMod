@@ -126,8 +126,9 @@ class Community:
                 termes = termes.replace("-recap", "")
                 recap = True
 
-            if "ou" in termes.lower():
-                qr = [r.strip() for r in termes.strip(" ?").split("ou")]
+            if " ou " in termes:
+                qr = [r.strip() for r in termes.strip(" ?").split(" ou ")]
+                qr = [termes] + qr
                 question = termes
             else:
                 qr = [r.strip() for r in termes.strip(" ;").split(";")]  # on supprime les caractères qui trainent
