@@ -127,11 +127,11 @@ class Community:
                 recap = True
 
             if " ou " in termes:
-                qr = [r.strip() for r in termes.strip(" ?").split(" ou ")]
+                qr = [r.strip().capitalize() for r in termes.strip(" ?").split(" ou ")]
                 qr = [termes] + qr
                 question = termes
             else:
-                qr = [r.strip() for r in termes.strip(" ;").split(";")]  # on supprime les caractères qui trainent
+                qr = [r.strip().capitalize() for r in termes.strip(" ;").split(";")]  # on supprime les caractères qui trainent
                 question = qr[0]
             reps = {}
             maxdur = (now + timedelta(minutes=int(expiration))).timestamp()
