@@ -53,7 +53,7 @@ class Community:
                 reptxt += "\{} — **{}**\n".format(reps[r]["emoji"], r)
                 statext += "\{} — **{}** · {}%\n".format(reps[r]["emoji"], reps[r]["nb"], round(pourcent * 100, 1))
             em = discord.Embed(color=base_em["color"])
-            em.set_author(name=base_em["title"], icon_url=base_em["author"]["icon_url"])
+            em.set_author(name=base_em.author.name, icon_url=base_em.author.icon_url)
             em.add_field(name="• Réponses", value=reptxt)
             em.add_field(name="• Stats", value=statext)
             em.set_footer(text="{} | Expire {}".format(consigne, datedur))
