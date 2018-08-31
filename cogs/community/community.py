@@ -274,7 +274,7 @@ class Community:
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
     async def grab_reaction_remove(self, reaction, user):
-        message = reaction.emoji
+        message = reaction.message
         if self.find_poll(message):
             poll, numero = self.find_poll(message)
             if poll["OPTS"]["souple"]:
