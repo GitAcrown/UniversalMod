@@ -119,6 +119,7 @@ class Community:
                 datedur = datetime.fromtimestamp(maxdur).strftime("le %d/%m à %H:%M")
             else:
                 datedur = datetime.fromtimestamp(maxdur).strftime("à %H:%M")
+            emos = []
             if len(qr) == 1:
                 reps = {"Oui": {"nb": 0,
                                 "emoji": "👍",
@@ -128,6 +129,7 @@ class Community:
                                 "users": []}}
                 reptxt = "\👍 — **Oui**\n\👎 — **Non**"
                 statext = "\👍 — **0** · 0%\n\👎 — **0** · 0%"
+                emos = ["👍", "👎"]
             else:
                 reptxt = statext = ""
                 for i in [r.capitalize() for r in qr[1:]]:
@@ -136,8 +138,8 @@ class Community:
                                "users": []}
                     reptxt += "\{} — **{}**\n".format(reps[i]["emoji"], i)
                     statext += "\{} — **0** · 0%\n".format(reps[i]["emoji"])
-            emos = [reps[e]["emoji"] for e in reps]
-            emos.reverse()
+                    emos.append(lettres[qr[1:].index(i)])
+
             if len(self.session["POLLS"]) >= 1:
                 numero = sorted([n for n in self.session["POLLS"]], reverse=True)[0] + 1
             else:
@@ -261,7 +263,7 @@ class Community:
                     except:
                         pass
                 elif reaction.emoji == "📌":
-                    if message.pin == False:
+                    if message.pinned == False:
                         if user.server_permissions.manage_messages:
                             await self.bot.pin_message(message)
                         else:
