@@ -1,9 +1,11 @@
 import asyncio
+import operator
 import os
 import random
 import re
 import string
 import time
+from collections import namedtuple
 from datetime import datetime, timedelta
 
 import discord
@@ -34,29 +36,41 @@ class Community:
                     return r
         return False
 
+    def get_reps(self, numero):
+        """Retourne des objets réponses arrangés dans le bon ordre"""
+        if numero in self.session["POLLS"]:
+            objs = []
+            reps = self.session["POLLS"][numero]["REPS"]
+            replist = [[r, reps[r]["nb"], reps[r]["emoji"], reps[r]["users"], reps[r]["index"]] for r in reps]
+            replist = sorted(replist, key=operator.itemgetter(4))
+            Answer = namedtuple('Answer', ['name', 'nb', 'emoji', 'users'])
+            for r in replist:
+                objs.append(Answer(r[0], r[1], r[2], r[3]))
+            return objs
+        return False
+
     def gen_poll_embed(self, message: discord.Message):
         """Génère le message de poll mis à jour"""
         if self.find_poll(message):
             poll, numero = self.find_poll(message)
             base_em = message.embeds[0]
-            reptxt = statext = ""
-            reps = poll["REPS"]
-            total = sum([reps[r]["nb"] for r in reps])
             datedur = poll["EXPIRE"]
             consigne = "Votez avec les réactions ci-dessous"
             if poll["OPTS"]["souple"]:
                 consigne = "Votez ou changez de réponse avec les réactions ci-dessous"
+            reptxt = statext = ""
+            reps = self.get_reps(numero)
+            total = sum([r.nb for r in reps])
             for r in reps:
-                pourcent = reps[r]["nb"] / total if round(total) > 0 else 0
-                reptxt += "\{} — **{}**\n".format(reps[r]["emoji"], r)
-                statext += "\{} — **{}** · {}%\n".format(reps[r]["emoji"], reps[r]["nb"], round(pourcent * 100, 1))
+                pourcent = r.nb / total if round(total) > 0 else 0
+                reptxt += "\{} — **{}**\n".format(r.emoji, r.name)
+                statext += "\{} — **{}** · {}%\n".format(r.emoji, r.nb, round(pourcent * 100, 1))
             em = discord.Embed(color=base_em["color"])
             em.set_author(name=base_em["author"]["name"], icon_url=base_em["author"]["icon_url"])
             em.add_field(name="• Réponses", value=reptxt)
             em.add_field(name="• Stats", value=statext)
             em.set_footer(text="{} | Expire {}".format(consigne, datedur))
             return em
-        print("Embed introuvable")
         return False
 
 
@@ -82,7 +96,7 @@ class Community:
         if termes:
             if termes[0].lower() == "stop":
                 try:
-                    poll = self.session["POLLS"][termes[1]]
+                    poll = self.session["POLLS"][int(termes[1])]
                     if poll["AUTHOR_ID"] == \
                             ctx.message.author.id or ctx.message.author.server_permissions.manage_messages:
                         poll["ACTIF"] = False
@@ -123,10 +137,12 @@ class Community:
             if len(qr) == 1:
                 reps = {"Oui": {"nb": 0,
                                 "emoji": "👍",
-                                "users": []},
+                                "users": [],
+                                "index": 0},
                         "Non": {"nb": 0,
                                 "emoji": "👎",
-                                "users": []}}
+                                "users": [],
+                                "index": 1}}
                 reptxt = "\👍 — **Oui**\n\👎 — **Non**"
                 statext = "\👍 — **0** · 0%\n\👎 — **0** · 0%"
                 emos = ["👍", "👎"]
@@ -135,7 +151,8 @@ class Community:
                 for i in [r.capitalize() for r in qr[1:]]:
                     reps[i] = {"nb": 0,
                                "emoji": lettres[qr[1:].index(i)],
-                               "users": []}
+                               "users": [],
+                               "index": qr[1:].index(i)}
                     reptxt += "\{} — **{}**\n".format(reps[i]["emoji"], i)
                     statext += "\{} — **0** · 0%\n".format(reps[i]["emoji"])
                     emos.append(lettres[qr[1:].index(i)])
@@ -177,12 +194,12 @@ class Community:
             self.session["POLLS"][numero]["ACTIF"] = False
             if msg.pinned: await self.bot.unpin_message(msg)
             reptxt = statext = ""
-            reps = self.session["POLLS"][numero]["REPS"]
-            total = sum([reps[r]["nb"] for r in reps])
+            reps = self.get_reps(numero)
+            total = sum([r.nb for r in reps])
             for r in reps:
-                pourcent = reps[r]["nb"] / total if round(total) > 0 else 0
-                reptxt += "\{} — **{}**\n".format(reps[r]["emoji"], r)
-                statext += "\{} — **{}** · {}%\n".format(reps[r]["emoji"], reps[r]["nb"], round(pourcent * 100, 1))
+                pourcent = r.nb / total if round(total) > 0 else 0
+                reptxt += "\{} — **{}**\n".format(r.emoji, r.name)
+                statext += "\{} — **{}** · {}%\n".format(r.emoji, r.nb, round(pourcent * 100, 1))
             em = discord.Embed(color=couleur)
             em.set_author(name="RÉSULTATS #{} — {}".format(numero, question.capitalize()),
                           icon_url=ctx.message.author.avatar_url)
@@ -195,8 +212,8 @@ class Community:
             if recap:
                 mlist = ""
                 for r in reps:
-                    mlist += "\n- {}\n".format(r)
-                    mlist += "\n".join([server.get_member(u).name for u in reps[r]["users"]])
+                    mlist += "\n- {}\n".format(r.name)
+                    mlist += "\n".join([server.get_member(u).name for u in r.users])
                 txt = "• Réponses\n" + reptxt + "\n• Stats\n" + statext + "\n• Par membre\n" + mlist
                 filename = "POLL_#{}.txt".format(numero)
                 file = open("data/community/junk/{}".format(filename), "w", encoding="UTF-8")
@@ -246,13 +263,12 @@ class Community:
                             await self.bot.send_message(user, "**POLL #{}** — Vous avez déjà voté !".format(numero))
                 elif reaction.emoji == "📱":
                     reptxt = statext = ""
-                    reps = self.session["POLLS"][numero]["REPS"]
-                    total = sum([reps[r]["nb"] for r in reps])
+                    reps = self.get_reps(numero)
+                    total = sum([r.nb for r in reps])
                     for r in reps:
-                        pourcent = reps[r]["nb"] / total if round(total) > 0 else 0
-                        reptxt += "\{} — **{}**\n".format(reps[r]["emoji"], r)
-                        statext += "\{} — **{}** · {}%\n".format(reps[r]["emoji"], reps[r]["nb"],
-                                                                 round(pourcent * 100, 1))
+                        pourcent = r.nb / total if round(total) > 0 else 0
+                        reptxt += "\{} — **{}**\n".format(r.emoji, r.name)
+                        statext += "\{} — **{}** · {}%\n".format(r.emoji, r.nb, round(pourcent * 100, 1))
                     txt = "**POLL #{}** — ***{}***\n".format(numero, poll["QUESTION"])
                     txt += "• Réponses\n" + reptxt + "\n• Stats\n" + statext + "\n\n*Tu peux voter avec les réactions " \
                                                                                "en dessous du message sur le channel*"
