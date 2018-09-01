@@ -60,7 +60,7 @@ class Community:
         """Active/Désactive la détection des repost sur le serveur"""
         server = ctx.message.server
         get = self.get_sys(server)
-        if get:
+        if get["REPOST"]:
             get["REPOST"] = False
             await self.bot.say("**Détection désactivée** ─ Les reposts ne seront plus signalés")
         else:
@@ -73,7 +73,7 @@ class Community:
         """Active/Désactive la notification en cas d'absence"""
         server = ctx.message.server
         get = self.get_sys(server)
-        if get:
+        if get["AFK"]:
             get["AFK"] = False
             await self.bot.say("**Notification désactivée** ─ Vos absences ne seront plus reportées")
         else:
@@ -87,7 +87,7 @@ class Community:
         """Active/Désactive la création de balises spoil"""
         server = ctx.message.server
         get = self.get_sys(server)
-        if get:
+        if ["SPOIL"]:
             get["SPOIL"] = False
             await self.bot.say("**Balises désactivées** ─ Les balises spoil ne pourront plus être créées")
         else:
@@ -101,7 +101,7 @@ class Community:
         """Active/Désactive la création de chronos instantanés"""
         server = ctx.message.server
         get = self.get_sys(server)
-        if get:
+        if get["CHRONO"]:
             get["CHRONO"] = False
             await self.bot.say("**Chronomètre désactivé** ─ Il ne sera plus possible de créer des chronos instantanés")
         else:
@@ -480,7 +480,7 @@ class Community:
         if opts["CHRONO"]:
             regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
             if regex:
-                temps = int(regex[0]) if int(regex[0]) <= 60 else 60
+                temps = int(regex) if int(regex) <= 60 else 60
                 await self.bot.add_reaction(message, "⏱")
                 await asyncio.sleep(temps)
                 await self.bot.delete_message(message)
