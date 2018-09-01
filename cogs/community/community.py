@@ -480,7 +480,7 @@ class Community:
         if opts["CHRONO"]:
             regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
             if regex:
-                temps = int(regex) if int(regex) <= 60 else 60
+                temps = int(regex[0]) if int(regex[0]) <= 60 else 60
                 await self.bot.add_reaction(message, "⏱")
                 await asyncio.sleep(temps)
                 await self.bot.delete_message(message)

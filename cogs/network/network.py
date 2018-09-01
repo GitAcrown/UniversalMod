@@ -594,6 +594,14 @@ class Network:
         else:
             await self.bot.say("**Aucun greffon** — Vous n'avez aucun greffon sur votre carte")
 
+    @commands.command(aliases=["ns"], pass_context=True)
+    async def stats(self, ctx, user: discord.Member = None):
+        """Affiche ses statistiques Network (ou celles du membre visé)"""
+        user = user if user else ctx.message.author
+        u = self.app.get_account(user, "STATS")
+        em = discord.Embed(title="Statistiques — {}".format(user.name), color=user.color)
+        txt = "**Ratio msg/j** — {}"
+
     @commands.group(aliases=["apps"], no_pm=True, pass_context=True)
     async def jeux(self, ctx):
         """Gestion de vos jeux & applications enregistrés"""
