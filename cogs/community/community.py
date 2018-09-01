@@ -480,7 +480,7 @@ class Community:
         if opts["CHRONO"]:
             r = False
             regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
-            regex2 = re.compile(r".(\d+)s", re.IGNORECASE | re.DOTALL).findall(content)
+            regex2 = re.compile(r"\.(\d+)s", re.IGNORECASE | re.DOTALL).findall(content)
             if regex:
                 r = regex[0]
             elif regex2:
