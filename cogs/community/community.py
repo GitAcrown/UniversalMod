@@ -9,8 +9,10 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 
 import discord
+from __main__ import send_cmd_help
 from discord.ext import commands
 
+from .utils import checks
 from .utils.dataIO import fileIO, dataIO
 
 
@@ -19,28 +21,118 @@ class Community:
     def __init__(self, bot):
         self.bot = bot
         self.sys = dataIO.load_json("data/community/sys.json")
-        self.session = {"POLLS": {}}
+        self.session = {}
+
+    def save(self):
+        fileIO("data/community/sys.json", "save", self.sys)
+
+    def get_session(self, server: discord.Server):
+        if server.id not in self.session:
+            self.session[server.id] = {"POLLS": {},
+                                       "REPOST_LIST": [],
+                                       "AFK_LIST": [],
+                                       "SPOIL": {}}
+        return self.session[server.id]
+
+    def get_sys(self, server: discord.Server, sub: str = None):
+        if server.id not in self.sys:
+            self.sys[server.id] = {"REPOST": False,
+                                   "AFK": True,
+                                   "RECAP": True,
+                                   "CHRONO": False,
+                                   "SPOIL": True}
+            self.save()
+        if sub:
+            if sub.upper() not in self.sys[server.id]:
+                self.sys[server.id][sub.upper()] = None
+            return self.sys[server.id][sub.upper()]
+        return self.sys[server.id]
+
+    @commands.group(name="tools", aliases=["comset", "cs"], pass_context=True)
+    @checks.admin_or_permissions(manage_messages=True)
+    async def _tools(self, ctx):
+        """Paramètres de Community (Outils communautaires)"""
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+    @_tools.command(pass_context=True)
+    async def repost(self, ctx):
+        """Active/Désactive la détection des repost sur le serveur"""
+        server = ctx.message.server
+        get = self.get_sys(server)
+        if get:
+            get["REPOST"] = False
+            await self.bot.say("**Détection désactivée** ─ Les reposts ne seront plus signalés")
+        else:
+            get["REPOST"] = True
+            await self.bot.say("**Détection activée** ─ Les repost seront signalés par l'emoji ♻")
+        self.save()
+
+    @_tools.command(pass_context=True)
+    async def afk(self, ctx):
+        """Active/Désactive la notification en cas d'absence"""
+        server = ctx.message.server
+        get = self.get_sys(server)
+        if get:
+            get["AFK"] = False
+            await self.bot.say("**Notification désactivée** ─ Vos absences ne seront plus reportées")
+        else:
+            get["AFK"] = True
+            await self.bot.say("**Notification activée** ─ Vos absences seront signalées si vous avez prévenu avec "
+                               "\"afk\"")
+        self.save()
+
+    @_tools.command(pass_context=True)
+    async def spoil(self, ctx):
+        """Active/Désactive la création de balises spoil"""
+        server = ctx.message.server
+        get = self.get_sys(server)
+        if get:
+            get["SPOIL"] = False
+            await self.bot.say("**Balises désactivées** ─ Les balises spoil ne pourront plus être créées")
+        else:
+            get["SPOIL"] = True
+            await self.bot.say("**Balises autorisées** ─ Vous pouvez créer une balise en précédant votre message du "
+                               "symbole § (paragraphe)")
+        self.save()
+
+    @_tools.command(pass_context=True)
+    async def chrono(self, ctx):
+        """Active/Désactive la création de chronos instantanés"""
+        server = ctx.message.server
+        get = self.get_sys(server)
+        if get:
+            get["CHRONO"] = False
+            await self.bot.say("**Chronomètre désactivé** ─ Il ne sera plus possible de créer des chronos instantanés")
+        else:
+            get["CHRONO"] = True
+            await self.bot.say("**Chronomètres autorisés** ─ Vous pouvez créer un chronomètre instantané en faisant "
+                               "[Xs] avec X le nombre de secondes dans vos messages")
+        self.save()
 
     def find_poll(self, message: discord.Message):
         """Retrouve le poll lié à un message"""
-        for poll in self.session["POLLS"]:
-            if message.id == self.session["POLLS"][poll]["MSGID"]:
-                return self.session["POLLS"][poll], poll
+        session = self.get_session(message.server)
+        for poll in session["POLLS"]:
+            if message.id == session["POLLS"][poll]["MSGID"]:
+                return session["POLLS"][poll], poll
         return False
 
     def find_user_vote(self, numero, user: discord.Member):
         """Retrouve le vote d'un membre"""
-        if numero in self.session["POLLS"]:
-            for r in self.session["POLLS"][numero]["REPS"]:
-                if user.id in self.session["POLLS"][numero]["REPS"][r]["users"]:
+        session = self.get_session(user.server)
+        if numero in session["POLLS"]:
+            for r in session["POLLS"][numero]["REPS"]:
+                if user.id in session["POLLS"][numero]["REPS"][r]["users"]:
                     return r
         return False
 
-    def get_reps(self, numero):
+    def get_reps(self, numero, server: discord.Server):
         """Retourne des objets réponses arrangés dans le bon ordre"""
-        if numero in self.session["POLLS"]:
+        session = self.get_session(server)
+        if numero in session["POLLS"]:
             objs = []
-            reps = self.session["POLLS"][numero]["REPS"]
+            reps = session["POLLS"][numero]["REPS"]
             replist = [[r, reps[r]["nb"], reps[r]["emoji"], reps[r]["users"], reps[r]["index"]] for r in reps]
             replist = sorted(replist, key=operator.itemgetter(4))
             Answer = namedtuple('Answer', ['name', 'nb', 'emoji', 'users'])
@@ -59,7 +151,7 @@ class Community:
             if poll["OPTS"]["souple"]:
                 consigne = "Votez ou changez de réponse avec les réactions ci-dessous"
             reptxt = statext = ""
-            reps = self.get_reps(numero)
+            reps = self.get_reps(numero, message.server)
             total = sum([r.nb for r in reps])
             for r in reps:
                 pourcent = r.nb / total if round(total) > 0 else 0
@@ -88,6 +180,7 @@ class Community:
         -notif => Envoie une notification de vote en MP
         -recap => Obtenir les résultats sur un fichier text à la fin du vote"""
         server = ctx.message.server
+        session = self.get_session(server)
         souple = nopin = mobile = notif = recap = False
         expiration = 5  # Valeur par défaut en minute
         lettres = [s for s in "🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯"]
@@ -96,7 +189,7 @@ class Community:
         if termes:
             if termes[0].lower() == "stop":
                 try:
-                    poll = self.session["POLLS"][int(termes[1])]
+                    poll = session["POLLS"][int(termes[1])]
                     if poll["AUTHOR_ID"] == \
                             ctx.message.author.id or ctx.message.author.server_permissions.manage_messages:
                         poll["ACTIF"] = False
@@ -163,8 +256,8 @@ class Community:
                     statext += "\{} — **0** · 0%\n".format(reps[i]["emoji"])
                     emos.append(lettres[qr[1:].index(i)])
 
-            if len(self.session["POLLS"]) >= 1:
-                numero = sorted([n for n in self.session["POLLS"]], reverse=True)[0] + 1
+            if len(session["POLLS"]) >= 1:
+                numero = sorted([n for n in session["POLLS"]], reverse=True)[0] + 1
             else:
                 numero = 1
             consigne = "Votez avec les réactions ci-dessous"
@@ -176,7 +269,7 @@ class Community:
             em.add_field(name="• Stats", value=statext)
             em.set_footer(text="{} | Expire {}".format(consigne, datedur))
             msg = await self.bot.say(embed=em)
-            self.session["POLLS"][numero] = {"MSGID" : msg.id,
+            session["POLLS"][numero] = {"MSGID" : msg.id,
                                              "QUESTION": question.capitalize(),
                                              "REPS": reps,
                                              "OPTS": {"souple": souple,
@@ -194,14 +287,14 @@ class Community:
             if mobile: await self.bot.add_reaction(msg, "📱")
             if nopin == False: await self.bot.pin_message(msg)
 
-            while time.time() < maxdur and self.session["POLLS"][numero]["ACTIF"]:
+            while time.time() < maxdur and session["POLLS"][numero]["ACTIF"]:
                 await asyncio.sleep(1)
 
-            self.session["POLLS"][numero]["ACTIF"] = False
-            upmsg = await self.bot.get_message(ctx.message.channel, self.session["POLLS"][numero]["MSGID"])
+            session["POLLS"][numero]["ACTIF"] = False
+            upmsg = await self.bot.get_message(ctx.message.channel, session["POLLS"][numero]["MSGID"])
             if upmsg.pinned: await self.bot.unpin_message(upmsg)
             reptxt = statext = ""
-            reps = self.get_reps(numero)
+            reps = self.get_reps(numero, server)
             total = sum([r.nb for r in reps])
             for r in reps:
                 pourcent = r.nb / total if round(total) > 0 else 0
@@ -212,7 +305,7 @@ class Community:
                           icon_url=ctx.message.author.avatar_url)
             em.add_field(name="• Réponses", value= reptxt)
             em.add_field(name="• Stats", value= statext)
-            votes = self.session["POLLS"][numero]["REPS"]
+            votes = session["POLLS"][numero]["REPS"]
             total = sum([len(votes[i]["users"]) for i in votes])
             em.set_footer(text="Terminé — Merci d'y avoir participé | {} votes".format(total))
             await self.bot.say(embed=em)
@@ -231,7 +324,7 @@ class Community:
                     os.remove("data/community/junk/{}".format(filename))
                 except Exception as e:
                     await self.bot.say("**Impossible d'upload le récapitualtif** — `{}`".format(e))
-            del self.session["POLLS"][numero]
+            del session["POLLS"][numero]
         else:
             txt = "**Format :** `{}sp Question ?; Réponse 1; Réponse 2; Réponse N [...]`\n\n**Remarques :**\n" \
                   "• Si aucune réponse n'est fournie, le poll se mettra automatiquement en sondage binaire OUI/NON.\n" \
@@ -252,6 +345,8 @@ class Community:
 
     async def grab_reaction_add(self, reaction, user):
         message = reaction.message
+        server = message.server
+        session = self.get_session(server)
         if not user.bot:
             if self.find_poll(message):
                 poll, numero = self.find_poll(message)
@@ -272,7 +367,7 @@ class Community:
                             await self.bot.send_message(user, "**POLL #{}** — Vous avez déjà voté !".format(numero))
                 elif reaction.emoji == "📱":
                     reptxt = statext = ""
-                    reps = self.get_reps(numero)
+                    reps = self.get_reps(numero, server)
                     total = sum([r.nb for r in reps])
                     for r in reps:
                         pourcent = r.nb / total if round(total) > 0 else 0
@@ -300,6 +395,23 @@ class Community:
                 else:
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
+            if reaction.emoji == "👁":
+                if not user.bot:
+                    if message.id in session["SPOIL"]:
+                        try:
+                            await self.bot.remove_reaction(message, "👁", user)
+                        except:
+                            pass
+                        rs = lambda: random.randint(0, 255)
+                        color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
+                        param = session["SPOIL"][message.id]
+                        em = discord.Embed(color=color, description=param["TEXTE"])
+                        em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
+                        try:
+                            await self.bot.send_message(user, embed=em)
+                        except:
+                            print("SPOIL - Impossible d'envoyer un message à {} (Bloqué)".format(str(user)))
+
     async def grab_reaction_remove(self, reaction, user):
         message = reaction.message
         if self.find_poll(message):
@@ -316,6 +428,62 @@ class Community:
                                     await self.bot.send_message(user, "**POLL #{}** — Vote `{}` retiré !".format(
                                         numero, r))
                                 return
+
+    async def grab_message(self, message):
+        author = message.author
+        server, channel = message.server, message.channel
+        content = message.content
+        opts = self.get_sys(server)
+        session = self.get_session(server)
+        if opts["AFK"]:
+            for afk in session["AFK_LIST"]:
+                if author.id == afk[0]:
+                    session["AFK_LIST"].remove([afk[0], afk[1], afk[2]])
+            if "afk" in content.lower():
+                raison = " ".join([m.strip() for m in content.split() if "afk" not in m.lower()])
+                session["AFK_LIST"].append([author.id, author.name, raison])
+            if message.mentions:
+                for m in message.mentions:
+                    for afk in session["AFK_LIST"]:
+                        if m.id == afk[0]:
+                            if afk[2] != "":
+                                msg = await self.bot.send_message(channel, "**{}** est AFK — *{}*".format(afk[1], afk[2]))
+                            else:
+                                msg = await self.bot.send_message(channel, "**{}** est AFK — "
+                                                                     "Ce membre sera de retour sous peu".format(afk[1]))
+                            await asyncio.sleep(5)
+                            await self.bot.delete_message(msg)
+
+        if opts["SPOIL"]:
+            if content.startswith("§") or content.lower().startswith("spoil:"):
+                rs = lambda: random.randint(0, 255)
+                color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
+                balise = "spoil:" if content.lower().startswith("spoil:") else "§"
+                await self.bot.delete_message(message)
+                em = discord.Embed(color=color)
+                em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                em.set_footer(text="👁 ─ Voir le spoil")
+                msg = await self.bot.send_message(channel, embed=em)
+                session["SPOIL"][msg.id] = {"TEXTE": content.replace(balise, ""),
+                                                         "AUTEUR": message.author.name,
+                                                         "AUTEURIMG": message.author.avatar_url}
+                await self.bot.add_reaction(msg, "👁")
+                return
+
+        if opts["REPOST"]:
+            if content.startswith("http"):
+                if content in session["REPOST_LIST"]:
+                    await self.bot.add_reaction(message, "♻")
+                else:
+                    session["REPOST_LIST"].append(content)
+
+        if opts["CHRONO"]:
+            regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
+            if regex:
+                temps = int(regex[0]) if int(regex[0]) <= 60 else 60
+                await self.bot.add_reaction(message, "⏱")
+                await asyncio.sleep(temps)
+                await self.bot.delete_message(message)
 
 def check_folders():
     if not os.path.exists("data/community"):
@@ -337,5 +505,6 @@ def setup(bot):
     check_files()
     n = Community(bot)
     bot.add_cog(n)
+    bot.add_listener(n.grab_message, "on_message")
     bot.add_listener(n.grab_reaction_add, "on_reaction_add")
     bot.add_listener(n.grab_reaction_remove, "on_reaction_remove")

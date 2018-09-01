@@ -1248,11 +1248,6 @@ class Echo:
             return
         channel = message.channel
         self._set_server(server)
-        if ".5s" in content.lower():
-            await self.bot.add_reaction(message, "⏱")
-            await asyncio.sleep(5.5)
-            await self.bot.delete_message(message)
-            return
 
         if author.id not in self.sys[server.id]["BLACKLIST"]:
             if ":" in content:
@@ -1261,12 +1256,6 @@ class Echo:
                     stickers_list = self.get_all_stickers(server, True, "NOM")
                     for e in stickers:
                         if e[1] in [e.name for e in server.emojis]:
-                            continue
-
-                        if e[1] == "5s" or e[1] == "auto":
-                            await self.bot.add_reaction(message, "⏱")
-                            await asyncio.sleep(5.5)
-                            await self.bot.delete_message(message)
                             continue
 
                         if e[1] in stickers_list:
