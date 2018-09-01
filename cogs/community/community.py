@@ -478,9 +478,15 @@ class Community:
                     session["REPOST_LIST"].append(content)
 
         if opts["CHRONO"]:
+            r = False
             regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
+            regex2 = re.compile(r".(\d+)s", re.IGNORECASE | re.DOTALL).findall(content)
             if regex:
-                temps = int(regex[0]) if int(regex[0]) <= 60 else 60
+                r = regex[0]
+            elif regex2:
+                r = regex2[0]
+            if r:
+                temps = int(r) if int(r) <= 60 else 60
                 await self.bot.add_reaction(message, "⏱")
                 await asyncio.sleep(temps)
                 await self.bot.delete_message(message)
