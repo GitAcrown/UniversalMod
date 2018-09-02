@@ -433,11 +433,18 @@ class Community:
                     if message.embeds:
                         texte += "\n\n" + message.embeds[0]["description"]
                     url = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
+                    out = re.compile(r'(https?:\/\/(?:.*)\/\w*\.[A-z]*)',
+                                     re.DOTALL | re.IGNORECASE).findall(message.content)
+                    if out:
+                        incop_url = out[0]
+                    else:
+                        incop_url = False
                     session["QUOTE"][user.id] = {"texte": texte,
                                                  "color": author.color,
                                                  "name": author.name,
                                                  "image":author.avatar_url,
-                                                 "url": url}
+                                                 "url": url,
+                                                 "incop_url":incop_url}
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
             if reaction.emoji == "🔗":
@@ -527,10 +534,13 @@ class Community:
         if self.get_sys(server, "QUOTE"):
             if author.id in session["QUOTE"]:
                 texte = session["QUOTE"][author.id]["texte"]
+                image = session["QUOTE"][author.id]["incop_url"] if session["QUOTE"][author.id]["incop_url"] else None
                 em = discord.Embed(description=texte, color=session["QUOTE"][author.id]["color"])
                 em.set_author(name="Citation de {}".format(session["QUOTE"][author.id]["name"]),
                               icon_url= session["QUOTE"][author.id]["image"], url=session["QUOTE"][author.id]["url"])
                 em.add_field(name="\▶ {}".format(author.name), value=message.content)
+                if image:
+                    em.set_image(url=image)
                 await self.bot.delete_message(message)
                 await self.bot.send_message(channel, embed=em)
                 del session["QUOTE"][author.id]
