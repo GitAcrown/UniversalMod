@@ -480,7 +480,7 @@ class Community:
                             re.IGNORECASE | re.DOTALL).findall(message.content)
         if output:
             output = output[0]
-            new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".formaat(
+            new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
                 output[0], output[1], output[2], output[3])
             await self.bot.send_message(channel, "**Correction automatique** — " + new_url)
         if opts["AFK"]:
