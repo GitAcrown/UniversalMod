@@ -281,8 +281,8 @@ class NetworkApp:
             em = discord.Embed(title=titlename, description=desc, color=colorset)
             em.set_thumbnail(url=user.avatar_url)
             em.add_field(name="Infos", value=val)
-            em.add_field(name="Rôles & Présence", value=", ".join(["*{}*".format(r.name) for r in user.roles if
-                                                                   r.name != "@everyone"]) + vtxt)
+            roles = ", ".join(["*{}*".format(r.name) for r in user.roles if r.name != "@everyone"])
+            em.add_field(name="Rôles & Présence", value=roles if roles else "Aucun" + vtxt)
             em.add_field(name="Historique", value=psetxt + hist)
             if soc["image"]:
                 em.set_image(url=soc["image"])
@@ -299,8 +299,8 @@ class NetworkApp:
             em = discord.Embed(color=colorset)
             em.set_author(name=titlename, icon_url=user.avatar_url)
             em.add_field(name="Infos", value=val)
-            em.add_field(name="Rôles", value=", ".join(["*{}*".format(r.name) for r in user.roles if
-                                                        r.name != "@everyone"]))
+            roles = ", ".join(["*{}*".format(r.name) for r in user.roles if r.name != "@everyone"])
+            em.add_field(name="Rôles", value=roles if roles else "Aucun")
             em.add_field(name="Changements", value=psetxt)
         rx = " | {}".format(user.game.name) if user.game else ""
         em.set_footer(text="ID — {}{}".format(user.id, rx), icon_url=self.get_status_img(user))
