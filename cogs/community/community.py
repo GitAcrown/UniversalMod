@@ -102,14 +102,11 @@ class Community:
     async def quoteexp(self, ctx):
         """Active/Désactive la fonctionnalité de citation (Expérimental)"""
         server = ctx.message.server
-        get = self.get_sys(server)
-        if get.get("QUOTE", False):
-            get["QUOTE"] = False
-        if get["QUOTE"]:
-            get["QUOTE"] = False
+        if self.get_sys(server, "QUOTE"):
+            self.get_sys(server)["QUOTE"] = False
             await self.bot.say("**Citations désactivées** ─ Il n'est plus possible de citer d'autre membres")
         else:
-            get["QUOTE"] = True
+            self.get_sys(server)["QUOTE"] = True
             await self.bot.say("**Citations disponibles** ─ Vous pouvez citer quelqu'un en mettant une réaction"
                                " 💬 à son message **[Expérimental]**")
         self.save()
@@ -519,7 +516,7 @@ class Community:
                 await asyncio.sleep(temps)
                 await self.bot.delete_message(message)
 
-        if opts["QUOTE"]:
+        if self.get_sys(server, "QUOTE"):
             if author.id in session["QUOTE"]:
                 texte = session["QUOTE"][author.id]["texte"]
                 em = discord.Embed(description=texte, color=session["QUOTE"][author.id]["color"])
