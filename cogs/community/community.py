@@ -476,13 +476,22 @@ class Community:
         content = message.content
         opts = self.get_sys(server)
         session = self.get_session(server)
-        output = re.compile(r"https*://www.noelshack.com/(\d+)-(\d+)-(\d+)-(.*)",
+
+        output = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(\d{1,3})-(.*)",
                             re.IGNORECASE | re.DOTALL).findall(message.content)
-        if output:
+        output2 = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(.*)",
+                            re.IGNORECASE | re.DOTALL).findall(message.content)
+        if output: # 2018
             output = output[0]
             new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
                 output[0], output[1], output[2], output[3])
             await self.bot.send_message(channel, "**Correction automatique** — " + new_url)
+        elif output2:
+            output = output[0]
+            new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
+                output[0], output[1], output[2])
+            await self.bot.send_message(channel, "**Correction automatique** — " + new_url)
+
         if opts["AFK"]:
             for afk in session["AFK_LIST"]:
                 if author.id == afk[0]:
