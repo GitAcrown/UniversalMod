@@ -31,7 +31,8 @@ class Community:
             self.session[server.id] = {"POLLS": {},
                                        "REPOST_LIST": [],
                                        "AFK_LIST": [],
-                                       "SPOIL": {}}
+                                       "SPOIL": {},
+                                       "QUOTE": {}}
         return self.session[server.id]
 
     def get_sys(self, server: discord.Server, sub: str = None):
@@ -40,11 +41,12 @@ class Community:
                                    "AFK": True,
                                    "RECAP": True,
                                    "CHRONO": False,
-                                   "SPOIL": True}
+                                   "SPOIL": True,
+                                   "QUOTE": False}
             self.save()
         if sub:
             if sub.upper() not in self.sys[server.id]:
-                self.sys[server.id][sub.upper()] = None
+                self.sys[server.id][sub.upper()] = False
             return self.sys[server.id][sub.upper()]
         return self.sys[server.id]
 
@@ -87,13 +89,29 @@ class Community:
         """Active/Désactive la création de balises spoil"""
         server = ctx.message.server
         get = self.get_sys(server)
-        if ["SPOIL"]:
+        if get["SPOIL"]:
             get["SPOIL"] = False
             await self.bot.say("**Balises désactivées** ─ Les balises spoil ne pourront plus être créées")
         else:
             get["SPOIL"] = True
             await self.bot.say("**Balises autorisées** ─ Vous pouvez créer une balise en précédant votre message du "
                                "symbole § (paragraphe)")
+        self.save()
+
+    @_tools.command(pass_context=True)
+    async def quoteexp(self, ctx):
+        """Active/Désactive la fonctionnalité de citation (Expérimental)"""
+        server = ctx.message.server
+        get = self.get_sys(server)
+        if get.get("QUOTE", False):
+            get["QUOTE"] = False
+        if get["QUOTE"]:
+            get["QUOTE"] = False
+            await self.bot.say("**Citations désactivées** ─ Il n'est plus possible de citer d'autre membres")
+        else:
+            get["QUOTE"] = True
+            await self.bot.say("**Citations disponibles** ─ Vous pouvez citer quelqu'un en mettant une réaction"
+                               " 💬 à son message **[Expérimental]**")
         self.save()
 
     @_tools.command(pass_context=True)
@@ -396,21 +414,31 @@ class Community:
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
             if reaction.emoji == "👁":
-                if not user.bot:
-                    if message.id in session["SPOIL"]:
-                        try:
-                            await self.bot.remove_reaction(message, "👁", user)
-                        except:
-                            pass
-                        rs = lambda: random.randint(0, 255)
-                        color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
-                        param = session["SPOIL"][message.id]
-                        em = discord.Embed(color=color, description=param["TEXTE"])
-                        em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
-                        try:
-                            await self.bot.send_message(user, embed=em)
-                        except:
-                            print("SPOIL - Impossible d'envoyer un message à {} (Bloqué)".format(str(user)))
+                if message.id in session["SPOIL"]:
+                    try:
+                        await self.bot.remove_reaction(message, "👁", user)
+                    except:
+                        pass
+                    rs = lambda: random.randint(0, 255)
+                    color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
+                    param = session["SPOIL"][message.id]
+                    em = discord.Embed(color=color, description=param["TEXTE"])
+                    em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
+                    try:
+                        await self.bot.send_message(user, embed=em)
+                    except:
+                        print("SPOIL - Impossible d'envoyer un message à {} (Bloqué)".format(str(user)))
+
+            if reaction.emoji == "💬":
+                if self.get_sys(server, "QUOTE"):
+                    texte = message.content if message.content else ""
+                    if message.embeds:
+                        texte += "\n\n" + message.embeds[0]["description"]
+                    session["QUOTE"][user.id] = {"texte": texte,
+                                                 "color": user.color,
+                                                 "name": user.name,
+                                                 "image": user.avataar_url}
+                    await self.bot.remove_reaction(message, reaction.emoji, user)
 
     async def grab_reaction_remove(self, reaction, user):
         message = reaction.message
@@ -490,6 +518,17 @@ class Community:
                 await self.bot.add_reaction(message, "⏱")
                 await asyncio.sleep(temps)
                 await self.bot.delete_message(message)
+
+        if opts["QUOTE"]:
+            if author.id in session["QUOTE"]:
+                texte = session["QUOTE"][author.id]["texte"]
+                em = discord.Embed(description=texte, color=session["QUOTE"][author.id]["color"])
+                em.set_author(name="Citation de {}".format(session["QUOTE"][author.id]["name"]),
+                              icon_url= session["QUOTE"][author.id]["image"])
+                em.add_field(name="\▶ {}".format(author.name), value=message.content)
+                await self.bot.delete_message(message)
+                await self.bot.say(embed=em)
+                del session["QUOTE"][author.id]
 
 def check_folders():
     if not os.path.exists("data/community"):
