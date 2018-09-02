@@ -440,6 +440,11 @@ class Community:
                                                  "url": url}
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
+            if reaction.emoji == "🔗":
+                url = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
+                await self.bot.remove_reaction(message, reaction.emoji, user)
+                await self.bot.send_message(user, "**Lien du message** — " + url)
+
     async def grab_reaction_remove(self, reaction, user):
         message = reaction.message
         if self.find_poll(message):
