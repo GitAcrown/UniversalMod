@@ -431,10 +431,12 @@ class Community:
                     texte = message.content if message.content else ""
                     if message.embeds:
                         texte += "\n\n" + message.embeds[0]["description"]
+                    url = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
                     session["QUOTE"][user.id] = {"texte": texte,
                                                  "color": user.color,
                                                  "name": user.name,
-                                                 "image": user.avataar_url}
+                                                 "image": user.avatar_url,
+                                                 "url": url}
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
     async def grab_reaction_remove(self, reaction, user):
@@ -521,7 +523,7 @@ class Community:
                 texte = session["QUOTE"][author.id]["texte"]
                 em = discord.Embed(description=texte, color=session["QUOTE"][author.id]["color"])
                 em.set_author(name="Citation de {}".format(session["QUOTE"][author.id]["name"]),
-                              icon_url= session["QUOTE"][author.id]["image"])
+                              icon_url= session["QUOTE"][author.id]["image"], url=session["QUOTE"][author.id]["url"])
                 em.add_field(name="\▶ {}".format(author.name), value=message.content)
                 await self.bot.delete_message(message)
                 await self.bot.say(embed=em)
