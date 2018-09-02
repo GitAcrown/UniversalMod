@@ -526,7 +526,7 @@ class Community:
                               icon_url= session["QUOTE"][author.id]["image"], url=session["QUOTE"][author.id]["url"])
                 em.add_field(name="\▶ {}".format(author.name), value=message.content)
                 await self.bot.delete_message(message)
-                await self.bot.say(embed=em)
+                await self.bot.send_message(channel, embed=em)
                 del session["QUOTE"][author.id]
 
 def check_folders():
