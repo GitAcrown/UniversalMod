@@ -158,10 +158,10 @@ class NetworkApp:
             dataIO.save_json("data/mod/past_names.json", self.past_names)
             return True
         names = self.past_names[user.id] if user.id in self.past_names else None
-        try:
+        if user.id in self.past_nicknames[server.id]:
             nicks = self.past_nicknames[server.id][user.id]
             nicks = [escape_mass_mentions(nick) for nick in nicks]
-        except IndexError:
+        else:
             nicks = "Aucun"
         if names:
             names = [escape_mass_mentions(name) for name in names]
