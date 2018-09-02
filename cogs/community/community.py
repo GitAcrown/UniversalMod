@@ -360,6 +360,7 @@ class Community:
 
     async def grab_reaction_add(self, reaction, user):
         message = reaction.message
+        author = message.author
         server = message.server
         session = self.get_session(server)
         if not user.bot:
@@ -433,9 +434,9 @@ class Community:
                         texte += "\n\n" + message.embeds[0]["description"]
                     url = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
                     session["QUOTE"][user.id] = {"texte": texte,
-                                                 "color": user.color,
-                                                 "name": user.name,
-                                                 "image": user.avatar_url,
+                                                 "color": author.color,
+                                                 "name": author.name,
+                                                 "image":author.avatar_url,
                                                  "url": url}
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
