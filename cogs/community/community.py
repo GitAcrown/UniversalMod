@@ -431,7 +431,8 @@ class Community:
                 if self.get_sys(server, "QUOTE"):
                     texte = message.content if message.content else ""
                     if message.embeds:
-                        texte += "\n\n" + message.embeds[0]["description"]
+                        if "description" in message.embeds[0]:
+                            texte += "\n\n" + message.embeds[0]["description"]
                     url = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
                     out = re.compile(r'(https?:\/\/(?:.*)\/\w*\.[A-z]*)',
                                      re.DOTALL | re.IGNORECASE).findall(message.content)
@@ -536,9 +537,9 @@ class Community:
                 texte = session["QUOTE"][author.id]["texte"]
                 image = session["QUOTE"][author.id]["incop_url"] if session["QUOTE"][author.id]["incop_url"] else None
                 em = discord.Embed(description=texte, color=session["QUOTE"][author.id]["color"])
-                em.set_author(name="Citation de {}".format(session["QUOTE"][author.id]["name"]),
+                em.set_author(name="Message de {}".format(session["QUOTE"][author.id]["name"]),
                               icon_url= session["QUOTE"][author.id]["image"], url=session["QUOTE"][author.id]["url"])
-                em.add_field(name="\▶ {}".format(author.name), value=message.content)
+                em.add_field(name="• Réponse de {}".format(author.name), value=message.content)
                 if image:
                     em.set_image(url=image)
                 await self.bot.delete_message(message)
