@@ -530,7 +530,8 @@ class Community:
         if opts["REPOST"]:
             if content.startswith("http"):
                 if content in session["REPOST_LIST"]:
-                    await self.bot.add_reaction(message, "♻")
+                    if not author.bot:
+                        await self.bot.add_reaction(message, "♻")
                 else:
                     session["REPOST_LIST"].append(content)
 
