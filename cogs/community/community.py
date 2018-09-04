@@ -485,12 +485,18 @@ class Community:
             output = output[0]
             new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
                 output[0], output[1], output[2], output[3])
-            await self.bot.send_message(channel, "**Correction automatique** — " + new_url)
+            await self.bot.send_message(channel, "**Correction de l'URL** — " + new_url)
         elif output2:
             output2 = output2[0]
             new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
                 output2[0], output2[1], output2[2])
-            await self.bot.send_message(channel, "**Correction automatique** — " + new_url)
+            await self.bot.send_message(channel, "**Correction de l'URL** — " + new_url)
+
+        if "twitter.com" in message.content:
+            for e in message.content.split():
+                if e.startswith("https://mobile.twitter.com/"):
+                    new = e.replace("mobile.twitter.com", "twitter.com", 1)
+                    await self.bot.send_message(channel, "**Conversion du lien mobile** — " + new)
 
         if opts["AFK"]:
             for afk in session["AFK_LIST"]:
