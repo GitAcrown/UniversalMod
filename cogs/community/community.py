@@ -55,6 +55,7 @@ class Community:
     @commands.command(pass_context=True, no_pm=True, hidden=True)
     async def aijebesoindunpsy(self, ctx):
         """Vous indique si vous avez besoin d'un psy"""
+        author = ctx.message.author
         await self.bot.send_typing(ctx.message.channel)
         await asyncio.sleep(2.2)
         await self.bot.say("Est-ce que vous êtes **Emmo** ?")
@@ -63,11 +64,23 @@ class Community:
             await self.bot.say("Si vous me répondez pas je peux pas savoir... Tant pis pour vous.")
             return
         elif rep.content.lower() in ["oui", "o", "ouais", "absolument", "yes", "y"]:
+            if author.id == "262698796616646657":
+                await self.bot.send_typing(ctx.message.channel)
+                await asyncio.sleep(2)
+                r = random.choice(["Alors oui, tu as besoin d'un Psy.", "Oui évidemment que tu as besoin d'un psy",
+                                        "Bah pourquoi tu viens me voir t'es conne, il te faut un psy oui.",
+                                        "Duh, bien sûr que oui t'as besoin d'un psy."])
+                await self.bot.say(r)
+                return
             await self.bot.send_typing(ctx.message.channel)
             await asyncio.sleep(2)
-            r = random.choice(["Alors oui, tu as besoin d'un Psy.", "Oui évidemment que tu as besoin d'un psy",
-                                    "Bah pourquoi tu viens me voir t'es conne, il te faut un psy oui.",
-                                    "Duh, bien sûr que oui t'as besoin d'un psy."])
+            r = random.choice(["T'as cru me berner ? Bien sûr que non t'es pas Emmo, allez ouste !",
+                               "Tu me prend pour un con ? "
+                               "Oui t'as besoin d'un psy, qui voudrait se faire passer pour Emmo devant un bot ?!",
+                               "Ahahah, trop mdr. Je sais très bien que t'es pas Emmo petit chenapan.",
+                               "Hey, t'as vraiment crû prendre un bot qui connait plus de détails de ta vie "
+                               "trépidante que tes propres parents pour un con ?",
+                               "Oui t'as besoin d'un psy, sale mythomane."])
             await self.bot.say(r)
             return
         elif rep.content.lower() in ["non", "n", "nan", "absolument pas", "no"]:
