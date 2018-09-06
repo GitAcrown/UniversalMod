@@ -71,18 +71,17 @@ class Community:
                                         "Bah pourquoi tu viens me voir t'es conne, il te faut un psy oui.",
                                         "Duh, bien sûr que oui t'as besoin d'un psy."])
                 await self.bot.say(r)
-                return
-            await self.bot.send_typing(ctx.message.channel)
-            await asyncio.sleep(2)
-            r = random.choice(["T'as cru me berner ? Bien sûr que non t'es pas Emmo, allez ouste !",
-                               "Tu me prend pour un con ? "
-                               "Oui t'as besoin d'un psy, qui voudrait se faire passer pour Emmo devant un bot ?!",
-                               "Ahahah, trop mdr. Je sais très bien que t'es pas Emmo petit chenapan.",
-                               "Hey, t'as vraiment crû prendre un bot qui connait plus de détails de ta vie "
-                               "trépidante que tes propres parents pour un con ?",
-                               "Oui t'as besoin d'un psy, sale mythomane."])
-            await self.bot.say(r)
-            return
+            else:
+                await self.bot.send_typing(ctx.message.channel)
+                await asyncio.sleep(2)
+                r = random.choice(["T'as cru me berner ? Bien sûr que non t'es pas Emmo, allez ouste !",
+                                   "Tu me prend pour un con ? "
+                                   "Oui t'as besoin d'un psy, qui voudrait se faire passer pour Emmo devant un bot ?!",
+                                   "Ahahah, trop mdr. Je sais très bien que t'es pas Emmo petit chenapan.",
+                                   "Hey, t'as vraiment crû prendre un bot qui connait plus de détails de ta vie "
+                                   "trépidante que tes propres parents pour un con ?",
+                                   "Oui t'as besoin d'un psy, sale mythomane."])
+                await self.bot.say(r)
         elif rep.content.lower() in ["non", "n", "nan", "absolument pas", "no"]:
             await self.bot.send_typing(ctx.message.channel)
             await asyncio.sleep(1.8)
@@ -91,18 +90,17 @@ class Community:
                                "M'ouais... bon ça va tu peux y aller.", "Nope c'est bon, pas besoin d'un psy",
                                "C'est pas d'un psy que t'as besoin mais d'un médecin, désolé."])
             await self.bot.say(r)
-            return
         else:
             await self.bot.send_typing(ctx.message.channel)
             await asyncio.sleep(1.8)
             r = random.choice(["Etant donné ton incapacité à me donner une réponse convainquante, "
-                               "'est pas d'un psy que t'as besoin là.",
+                               "c'est pas d'un psy que t'as besoin là.",
                                "Pardon, vous parlez bien la même langue que moi ?",
                                "Hein ? Vas-y cause toujours j'y comprend rien.",
                                "Désolé je ne vous écoutais pas, vous disiez ?",
                                "Ecoutez, j'ai mieux à faire qu'essayer de décrypter votre réponse là."])
             await self.bot.say(r)
-            return
+
 
 
     @commands.group(name="tools", aliases=["comset", "cs"], pass_context=True)
