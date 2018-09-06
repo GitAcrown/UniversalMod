@@ -57,7 +57,7 @@ class Community:
         """Vous indique si vous avez besoin d'un psy"""
         await self.bot.send_typing(ctx.message.channel)
         await asyncio.sleep(2.2)
-        await self.bot.say("**Est-ce que vous êtes **Emmo** ?")
+        await self.bot.say("Est-ce que vous êtes **Emmo** ?")
         rep = await self.bot.wait_for_message(author=ctx.message.author, channel=ctx.message.channel, timeout=60)
         if rep is None:
             await self.bot.say("Si vous me répondez pas je peux pas savoir... Tant pis pour vous.")
