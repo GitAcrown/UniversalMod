@@ -50,6 +50,37 @@ class Community:
             return self.sys[server.id][sub.upper()]
         return self.sys[server.id]
 
+    # Partie expérimentale ==========
+
+    @commands.command(pass_context=True, no_pm=True, hidden=True)
+    async def aijebesoindunpsy(self, ctx):
+        """Vous indique si vous avez besoin d'un psy"""
+        await self.bot.send_typing(ctx.message.channel)
+        await asyncio.sleep(3)
+        await self.bot.say("**Est-ce que vous êtes **Emmo** ?")
+        rep = await self.bot.wait_for_message(author=ctx.message.author, channel=ctx.message.channel, timeout=60)
+        if rep is None:
+            await self.bot.say("Si vous me répondez pas je peux pas savoir... Tant pis pour vous.")
+            return
+        elif rep.content.lower() in ["oui", "o", "ouais", "absolument", "yes", "y"]:
+            await self.bot.send_typing(ctx.message.channel)
+            await asyncio.sleep(2.5)
+            r = random.choice(["Alors oui, tu as besoin d'un Psy.", "Oui évidemment que tu as besoin d'un psy",
+                                    "Bah pourquoi tu viens me voir t'es conne, il te faut un psy oui.",
+                                    "Duh, bien sûr que oui t'as besoin d'un psy."])
+            await self.bot.say(r)
+            return
+        elif rep.content.lower() in ["non", "n", "nan", "absolument pas", "no"]:
+            await self.bot.send_typing(ctx.message.channel)
+            await asyncio.sleep(2)
+            r = random.choice(["Non ça va tu peux partir, ça fera 150€",
+                               "Nope t'es clean, en revanche tu devrais arrêter de faire ce dont à quoi je pense...",
+                               "M'ouais... bon ça va tu peux y aller.", "Nope c'est bon, pas besoin d'un psy",
+                               "C'est pas d'un psy que t'as besoin mais d'un médecin, désolé."])
+            await self.bot.say(r)
+            return
+
+
     @commands.group(name="tools", aliases=["comset", "cs"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def _tools(self, ctx):
