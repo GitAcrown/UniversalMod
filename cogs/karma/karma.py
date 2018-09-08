@@ -487,6 +487,7 @@ class Karma:
                 em = discord.Embed(description="**Slow** ─ {} est désormais limité à {} messages par minute.".format(
                     user.mention, limite), color=ctx.message.author.color)
                 msg = await self.bot.say(embed=em)
+                self.api.get_karma(user, -1)
                 await self.bot.send_message(user, "**Slow** ─ Vous êtes désormais limité à {} messages par minute (par {})"
                                                   "".format(limite, ctx.message.author.mention))
                 await self.api.send_log(server, "slow", "Slow d'un membre",
