@@ -146,7 +146,9 @@ class Karma:
             self.session[server.id] = {"PRISON": {},
                                        "MSG_PRISON": [],
                                        "SLOW": {},
-                                       "GLOBAL_SLOW": False}
+                                       "GLOBAL_SLOW": False,
+                                       "S_cooldown": {},
+                                       "GS_cooldown": {}}
         return self.session[server.id]
 
     def get_prison_role(self, server: discord.Server):
@@ -325,7 +327,7 @@ class Karma:
                                     await self.bot.send_message(prschannel, "{}".format(user.mention))
                                     await self.bot.send_message(prschannel, embed=emp)
 
-                            em = discord.Embed(description=msg, color=prschannel.color)
+                            em = discord.Embed(description=msg, color=prsrole.color)
                             em.set_footer(text=estim_txt)
                             notif = await self.bot.say(embed=em)
                             await asyncio.sleep(10)
@@ -529,6 +531,7 @@ class Karma:
         """Voir le casier du membre"""
         server = ctx.message.server
         today = time.strftime("%d/%m/%Y", time.localtime())
+        user = user if user else ctx.message.author
         case = self.api.get_casier(user)
         karma = "+" + case["KARMA"] if case["KARMA"] >= 0 else case["KARMA"]
         txt = "**Karma** ─ {}\n".format(karma)
@@ -752,30 +755,51 @@ class Karma:
                                "il m'est donc impossible d'en libérer les membres.")
 
     async def on_message(self, message):
-        server = message.server
-        author = message.author
-        mentions, rolesmention = message.mentions, message.role_mentions
-        casier = self.api.get_casier(author)
-        if casier["SUIVI"]:
-            await self.api.send_log(server, "suivi", "Membre suivi — {}".format(author.name), message.content)
-        if casier["KARMA"] < 0:
-            await self.api.send_log(server, "badkarma", "Membre ayant un Karma négatif — {}".format(author.name),
-                                message.content)
-        if author.bot:
-            await self.api.send_log(server, "bots", "Bot ayant posté un message — {}".format(author.name), message.content)
-        if mentions or rolesmention:
-            await self.api.send_log(server, "mentions", "Mentions détectées — {}".format(author.name), message.content)
+        if hasattr(message, "server"):
+            server = message.server
+            author = message.author
+            mentions, rolesmention = message.mentions, message.role_mentions
+            casier = self.api.get_casier(author)
+            if casier["SUIVI"]:
+                await self.api.send_log(server, "suivi", "Membre suivi — {}".format(author.name), message.content)
+            if casier["KARMA"] < 0:
+                await self.api.send_log(server, "badkarma", "Membre ayant un Karma négatif — {}".format(author.name),
+                                    message.content)
+            if author.bot:
+                await self.api.send_log(server, "bots", "Bot ayant posté un message — {}".format(author.name), message.content)
+            if mentions or rolesmention:
+                await self.api.send_log(server, "mentions", "Mentions détectées — {}".format(author.name), message.content)
+
+            session = self.get_session(server)
+            if session["GLOBAL_SLOW"]:
+                heure = time.strftime("%H:%M", time.localtime())
+                if heure not in session["GS_cooldown"]:
+                    session["GS_cooldown"] = {heure: []}
+                session["GS_cooldown"][heure].append(author.id)
+                if session["GS_cooldown"][heure].count(author.id) > session["GLOBAL_SLOW"]:
+                    await self.bot.delete_message(message)
+
+            if author.id in session["SLOW"]:
+                heure = time.strftime("%H:%M", time.localtime())
+                if heure not in session["S_cooldown"]:
+                    session["S_cooldown"] = {heure: []}
+                session["S_cooldown"][heure].append(author.id)
+                if session["S_cooldown"][heure].count(author.id) > session["SLOW"][author.id]:
+                    await self.bot.delete_message(message)
+
 
     async def on_message_delete(self, message):
-        server = message.server
-        author = message.author
-        await self.api.send_log(server, "delete", "Message supprimé de {}".format(author.name), message.content)
+        if hasattr(message, "server"):
+            server = message.server
+            author = message.author
+            await self.api.send_log(server, "delete", "Message supprimé de {}".format(author.name), message.content)
 
     async def on_reaction_clear(self, message, reactions):
-        server = message.server
-        author = message.author
-        await self.api.send_log(server, "reactclear", "Réactions du message de {} retirés".format(author.name),
-                            message.content)
+        if hasattr(message, "server"):
+            server = message.server
+            author = message.author
+            await self.api.send_log(server, "reactclear", "Réactions du message de {} retirés".format(author.name),
+                                message.content)
 
     async def on_member_update(self, before, after):
         server = after.server
