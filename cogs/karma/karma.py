@@ -58,7 +58,7 @@ class KarmaAPI:
                 if channel.id == obj:
                     return channel
         else:
-            user = server.get_member_named(obj)
+            user = server.get_member_named(obj.name)
             if user:
                 return user
             for channel in server.channels:
@@ -180,9 +180,6 @@ class Karma:
         prschannel = self.bot.get_channel(serv["OPTS"]["prison_salon"])
         prsrole = self.get_prison_role(server)
         prsmsg = self.bot.get_channel(serv["OPTS"]["prison_msgsalon"]) if serv["OPTS"]["prison_msgsalon"] else False
-        if server.id not in session["PRISON"]:
-            session["PRISON"] = {}
-            session["MSG_PRISON"] = []
         if prsrole:
             if form.lower() in ["s", "m", "h", "j"]:
                 if type(obj) == discord.Member:
@@ -287,7 +284,7 @@ class Karma:
                                                       "la sortie automatique du membre lorsqu'il aura purgé sa peine.")
                         if user.id not in session["PRISON"]:
                             session["PRISON"][user.id] = {"ENTREE": 0,
-                                                               "SORTIE": 0}
+                                                          "SORTIE": 0}
                         if prsrole not in [r.name for r in user.roles]:
                             b_peine = time.time()
                             session["PRISON"][user.id]["ENTREE"] = b_peine
@@ -309,7 +306,7 @@ class Karma:
                             else:
                                 txt = ""
                             if prsmsg:
-                                txt += "\n• Vous avez le droit d'envoyer un dernier message avec `{}msg`".format(
+                                txt += "\n• Vous avez le droit d'envoyer un dernier message avec `{}prisonmsg`".format(
                                     ctx.prefix)
                                 if user.id not in session["MSG_PRISON"]:
                                     session["MSG_PRISON"].append(user.id)
@@ -330,13 +327,13 @@ class Karma:
                             em = discord.Embed(description=msg, color=prsrole.color)
                             em.set_footer(text=estim_txt)
                             notif = await self.bot.say(embed=em)
-                            await asyncio.sleep(10)
+                            await asyncio.sleep(8)
                             await self.bot.delete_message(notif)
                             if warn:
                                 await self.bot.delete_message(warn)
 
                             while time.time() < session["PRISON"][user.id]["SORTIE"]:
-                                await asyncio.sleep(0.75)  # TIMER ============#
+                                await asyncio.sleep(1)  # TIMER ============#
 
                             if user in server.members:
                                 if prsrole in [r.name for r in user.roles]:
