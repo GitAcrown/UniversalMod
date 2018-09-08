@@ -58,20 +58,24 @@ class KarmaAPI:
                 if channel.id == obj:
                     return channel
         else:
-            user = server.get_member_named(obj.name)
-            if user:
+            if type(obj) is str:
+                for channel in server.channels:
+                    if channel.name.lower() == obj.lower():
+                        return channel
+                for role in server.roles:
+                    if role.name.lower() == obj.lower():
+                        return role
+                for member in server.members:
+                    if member.name.lower() == obj.lower():
+                        return member
+                    if member.display_name.lower() == obj.lower():
+                        return member
+                user = server.get_member_named(obj)
+            try:
+                user = server.get_member_named(obj.name)
                 return user
-            for channel in server.channels:
-                if channel.name.lower() == obj.lower():
-                    return channel
-            for role in server.roles:
-                if role.name.lower() == obj.lower():
-                    return role
-            for member in server.members:
-                if member.name.lower() == obj.lower():
-                    return member
-                if member.display_name.lower() == obj.lower():
-                    return member
+            except:
+                pass
             return None
 
     def get_server(self, server: discord.Server):
@@ -531,7 +535,7 @@ class Karma:
         today = time.strftime("%d/%m/%Y", time.localtime())
         user = user if user else ctx.message.author
         case = self.api.get_casier(user)
-        karma = "+" + case["KARMA"] if case["KARMA"] >= 0 else case["KARMA"]
+        karma = "+" + str(case["KARMA"]) if case["KARMA"] >= 0 else str(case["KARMA"])
         txt = "**Karma** ─ {}\n".format(karma)
         txt += "**Note** ─ {}".format(case["PUBLIC_NOTE"] if case["PUBLIC_NOTE"] else "Aucune note")
         em = discord.Embed(title="Casier de {}".format(user.name), description=txt)
