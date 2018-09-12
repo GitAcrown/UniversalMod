@@ -276,18 +276,24 @@ class Pendu:
                                         await self.bot.edit_message(msg, embed=em)
                                         await asyncio.sleep(1)
                                     else:
-                                        em.set_footer(text="{} — Vous avez déjà proposé cette lettre !".format(
+                                        em.set_footer(text="{} — Vous avez déjà trouvé cette lettre !".format(
                                             self.bottomtext("neutre")))
                                         await self.bot.edit_message(msg, embed=em)
                                         await asyncio.sleep(1)
                                 else:
-                                    session["VIES"] -= 1
-                                    session["JOUEURS"][rep.author.id]["MALUS"] -= 1
-                                    session["PROPOSE"].append(content)
-                                    em.set_footer(text="{} — Cette lettre ne s'y trouve pas !".format(
-                                        self.bottomtext("neutre")))
-                                    await self.bot.edit_message(msg, embed=em)
-                                    await asyncio.sleep(1)
+                                    if content.lower() in [i.lower() for i in session["PROPOSE"]]:
+                                        em.set_footer(text="{} — Vous avez déjà proposé cette lettre !".format(
+                                            self.bottomtext("neutre")))
+                                        await self.bot.edit_message(msg, embed=em)
+                                        await asyncio.sleep(1)
+                                    else:
+                                        session["VIES"] -= 1
+                                        session["JOUEURS"][rep.author.id]["MALUS"] -= 1
+                                        session["PROPOSE"].append(content)
+                                        em.set_footer(text="{} — Cette lettre ne s'y trouve pas !".format(
+                                            self.bottomtext("neutre")))
+                                        await self.bot.edit_message(msg, embed=em)
+                                        await asyncio.sleep(1)
                             elif content == "".join(mot.literal):
                                     session["JOUEURS"][rep.author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
                                         sys["ENCODE_CHAR"])
@@ -306,17 +312,8 @@ class Pendu:
                         else:
                             pass
                     if not session["VIES"]:
-                        msg = "────────\n" \
-                              "    |  //     |\n" \
-                              "    |//       |\n" \
-                              "    |/       (X)\n" \
-                              "    |         /|\\\n" \
-                              "    |           |\n" \
-                              "    |         / \\\n" \
-                              "   [|]\n" \
-                              "  [ | ]\n" \
-                              "#####################\n"
-                        msg += "\nLe mot était **{}**".format(mot.literal.upper())
+                        image = random.choice(["https://i.imgur.com/4Rgj1iI.png"])
+                        msg = "Le mot était **{}**".format(mot.literal.upper())
                         unord = []
                         for p in session["JOUEURS"]:
                             perte = session["JOUEURS"][p]["MALUS"] * mot.niveau
@@ -327,10 +324,11 @@ class Pendu:
                         for i in classt:
                             user = server.get_member(i[1])
                             pay.perte_credits(user, i[0], "Échec au pendu", True)
-                            clt += "**{}** — **-{}** {}\n".format(user.name, i[0], monnaie)
+                            clt += "**{}** — **{}** {}\n".format(user.name, i[0], monnaie)
                         em = discord.Embed(title="PENDU — Échec", description=msg, color=0xff2841)
                         em.add_field(name="Perdants", value=clt)
                         em.set_footer(text=self.msgbye())
+                        em.set_thumbnail(url=image)
                         await self.bot.say(embed=em)
                         self.get_session(server, True)
                     elif "".join(session["AVANCEMENT"]) == mot.literal:
@@ -345,7 +343,7 @@ class Pendu:
                         for i in classt:
                             user = server.get_member(i[1])
                             pay.gain_credits(user, i[0], "Gain au pendu")
-                            clt += "**{}** — **-{}** {}\n".format(user.name, i[0], monnaie)
+                            clt += "**{}** — **{}** {}\n".format(user.name, i[0], monnaie)
                         em = discord.Embed(title="PENDU — Victoire", description=msg, color=0x42f44b)
                         em.add_field(name="Gagnants", value=clt)
                         em.set_footer(text=self.msgbye())
