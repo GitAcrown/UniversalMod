@@ -109,7 +109,7 @@ class Pendu:
         if server.id not in self.session or reset:
             self.session[server.id] = {"ON": False,
                                        "JOUEURS": {},
-                                       "VIES": 5,
+                                       "VIES": 0,
                                        "AVANCEMENT": [],
                                        "PROPOSE": []}
         return self.session[server.id]
@@ -158,11 +158,12 @@ class Pendu:
 
     def check(self, msg: discord.Message):
         session = self.get_session(msg.author.server)
-        if msg.content.lower()[0] in ["?", "&", ";;", "!", "\\", "§"] or len(msg.content.lower().split(" ")) > 1:
-            return False
-        if not msg.author.bot:
-            if msg.author.id in [i for i in session["JOUEURS"]]:
-                return True
+        if session["ON"]:
+            if msg.content.lower()[0] in ["?", "&", ";;", "!", "\\", "§"] or len(msg.content.split(" ")) > 1:
+                return False
+            if not msg.author.bot:
+                if msg.author.id in [i for i in session["JOUEURS"]]:
+                    return True
         return False
 
     def leven(self, s1, s2):
@@ -224,7 +225,7 @@ class Pendu:
                 if type(mots) != str:
                     session = self.get_session(server, True)
                     mot = self.get_mot(server, mots)
-                    session["VIES"] += len(themes)
+                    session["VIES"] = 7 + len(themes)
                     session["ON"] = True
                     session["AVANCEMENT"] = mot.encode
                     session["JOUEURS"][author.id] = {"BONUS": 0,
@@ -236,13 +237,17 @@ class Pendu:
                         txt += "\n{}".format("".join(session["AVANCEMENT"]))
                         em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
                                            description=txt, color=0x286fff)
+                        em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
                         msg = await self.bot.say(embed=em)
                         rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
                                                               check=self.check)
                         if not rep:
-                            em.set_footer(text="× Partie terminée pour cause d'inactivité")
-                            await self.bot.edit_message(msg, embed=em)
-                            self.get_session(server, True)
+                            if session["ON"]:
+                                em.set_footer(text="× Partie terminée pour cause d'inactivité")
+                                await self.bot.edit_message(msg, embed=em)
+                                self.get_session(server, True)
+                            else:
+                                pass
                             return
                         elif rep.author.id in [i for i in session["JOUEURS"]]:
                             content = self.normal(rep.content).upper()
@@ -255,7 +260,7 @@ class Pendu:
                                 if content in mot.lettres:
                                     if content not in self.normal("".join(session["AVANCEMENT"])) and \
                                             content not in session["PROPOSE"]:
-                                        indexes = [[i,x] for i, x in enumerate(mot.literal) if self.normal(x) == content]
+                                        indexes = [[i,x] for i, x in enumerate(mot.lettres) if self.normal(x) == content]
                                         for l in indexes:
                                             session["AVANCEMENT"][l[0]] = l[1].upper()
                                             session["JOUEURS"][rep.author.id]["BONUS"] += 1
@@ -266,12 +271,12 @@ class Pendu:
                                             phx = "Une lettre trouvée !"
                                         em.set_footer(text="{} — {}".format(self.bottomtext("good"), phx))
                                         await self.bot.edit_message(msg, embed=em)
-                                        await asyncio.sleep(0.75)
+                                        await asyncio.sleep(1)
                                     else:
                                         em.set_footer(text="{} — Vous avez déjà proposé cette lettre !".format(
                                             self.bottomtext("neutre")))
                                         await self.bot.edit_message(msg, embed=em)
-                                        await asyncio.sleep(0.75)
+                                        await asyncio.sleep(1)
                                 else:
                                     session["VIES"] -= 1
                                     session["JOUEURS"][rep.author.id]["MALUS"] -= 1
@@ -279,7 +284,7 @@ class Pendu:
                                     em.set_footer(text="{} — Cette lettre ne s'y trouve pas !".format(
                                         self.bottomtext("neutre")))
                                     await self.bot.edit_message(msg, embed=em)
-                                    await asyncio.sleep(0.75)
+                                    await asyncio.sleep(1)
                             elif content == "".join(mot.literal):
                                     session["JOUEURS"][rep.author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
                                         sys["ENCODE_CHAR"])
@@ -294,7 +299,7 @@ class Pendu:
                                     em.set_footer(text="{} — Ce n'est pas le mot recherché".format(
                                         self.bottomtext("bad")))
                                 await self.bot.edit_message(msg, embed=em)
-                                await asyncio.sleep(0.75)
+                                await asyncio.sleep(1)
                         else:
                             pass
                     if not session["VIES"]:
@@ -357,6 +362,7 @@ class Pendu:
                 await self.bot.say(embed=em)
         elif themes[0].lower() == "stop":
             await self.bot.say("**Partie stoppée de force**")
+            session["ON"] = False
             self.get_session(server, True)
         else:
             if author.id not in session["JOUEURS"]:
