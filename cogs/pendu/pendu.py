@@ -234,7 +234,7 @@ class Pendu:
                         txt += "**Joueurs** — {}\n".format(" ,".join([server.get_member(i).name for
                                                                       i in session["JOUEURS"]]))
                         txt += "\n{}".format("".join(session["AVANCEMENT"]))
-                        em = discord.Embed(title="PENDU — {}".join(" ,".join([i.title() for i in themes])),
+                        em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
                                            description=txt, color=0x286fff)
                         msg = await self.bot.say(embed=em)
                         rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
@@ -355,7 +355,7 @@ class Pendu:
                 em = discord.Embed(title="Thèmes", description=txt, color=0xFFC125)
                 em.set_footer(text="Charger plusieurs thèmes à la fois vous donne plus de vies (max. 3)")
                 await self.bot.say(embed=em)
-        elif themes[1].lower() == "stop":
+        elif themes[0].lower() == "stop":
             await self.bot.say("**Partie stoppée de force**")
             self.get_session(server, True)
         else:
