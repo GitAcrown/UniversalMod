@@ -158,7 +158,7 @@ class Pendu:
 
     def check(self, msg: discord.Message):
         session = self.get_session(msg.author.server)
-        if msg.content.lower()[1] in ["?", "&", ";;", "!", "\\", "§"] or len(msg.content.lower().split(" ")) > 1:
+        if msg.content.lower()[0] in ["?", "&", ";;", "!", "\\", "§"] or len(msg.content.lower().split(" ")) > 1:
             return False
         if not msg.author.bot:
             if msg.author.id in [i for i in session["JOUEURS"]]:
