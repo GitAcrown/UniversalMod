@@ -325,12 +325,18 @@ class PayAPI:
     def depot_credits(self, user: discord.Member, somme: int, raison: str):  # Compatibilité Capital
         return self.gain_credits(user, somme, raison)
 
-    def perte_credits(self, user: discord.Member, somme: int, raison: str):
+    def perte_credits(self, user: discord.Member, somme: int, raison: str, ignore_min: bool=False):
         """Retire des crédits au membre"""
         somme = abs(somme)  # On s'assure que 'somme' est positive
         data = self.get_account(user, True)
         if self.enough_credits(user, somme):
             data["SOLDE"] -= somme
+            t = self.ajt_transaction(user, "PERTE", -somme, raison)
+            self._save()
+            return t
+        elif ignore_min:
+            somme = data["SOLDE"]
+            data["SOLDE"] = 0
             t = self.ajt_transaction(user, "PERTE", -somme, raison)
             self._save()
             return t
