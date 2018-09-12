@@ -119,13 +119,14 @@ class Pendu:
         sys = self.get_system(server)
         mots = []
         ok = []
+        themes = themes[:3]
         for theme in themes:
             for m in sys["MOTS"]:
                 if sys["MOTS"][m]["theme"].lower() == theme.lower():
                     mots.append([m, sys["MOTS"][m]["niveau"]])
                     ok.append(theme)
-        if ok == themes:
-            return mots[:3]
+        if mots:
+            return mots
         return "**Absent·s :** `{}`".format(" ,".join([i for i in themes if i not in ok]))
 
     def ajt_mots(self, server: discord.Server, theme, mots: list):
