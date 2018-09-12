@@ -237,7 +237,8 @@ class Pendu:
                         txt += "\n{}".format("".join(session["AVANCEMENT"]))
                         em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
                                            description=txt, color=0x286fff)
-                        em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
+                        if session["PROPOSE"]:
+                            em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
                         msg = await self.bot.say(embed=em)
                         rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
                                                               check=self.check)
@@ -262,6 +263,7 @@ class Pendu:
                                             content not in session["PROPOSE"]:
                                         indexes = [[i,x] for i, x in enumerate(mot.lettres) if self.normal(x) == content]
                                         for l in indexes:
+                                            print("Ajout en position {} de la lettre {}".format(l[0], l[1]))
                                             session["AVANCEMENT"][l[0]] = l[1].upper()
                                             session["JOUEURS"][rep.author.id]["BONUS"] += 1
                                         session["PROPOSE"].append(content)
