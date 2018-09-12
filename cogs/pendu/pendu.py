@@ -159,11 +159,12 @@ class Pendu:
     def check(self, msg: discord.Message):
         session = self.get_session(msg.author.server)
         if session["ON"]:
-            if msg.content.lower()[0] in ["?", "&", ";;", "!", "\\", "§"] or len(msg.content.split(" ")) > 1:
-                return False
-            if not msg.author.bot:
-                if msg.author.id in [i for i in session["JOUEURS"]]:
-                    return True
+            if msg.content:
+                if msg.content.lower()[0] in ["?", "&", ";;", "!", "\\", "§"] or len(msg.content.split(" ")) > 1:
+                    return False
+                if not msg.author.bot:
+                    if msg.author.id in [i for i in session["JOUEURS"]]:
+                        return True
         return False
 
     def leven(self, s1, s2):
@@ -261,7 +262,7 @@ class Pendu:
                                 if content in mot.lettres:
                                     if content not in self.normal("".join(session["AVANCEMENT"])) and \
                                             content not in session["PROPOSE"]:
-                                        indexes = [[i,x] for i, x in enumerate(mot.lettres) if self.normal(x) == content]
+                                        indexes = [[i,x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == content]
                                         for l in indexes:
                                             print("Ajout en position {} de la lettre {}".format(l[0], l[1]))
                                             session["AVANCEMENT"][l[0]] = l[1].upper()
