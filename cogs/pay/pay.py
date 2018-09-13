@@ -178,7 +178,7 @@ class PayAPI:
                                description= "Certaines fonctionnalités sur ce bot utilisent un système monétaire appelé"
                                             " *Iota Pay* permettant par exemple de pouvoir participer à divers jeux.\n"
                                             "Il est important de savoir que cette monnaie est **virtuelle** et ne "
-                                            "pourra être échangée contre de l'argent réelle.\n"
+                                            "pourra être échangée contre de l'argent réel.\n"
                                             "A la création du compte, aucune information ne te sera demandée.")
             em.set_footer(text="Veux-tu ouvrir un compte ?")
             info = await self.bot.say(embed=em)

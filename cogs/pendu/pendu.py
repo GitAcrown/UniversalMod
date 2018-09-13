@@ -157,15 +157,7 @@ class Pendu:
         return SumNetwork(mot.upper(), [self.normal(l).upper() for l in mot], [n for n in symb * len(mot)], niveau)
 
     def check(self, msg: discord.Message):
-        session = self.get_session(msg.author.server)
-        if session["ON"]:
-            if msg.content:
-                if msg.content.lower()[0] in ["?", "&", ";;", "!", "\\", "§"] or len(msg.content.split(" ")) > 1:
-                    return False
-                if not msg.author.bot:
-                    if msg.author.id in [i for i in session["JOUEURS"]]:
-                        return True
-        return False
+        return not msg.author.bot
 
     def leven(self, s1, s2):
         if len(s1) < len(s2):
@@ -208,6 +200,12 @@ class Pendu:
         else:
             return "Bonne nuit !"
 
+    def ignore(self, msg: discord.Message):
+        session = self.get_session(msg.server)
+        if msg.content.lower()[0] in ["?", "!", ";;", "&", "\\", ":", ">"] or len(msg.content.split(" ")) > 1:
+            return True
+        return False
+
     def simplecheck(self, reaction, user):
         return not user.bot
 
@@ -243,7 +241,7 @@ class Pendu:
                         msg = await self.bot.say(embed=em)
                         rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
                                                               check=self.check)
-                        if not rep:
+                        if not rep or self.ignore(rep):
                             if session["ON"]:
                                 em.set_footer(text="× Partie terminée pour cause d'inactivité")
                                 await self.bot.edit_message(msg, embed=em)
@@ -331,6 +329,7 @@ class Pendu:
                         em.set_thumbnail(url=image)
                         await self.bot.say(embed=em)
                         self.get_session(server, True)
+                        return
                     elif "".join(session["AVANCEMENT"]) == mot.literal:
                         msg = "**Bravo !** Le mot est **{}**".format(mot.literal)
                         unord = []
@@ -349,9 +348,11 @@ class Pendu:
                         em.set_footer(text=self.msgbye())
                         await self.bot.say(embed=em)
                         self.get_session(server, True)
+                        return
                     else:
                         await self.bot.say("**Partie arrêtée** — Vos comptes ne sont pas affectés")
                         self.get_session(server, True)
+                        return
                 else:
                     await self.bot.say("**Erreur** — Thème·s inexistant·s\n{}".format(mots))
             else:
@@ -367,13 +368,14 @@ class Pendu:
             self.get_session(server, True)
         else:
             if author.id not in session["JOUEURS"]:
-                session["jOUEURS"][author.id] = {"BONUS": 0,
+                session["JOUEURS"][author.id] = {"BONUS": 0,
                                                  "MALUS": 0}
                 em = discord.Embed(description="{} a rejoint la partie de pendu !".format(author.mention),
                                    color=0xFFC125)
                 await self.bot.say(embed=em)
             else:
-                await self.bot.say("**Refusé** — Finissez déjà la partie en cours ou faîtes ")
+                await self.bot.say("**Refusé** — Finissez déjà la partie en cours ou faîtes `{}pendu stop`".format(
+                    ctx.prefix))
 
     @commands.group(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(ban_members=True)
