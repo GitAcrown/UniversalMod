@@ -218,164 +218,166 @@ class Pendu:
         author = ctx.message.author
         pay = self.bot.get_cog("Pay").pay
         session, sys = self.get_session(server), self.get_system(server)
-        if not session["ON"]:
-            if themes:
-                mots = self.load_themes(server, themes)
-                if type(mots) != str:
-                    session = self.get_session(server, True)
-                    mot = self.get_mot(server, mots)
-                    session["VIES"] = 7 + len(themes)
-                    session["ON"] = True
-                    session["AVANCEMENT"] = mot.encode
-                    session["JOUEURS"][author.id] = {"BONUS": 0,
-                                                     "MALUS": 0}
-                    while session["VIES"] > 0 and "".join(session["AVANCEMENT"]) != mot.literal and session["ON"]:
-                        txt = "**Vies** — {}\n".format(session["VIES"])
-                        txt += "**Joueurs** — {}\n".format(" ,".join([server.get_member(i).name for
-                                                                      i in session["JOUEURS"]]))
-                        txt += "\n{}".format("".join(session["AVANCEMENT"]))
-                        em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
-                                           description=txt, color=0x286fff)
-                        if session["PROPOSE"]:
-                            em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
-                        msg = await self.bot.say(embed=em)
-                        rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
-                                                              check=self.check)
-                        if not rep or self.ignore(rep):
-                            if session["ON"]:
-                                em.set_footer(text="× Partie terminée pour cause d'inactivité")
-                                await self.bot.edit_message(msg, embed=em)
-                                self.get_session(server, True)
+        if await pay.verify(ctx):
+            if not session["ON"]:
+                if themes:
+                    mots = self.load_themes(server, themes)
+                    if type(mots) != str:
+                        session = self.get_session(server, True)
+                        mot = self.get_mot(server, mots)
+                        session["VIES"] = 7 + len(themes)
+                        session["ON"] = True
+                        session["AVANCEMENT"] = mot.encode
+                        session["JOUEURS"][author.id] = {"BONUS": 0,
+                                                         "MALUS": 0}
+                        while session["VIES"] > 0 and "".join(session["AVANCEMENT"]) != mot.literal:
+                            txt = "**Vies** — {}\n".format(session["VIES"])
+                            txt += "**Joueurs** — {}\n".format(" ,".join([server.get_member(i).name for
+                                                                          i in session["JOUEURS"]]))
+                            txt += "\n{}".format("".join(session["AVANCEMENT"]))
+                            em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
+                                               description=txt, color=0x286fff)
+                            if session["PROPOSE"]:
+                                em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
+                            msg = await self.bot.say(embed=em)
+                            rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
+                                                                  check=self.check)
+                            if not rep or self.ignore(rep):
+                                if session["ON"]:
+                                    em.set_footer(text="× Partie terminée pour cause d'inactivité")
+                                    await self.bot.edit_message(msg, embed=em)
+                                    self.get_session(server, True)
+                                else:
+                                    pass
+                                return
+                            elif rep.author.id in [i for i in session["JOUEURS"]]:
+                                content = self.normal(rep.content).upper()
+                                if content == "STOP":
+                                    await self.bot.say("**Partie terminée prématurément** — "
+                                                       "Vos comptes ne sont pas affectés.")
+                                    self.get_session(server, True)
+                                    return
+                                elif len(content) == 1:
+                                    if content in mot.lettres:
+                                        if content not in self.normal("".join(session["AVANCEMENT"])) and \
+                                                content not in session["PROPOSE"]:
+                                            indexes = [[i,x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == content]
+                                            for l in indexes:
+                                                session["AVANCEMENT"][l[0]] = l[1].upper()
+                                            session["PROPOSE"].append(content)
+                                            session["JOUEURS"][rep.author.id]["BONUS"] += mot.lettres.count(content)
+                                            if mot.lettres.count(content) > 1:
+                                                phx = "{} lettres trouvées !".format(mot.lettres.count(content))
+                                            else:
+                                                phx = "Une lettre trouvée !"
+                                            em.set_footer(text=self.bottomtext("good") + " — " + phx)
+                                            await self.bot.edit_message(msg, embed=em)
+                                            await asyncio.sleep(2)
+                                        else:
+                                            em.set_footer(text="{} — Vous avez déjà trouvé cette lettre !".format(
+                                                self.bottomtext("neutre")))
+                                            await self.bot.edit_message(msg, embed=em)
+                                            await asyncio.sleep(2)
+                                    else:
+                                        if content.lower() in [i.lower() for i in session["PROPOSE"]]:
+                                            em.set_footer(text="{} — Vous avez déjà proposé cette lettre !".format(
+                                                self.bottomtext("neutre")))
+                                            await self.bot.edit_message(msg, embed=em)
+                                            await asyncio.sleep(2)
+                                        else:
+                                            session["VIES"] -= 1
+                                            session["JOUEURS"][rep.author.id]["MALUS"] -= 1
+                                            session["PROPOSE"].append(content)
+                                            em.set_footer(text="{} — Cette lettre ne s'y trouve pas !".format(
+                                                self.bottomtext("neutre")))
+                                            await self.bot.edit_message(msg, embed=em)
+                                            await asyncio.sleep(2)
+                                elif content == "".join(mot.literal):
+                                        session["JOUEURS"][rep.author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
+                                            sys["ENCODE_CHAR"])
+                                        session["AVANCEMENT"] = mot.lettres
+                                else:
+                                    session["VIES"] -= 1
+                                    if self.leven("".join(mot.literal), content) == 1:
+                                        session["JOUEURS"][rep.author.id]["MALUS"] -= 1
+                                        em.set_footer(text="{} — Presque, mais non".format(self.bottomtext("bad")))
+                                    else:
+                                        session["JOUEURS"][rep.author.id]["MALUS"] -= 2
+                                        em.set_footer(text="{} — Ce n'est pas le mot recherché".format(
+                                            self.bottomtext("bad")))
+                                    await self.bot.edit_message(msg, embed=em)
+                                    await asyncio.sleep(2)
                             else:
                                 pass
+                        if not session["VIES"]:
+                            image = random.choice(["https://i.imgur.com/4Rgj1iI.png"])
+                            msg = "Le mot était **{}**".format(mot.literal.upper())
+                            unord = []
+                            for p in session["JOUEURS"]:
+                                perte = session["JOUEURS"][p]["MALUS"] * mot.niveau
+                                unord.append([perte, p])
+                            classt = sorted(unord, key=operator.itemgetter(0), reverse=True)
+                            clt = ""
+                            monnaie = pay.get_money_name(server, symbole=True)
+                            for i in classt:
+                                user = server.get_member(i[1])
+                                pay.perte_credits(user, i[0], "Échec au pendu", True)
+                                clt += "**{}** — **{}** {}\n".format(user.name, i[0], monnaie)
+                            em = discord.Embed(title="PENDU — Échec", description=msg, color=0xff2841)
+                            em.add_field(name="Perdants", value=clt)
+                            em.set_footer(text=self.msgbye())
+                            em.set_thumbnail(url=image)
+                            await self.bot.say(embed=em)
+                            self.get_session(server, True)
                             return
-                        elif rep.author.id in [i for i in session["JOUEURS"]]:
-                            content = self.normal(rep.content).upper()
-                            if content == "STOP":
-                                await self.bot.say("**Partie terminée prématurément** — "
-                                                   "Vos comptes ne sont pas affectés.")
-                                self.get_session(server, True)
-                                return
-                            elif len(content) == 1:
-                                if content in mot.lettres:
-                                    if content not in self.normal("".join(session["AVANCEMENT"])) and \
-                                            content not in session["PROPOSE"]:
-                                        indexes = [[i,x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == content]
-                                        for l in indexes:
-                                            print("Ajout en position {} de la lettre {}".format(l[0], l[1]))
-                                            session["AVANCEMENT"][l[0]] = l[1].upper()
-                                            session["JOUEURS"][rep.author.id]["BONUS"] += 1
-                                        session["PROPOSE"].append(content)
-                                        if mot.lettres.count(content) > 1:
-                                            phx = "{} lettres trouvées !".format(mot.lettres.count(content))
-                                        else:
-                                            phx = "Une lettre trouvée !"
-                                        em.set_footer(text="{} — {}".format(self.bottomtext("good"), phx))
-                                        await self.bot.edit_message(msg, embed=em)
-                                        await asyncio.sleep(1)
-                                    else:
-                                        em.set_footer(text="{} — Vous avez déjà trouvé cette lettre !".format(
-                                            self.bottomtext("neutre")))
-                                        await self.bot.edit_message(msg, embed=em)
-                                        await asyncio.sleep(1)
-                                else:
-                                    if content.lower() in [i.lower() for i in session["PROPOSE"]]:
-                                        em.set_footer(text="{} — Vous avez déjà proposé cette lettre !".format(
-                                            self.bottomtext("neutre")))
-                                        await self.bot.edit_message(msg, embed=em)
-                                        await asyncio.sleep(1)
-                                    else:
-                                        session["VIES"] -= 1
-                                        session["JOUEURS"][rep.author.id]["MALUS"] -= 1
-                                        session["PROPOSE"].append(content)
-                                        em.set_footer(text="{} — Cette lettre ne s'y trouve pas !".format(
-                                            self.bottomtext("neutre")))
-                                        await self.bot.edit_message(msg, embed=em)
-                                        await asyncio.sleep(1)
-                            elif content == "".join(mot.literal):
-                                    session["JOUEURS"][rep.author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
-                                        sys["ENCODE_CHAR"])
-                                    session["AVANCEMENT"] = mot.lettres
-                            else:
-                                session["VIES"] -= 1
-                                if self.leven("".join(mot.literal), content) == 1:
-                                    session["JOUEURS"][rep.author.id]["MALUS"] -= 1
-                                    em.set_footer(text="{} — Presque, mais non".format(self.bottomtext("bad")))
-                                else:
-                                    session["JOUEURS"][rep.author.id]["MALUS"] -= 2
-                                    em.set_footer(text="{} — Ce n'est pas le mot recherché".format(
-                                        self.bottomtext("bad")))
-                                await self.bot.edit_message(msg, embed=em)
-                                await asyncio.sleep(1)
+                        elif "".join(session["AVANCEMENT"]) == mot.literal:
+                            msg = "**Bravo !** Le mot est **{}**".format(mot.literal)
+                            unord = []
+                            for p in session["JOUEURS"]:
+                                gain = session["JOUEURS"][p]["BONUS"] * mot.niveau
+                                unord.append([gain, p])
+                            classt = sorted(unord, key=operator.itemgetter(0), reverse=True)
+                            clt = ""
+                            monnaie = pay.get_money_name(server, symbole=True)
+                            for i in classt:
+                                user = server.get_member(i[1])
+                                pay.gain_credits(user, i[0], "Gain au pendu")
+                                clt += "**{}** — **{}** {}\n".format(user.name, i[0], monnaie)
+                            em = discord.Embed(title="PENDU — Victoire", description=msg, color=0x42f44b)
+                            em.add_field(name="Gagnants", value=clt)
+                            em.set_footer(text=self.msgbye())
+                            await self.bot.say(embed=em)
+                            self.get_session(server, True)
+                            return
                         else:
-                            pass
-                    if not session["VIES"]:
-                        image = random.choice(["https://i.imgur.com/4Rgj1iI.png"])
-                        msg = "Le mot était **{}**".format(mot.literal.upper())
-                        unord = []
-                        for p in session["JOUEURS"]:
-                            perte = session["JOUEURS"][p]["MALUS"] * mot.niveau
-                            unord.append([perte, p])
-                        classt = sorted(unord, key=operator.itemgetter(0), reverse=True)
-                        clt = ""
-                        monnaie = pay.get_money_name(server, symbole=True)
-                        for i in classt:
-                            user = server.get_member(i[1])
-                            pay.perte_credits(user, i[0], "Échec au pendu", True)
-                            clt += "**{}** — **{}** {}\n".format(user.name, i[0], monnaie)
-                        em = discord.Embed(title="PENDU — Échec", description=msg, color=0xff2841)
-                        em.add_field(name="Perdants", value=clt)
-                        em.set_footer(text=self.msgbye())
-                        em.set_thumbnail(url=image)
-                        await self.bot.say(embed=em)
-                        self.get_session(server, True)
-                        return
-                    elif "".join(session["AVANCEMENT"]) == mot.literal:
-                        msg = "**Bravo !** Le mot est **{}**".format(mot.literal)
-                        unord = []
-                        for p in session["JOUEURS"]:
-                            gain = session["JOUEURS"][p]["BONUS"] * mot.niveau
-                            unord.append([gain, p])
-                        classt = sorted(unord, key=operator.itemgetter(0), reverse=True)
-                        clt = ""
-                        monnaie = pay.get_money_name(server, symbole=True)
-                        for i in classt:
-                            user = server.get_member(i[1])
-                            pay.gain_credits(user, i[0], "Gain au pendu")
-                            clt += "**{}** — **{}** {}\n".format(user.name, i[0], monnaie)
-                        em = discord.Embed(title="PENDU — Victoire", description=msg, color=0x42f44b)
-                        em.add_field(name="Gagnants", value=clt)
-                        em.set_footer(text=self.msgbye())
-                        await self.bot.say(embed=em)
-                        self.get_session(server, True)
-                        return
+                            await self.bot.say("**Partie arrêtée** — Vos comptes ne sont pas affectés")
+                            self.get_session(server, True)
+                            return
                     else:
-                        await self.bot.say("**Partie arrêtée** — Vos comptes ne sont pas affectés")
-                        self.get_session(server, True)
-                        return
+                        await self.bot.say("**Erreur** — Thème·s inexistant·s\n{}".format(mots))
                 else:
-                    await self.bot.say("**Erreur** — Thème·s inexistant·s\n{}".format(mots))
+                    txt = ""
+                    for p in self.themes:
+                        txt += "• {}\n".format(p)
+                    em = discord.Embed(title="Thèmes", description=txt, color=0xFFC125)
+                    em.set_footer(text="Charger plusieurs thèmes à la fois vous donne plus de vies (max. 3)")
+                    await self.bot.say(embed=em)
+            elif themes[0].lower() == "stop":
+                await self.bot.say("**Partie stoppée de force**")
+                session["ON"] = False
+                self.get_session(server, True)
             else:
-                txt = ""
-                for p in self.themes:
-                    txt += "• {}\n".format(p)
-                em = discord.Embed(title="Thèmes", description=txt, color=0xFFC125)
-                em.set_footer(text="Charger plusieurs thèmes à la fois vous donne plus de vies (max. 3)")
-                await self.bot.say(embed=em)
-        elif themes[0].lower() == "stop":
-            await self.bot.say("**Partie stoppée de force**")
-            session["ON"] = False
-            self.get_session(server, True)
+                if author.id not in session["JOUEURS"]:
+                    session["JOUEURS"][author.id] = {"BONUS": 0,
+                                                     "MALUS": 0}
+                    em = discord.Embed(description="{} a rejoint la partie de pendu !".format(author.mention),
+                                       color=0xFFC125)
+                    await self.bot.say(embed=em)
+                else:
+                    await self.bot.say("**Refusé** — Finissez déjà la partie en cours ou faîtes `{}pendu stop`".format(
+                        ctx.prefix))
         else:
-            if author.id not in session["JOUEURS"]:
-                session["JOUEURS"][author.id] = {"BONUS": 0,
-                                                 "MALUS": 0}
-                em = discord.Embed(description="{} a rejoint la partie de pendu !".format(author.mention),
-                                   color=0xFFC125)
-                await self.bot.say(embed=em)
-            else:
-                await self.bot.say("**Refusé** — Finissez déjà la partie en cours ou faîtes `{}pendu stop`".format(
-                    ctx.prefix))
+            await self.bot.say("**Impossible** — Vous avez besoin d'un compte *Pay* pour jouer au Pendu !")
 
     @commands.group(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(ban_members=True)
