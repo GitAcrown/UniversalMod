@@ -230,16 +230,18 @@ class Pendu:
                         session["AVANCEMENT"] = mot.encode
                         session["JOUEURS"][author.id] = {"BONUS": 0,
                                                          "MALUS": 0}
+                        reload = True
                         while session["VIES"] > 0 and "".join(session["AVANCEMENT"]) != mot.literal:
-                            txt = "**Vies** — {}\n".format(session["VIES"])
-                            txt += "**Joueurs** — {}\n".format(" ,".join([server.get_member(i).name for
-                                                                          i in session["JOUEURS"]]))
-                            txt += "\n{}".format("".join(session["AVANCEMENT"]))
-                            em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
-                                               description=txt, color=0x286fff)
-                            if session["PROPOSE"]:
-                                em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
-                            msg = await self.bot.say(embed=em)
+                            if reload:
+                                txt = "**Vies** — {}\n".format(session["VIES"])
+                                txt += "**Joueurs** — {}\n".format(" ,".join([server.get_member(i).name for
+                                                                              i in session["JOUEURS"]]))
+                                txt += "\n{}".format("".join(session["AVANCEMENT"]))
+                                em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
+                                                   description=txt, color=0x286fff)
+                                if session["PROPOSE"]:
+                                    em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
+                                msg = await self.bot.say(embed=em)
                             rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
                                                                   check=self.check)
                             if not rep:
@@ -251,8 +253,10 @@ class Pendu:
                                     pass
                                 return
                             elif self.ignore(rep):
+                                reload = False
                                 pass
                             elif rep.author.id in [i for i in session["JOUEURS"]]:
+                                reload = True
                                 content = self.normal(rep.content).upper()
                                 if content == "STOP":
                                     await self.bot.say("**Partie terminée prématurément** — "
