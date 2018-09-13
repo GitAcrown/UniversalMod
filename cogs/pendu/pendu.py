@@ -242,7 +242,7 @@ class Pendu:
                             msg = await self.bot.say(embed=em)
                             rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
                                                                   check=self.check)
-                            if not rep or self.ignore(rep):
+                            if not rep:
                                 if session["ON"]:
                                     em.set_footer(text="× Partie terminée pour cause d'inactivité")
                                     await self.bot.edit_message(msg, embed=em)
@@ -250,6 +250,8 @@ class Pendu:
                                 else:
                                     pass
                                 return
+                            elif self.ignore(rep):
+                                pass
                             elif rep.author.id in [i for i in session["JOUEURS"]]:
                                 content = self.normal(rep.content).upper()
                                 if content == "STOP":
