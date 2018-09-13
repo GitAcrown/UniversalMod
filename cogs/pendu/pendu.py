@@ -118,16 +118,20 @@ class Pendu:
         """Charge les themes donnés sur le serveur"""
         sys = self.get_system(server)
         mots = []
-        ok = []
+        denied = []
         themes = themes[:3]
         for theme in themes:
-            for m in sys["MOTS"]:
-                if sys["MOTS"][m]["theme"].lower() == theme.lower():
-                    mots.append([m, sys["MOTS"][m]["niveau"]])
-                    ok.append(theme)
+            if theme in self.themes:
+                for m in sys["MOTS"]:
+                    if sys["MOTS"][m]["theme"].lower() == theme.lower():
+                        mots.append([m, sys["MOTS"][m]["niveau"]])
+            else:
+                denied.append(theme)
+        if denied:
+            return "**Absent·s :** `{}`".format(" ,".join(denied))
         if mots:
             return mots
-        return "**Absent·s :** `{}`".format(" ,".join([i for i in themes if i not in ok]))
+        return "**Erreur** — Je n'ai pu charger de mots dans ces listes"
 
     def ajt_mots(self, server: discord.Server, theme, mots: list):
         """Ajoute des mots à un thème"""
@@ -237,10 +241,10 @@ class Pendu:
                         while session["VIES"] > 0 and "".join(session["AVANCEMENT"]) != mot.literal:
                             if reload:
                                 txt = "**Vies** — {}\n".format(session["VIES"])
-                                txt += "**Joueurs** — {}\n".format(" ,".join([server.get_member(i).name for
+                                txt += "**Joueurs** — {}\n".format(", ".join([server.get_member(i).name for
                                                                               i in session["JOUEURS"]]))
                                 txt += "\n{}".format("".join(session["AVANCEMENT"]))
-                                em = discord.Embed(title="PENDU — {}".format(" ,".join([i.title() for i in themes])),
+                                em = discord.Embed(title="PENDU — {}".format(", ".join([i.title() for i in themes])),
                                                    description=txt, color=0x286fff)
                                 if session["PROPOSE"]:
                                     em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
@@ -366,7 +370,6 @@ class Pendu:
                     em.set_footer(text="Charger plusieurs thèmes à la fois vous donne plus de vies (max. 3)")
                     await self.bot.say(embed=em)
             elif author.id not in session["JOUEURS"]:
-
                 session["JOUEURS"][author.id] = {"BONUS": 0,
                                                  "MALUS": 0}
                 em = discord.Embed(description="{} a rejoint la partie de pendu !".format(author.mention),
