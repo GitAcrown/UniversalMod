@@ -130,7 +130,7 @@ class Pendu:
             else:
                 denied.append(theme)
         if denied:
-            return "**Absent·s :** `{}`".format(" ,".join(denied))
+            return "**Absent·s :** `{}`".format(", ".join(denied))
         if mots:
             return mots
         return "**Erreur** — Je n'ai pu charger de mots dans ces listes"
@@ -363,7 +363,7 @@ class Pendu:
                             self.get_session(server, True)
                             return
                     else:
-                        await self.bot.say("**Erreur** — Thème·s inexistant·s\n{}".format(mots))
+                        await self.bot.say("**Erreur** — Thème·s inexistant·s ou invalide·s\n{}".format(mots))
                 else:
                     txt = ""
                     for p in self.themes:
