@@ -121,6 +121,8 @@ class Pendu:
         denied = []
         themes = themes[:3]
         for theme in themes:
+            if themes.count(theme) > 1:
+                denied.append(theme)
             if theme in self.themes:
                 for m in sys["MOTS"]:
                     if sys["MOTS"][m]["theme"].lower() == theme.lower():
