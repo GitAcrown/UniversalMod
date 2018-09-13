@@ -202,6 +202,8 @@ class Pendu:
 
     def ignore(self, msg: discord.Message):
         session = self.get_session(msg.server)
+        if msg.author.id not in session["JOUEURS"]:
+            return True
         if msg.content.lower()[0] in ["?", "!", ";;", "&", "\\", ":", ">"] or len(msg.content.split(" ")) > 1:
             return True
         return False
@@ -363,20 +365,20 @@ class Pendu:
                     em = discord.Embed(title="Thèmes", description=txt, color=0xFFC125)
                     em.set_footer(text="Charger plusieurs thèmes à la fois vous donne plus de vies (max. 3)")
                     await self.bot.say(embed=em)
+            elif author.id not in session["JOUEURS"]:
+
+                session["JOUEURS"][author.id] = {"BONUS": 0,
+                                                 "MALUS": 0}
+                em = discord.Embed(description="{} a rejoint la partie de pendu !".format(author.mention),
+                                   color=0xFFC125)
+                await self.bot.say(embed=em)
             elif themes[0].lower() == "stop":
                 await self.bot.say("**Partie stoppée de force**")
                 session["ON"] = False
                 self.get_session(server, True)
             else:
-                if author.id not in session["JOUEURS"]:
-                    session["JOUEURS"][author.id] = {"BONUS": 0,
-                                                     "MALUS": 0}
-                    em = discord.Embed(description="{} a rejoint la partie de pendu !".format(author.mention),
-                                       color=0xFFC125)
-                    await self.bot.say(embed=em)
-                else:
-                    await self.bot.say("**Refusé** — Finissez déjà la partie en cours ou faîtes `{}pendu stop`".format(
-                        ctx.prefix))
+                await self.bot.say("**Refusé** — Finissez déjà la partie en cours ou faîtes `{}pendu stop`".format(
+                    ctx.prefix))
         else:
             await self.bot.say("**Impossible** — Vous avez besoin d'un compte *Pay* pour jouer au Pendu !")
 
