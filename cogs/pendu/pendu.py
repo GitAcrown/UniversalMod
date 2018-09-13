@@ -266,7 +266,7 @@ class Pendu:
                                     return
                                 elif len(content) == 1:
                                     if content in mot.lettres:
-                                        if self.normal(content) not in session["PROPOSE"]:
+                                        if content not in session["PROPOSE"]:
                                             for l in indexes(content):
                                                 session["AVANCEMENT"][l[0]] = l[1].upper()
                                             session["PROPOSE"].append(content)
@@ -284,7 +284,7 @@ class Pendu:
                                             await self.bot.edit_message(msg, embed=em)
                                             await asyncio.sleep(0.75)
                                     else:
-                                        if content.lower() in [i.lower() for i in session["PROPOSE"]]:
+                                        if content in session["PROPOSE"]:
                                             em.set_footer(text="{} — Vous avez déjà proposé cette lettre !".format(
                                                 self.bottomtext("neutre")))
                                             await self.bot.edit_message(msg, embed=em)
@@ -303,13 +303,9 @@ class Pendu:
                                         session["AVANCEMENT"] = mot.lettres
                                 else:
                                     session["VIES"] -= 1
-                                    if self.leven("".join(mot.literal), content) == 1:
-                                        session["JOUEURS"][rep.author.id]["MALUS"] -= 1
-                                        em.set_footer(text="{} — Presque, mais non".format(self.bottomtext("bad")))
-                                    else:
-                                        session["JOUEURS"][rep.author.id]["MALUS"] -= 2
-                                        em.set_footer(text="{} — Ce n'est pas le mot recherché".format(
-                                            self.bottomtext("bad")))
+                                    session["JOUEURS"][rep.author.id]["MALUS"] -= 2
+                                    em.set_footer(text="{} — Ce n'est pas le mot recherché".format(
+                                        self.bottomtext("bad")))
                                     await self.bot.edit_message(msg, embed=em)
                                     await asyncio.sleep(0.75)
                             else:
