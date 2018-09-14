@@ -262,10 +262,12 @@ class Companion:
 
                 routput = re.compile(r"(?<!/)r/(\w*)(?!/|\w)", re.IGNORECASE | re.DOTALL).findall(content)
                 if routput:
-                    txt = "**Liens Reddit complétés :**\n"
+                    txt = ""
                     for r in routput:
-                        txt += "• https://www.reddit.com/r/{}/\n".format(r)
-                    await self.bot.send_message(channel, txt)
+                        if r:
+                            txt += "• https://www.reddit.com/r/{}/\n".format(r)
+                    if txt:
+                        await self.bot.send_message(channel, "**Liens Reddit complétés :**\n" + txt)
 
     async def get_on_reaction_add(self, reaction, user):
         message = reaction.message
