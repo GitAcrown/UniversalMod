@@ -243,9 +243,9 @@ class Companion:
         if opts["autolink"]:
             if not author.bot:
                 output = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(\d{1,3})-(.*)",
-                                    re.IGNORECASE | re.DOTALL).findall(message.content)
+                                    re.IGNORECASE | re.DOTALL).findall(content)
                 output2 = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(.*)",
-                                     re.IGNORECASE | re.DOTALL).findall(message.content)
+                                     re.IGNORECASE | re.DOTALL).findall(content)
                 if output:  # 2018
                     output = output[0]
                     new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
@@ -257,13 +257,13 @@ class Companion:
                         output2[0], output2[1], output2[2])
                     await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
 
-                if "twitter.com" in message.content:
-                    for e in message.content.split():
+                if "twitter.com" in content:
+                    for e in content.split():
                         if e.startswith("https://mobile.twitter.com/"):
                             new = e.replace("mobile.twitter.com", "twitter.com", 1)
                             await self.bot.send_message(channel, "**Lien mobile converti** — " + new)
 
-                routput = re.compile(r"(?<!.)r\/(\w*)(?!.)", re.IGNORECASE | re.DOTALL).findall(message.content)
+                routput = re.compile(r"(?<!/)r/(\w*)(?!/|\w)", re.IGNORECASE | re.DOTALL).findall(content)
                 if routput:
                     txt = "**Liens Reddit complétés :**\n"
                     for r in routput:
