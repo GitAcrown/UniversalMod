@@ -231,7 +231,7 @@ class Companion:
                     em = discord.Embed(description=q["contenu"], color=q["color"], timestamp=q["timestamp"])
                     em.set_author(name=q["auteur"], icon_url=q["avatar"], url=q["msg_url"])
                     em.add_field(name="• Réponse de {}".format(author.name), value=content)
-                    em.set_footer(text="Sur " + q["channel"])
+                    em.set_footer(text="Sur #" + q["channel"])
                     if q["img"]:
                         em.set_thumbnail(url=q["img"])
                     await self.bot.delete_message(message)
