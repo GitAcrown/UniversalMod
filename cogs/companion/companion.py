@@ -166,12 +166,6 @@ class Companion:
                     color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
                     balise = "spoil:" if content.lower().startswith("spoil:") else "§"
                     img = False
-                    if message.attachments:
-                        up = message.attachments[0]["url"]
-                        content += " [image]({})".format(up)
-                        for i in ["png", "jpeg", "jpg", "gif"]:
-                            if i in up:
-                                img = up
                     reg = re.compile(r'(https?:\/\/(?:.*)\/\w*\.[A-z]*)', re.DOTALL | re.IGNORECASE).findall(
                         message.content)
                     if reg:
