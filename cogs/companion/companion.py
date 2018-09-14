@@ -4,7 +4,7 @@ import re
 # from copy import deepcopy
 
 import asyncio
-import aiohttp
+# import aiohttp
 import discord
 # import wikipedia
 # import wikipediaapi
@@ -20,11 +20,11 @@ class CompanionAPI:
     def __init__(self, bot, path):
         self.bot = bot
         self.data = dataIO.load_json(path)
-        self.aiosession = aiohttp.ClientSession()
+        # self.aiosession = aiohttp.ClientSession()
         self.metasession = {"n_save": 0}
 
-    def __unload(self):
-        self.aiosession.close()
+    """def __unload(self):
+        self.aiosession.close()"""
 
     def forcesave(self):
         fileIO("data/companion/data.json", "save", self.data)
