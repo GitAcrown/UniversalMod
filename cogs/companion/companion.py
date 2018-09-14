@@ -152,7 +152,7 @@ class Companion:
                                "en secondes au bout desquelles votre message sera supprimé (max. 60).")
         self.api.forcesave()
 
-    async def on_message(self, message):
+    async def on_message_post(self, message):
         author = message.author
         server, channel = message.server, message.channel
         content = message.content
@@ -331,6 +331,6 @@ def setup(bot):
     check_folders()
     check_files()
     n = Companion(bot)
-    bot.add_listener(n.on_message, "on_message")
+    bot.add_listener(n.on_message_post, "on_message")
     bot.add_listener(n.on_reaction_add, "on_reaction_add")
     bot.add_cog(n)
