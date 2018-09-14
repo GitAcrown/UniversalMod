@@ -241,33 +241,34 @@ class Companion:
                 del session["QUOTES"][author.id]
 
         if opts["autolink"]:
-            output = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(\d{1,3})-(.*)",
-                                re.IGNORECASE | re.DOTALL).findall(message.content)
-            output2 = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(.*)",
-                                 re.IGNORECASE | re.DOTALL).findall(message.content)
-            if output:  # 2018
-                output = output[0]
-                new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
-                    output[0], output[1], output[2], output[3])
-                await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
-            elif output2:
-                output2 = output2[0]
-                new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
-                    output2[0], output2[1], output2[2])
-                await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
+            if not author.bot:
+                output = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(\d{1,3})-(.*)",
+                                    re.IGNORECASE | re.DOTALL).findall(message.content)
+                output2 = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(.*)",
+                                     re.IGNORECASE | re.DOTALL).findall(message.content)
+                if output:  # 2018
+                    output = output[0]
+                    new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
+                        output[0], output[1], output[2], output[3])
+                    await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
+                elif output2:
+                    output2 = output2[0]
+                    new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
+                        output2[0], output2[1], output2[2])
+                    await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
 
-            if "twitter.com" in message.content:
-                for e in message.content.split():
-                    if e.startswith("https://mobile.twitter.com/"):
-                        new = e.replace("mobile.twitter.com", "twitter.com", 1)
-                        await self.bot.send_message(channel, "**Lien mobile converti** — " + new)
+                if "twitter.com" in message.content:
+                    for e in message.content.split():
+                        if e.startswith("https://mobile.twitter.com/"):
+                            new = e.replace("mobile.twitter.com", "twitter.com", 1)
+                            await self.bot.send_message(channel, "**Lien mobile converti** — " + new)
 
-            routput = re.compile(r"(?<!.)r/(\w*)", re.IGNORECASE | re.DOTALL).findall(message.content)
-            if routput:
-                txt = "**Liens Reddit complétés :**"
-                for r in routput:
-                    txt += "• https://www.reddit.com/r/{}/\n".format(r)
-                await self.bot.send_message(channel, txt)
+                routput = re.compile(r"(?<!.)r\/(\w*)(?!.)", re.IGNORECASE | re.DOTALL).findall(message.content)
+                if routput:
+                    txt = "**Liens Reddit complétés :**\n"
+                    for r in routput:
+                        txt += "• https://www.reddit.com/r/{}/\n".format(r)
+                    await self.bot.send_message(channel, txt)
 
     async def on_reaction_add(self, reaction, user):
         message = reaction.message
