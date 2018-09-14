@@ -28,11 +28,7 @@ class Community:
 
     def get_session(self, server: discord.Server):
         if server.id not in self.session:
-            self.session[server.id] = {"POLLS": {},
-                                       "REPOST_LIST": [],
-                                       "AFK_LIST": [],
-                                       "SPOIL": {},
-                                       "QUOTE": {}}
+            self.session[server.id] = {"POLLS": {}}
         return self.session[server.id]
 
     def get_sys(self, server: discord.Server, sub: str = None):
@@ -100,83 +96,6 @@ class Community:
                                "Désolé je ne vous écoutais pas, vous disiez ?",
                                "Ecoutez, j'ai mieux à faire qu'essayer de décrypter votre réponse là."])
             await self.bot.say(r)
-
-
-
-    @commands.group(name="tools", aliases=["comset", "cs"], pass_context=True)
-    @checks.admin_or_permissions(manage_messages=True)
-    async def _tools(self, ctx):
-        """Paramètres de Community (Outils communautaires)"""
-        if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
-
-    @_tools.command(pass_context=True)
-    async def repost(self, ctx):
-        """Active/Désactive la détection des repost sur le serveur"""
-        server = ctx.message.server
-        get = self.get_sys(server)
-        if get["REPOST"]:
-            get["REPOST"] = False
-            await self.bot.say("**Détection désactivée** ─ Les reposts ne seront plus signalés")
-        else:
-            get["REPOST"] = True
-            await self.bot.say("**Détection activée** ─ Les repost seront signalés par l'emoji ♻")
-        self.save()
-
-    @_tools.command(pass_context=True)
-    async def afk(self, ctx):
-        """Active/Désactive la notification en cas d'absence"""
-        server = ctx.message.server
-        get = self.get_sys(server)
-        if get["AFK"]:
-            get["AFK"] = False
-            await self.bot.say("**Notification désactivée** ─ Vos absences ne seront plus reportées")
-        else:
-            get["AFK"] = True
-            await self.bot.say("**Notification activée** ─ Vos absences seront signalées si vous avez prévenu avec "
-                               "\"afk\"")
-        self.save()
-
-    @_tools.command(pass_context=True)
-    async def spoil(self, ctx):
-        """Active/Désactive la création de balises spoil"""
-        server = ctx.message.server
-        get = self.get_sys(server)
-        if get["SPOIL"]:
-            get["SPOIL"] = False
-            await self.bot.say("**Balises désactivées** ─ Les balises spoil ne pourront plus être créées")
-        else:
-            get["SPOIL"] = True
-            await self.bot.say("**Balises autorisées** ─ Vous pouvez créer une balise en précédant votre message du "
-                               "symbole § (paragraphe)")
-        self.save()
-
-    @_tools.command(pass_context=True)
-    async def quoteexp(self, ctx):
-        """Active/Désactive la fonctionnalité de citation (Expérimental)"""
-        server = ctx.message.server
-        if self.get_sys(server, "QUOTE"):
-            self.get_sys(server)["QUOTE"] = False
-            await self.bot.say("**Citations désactivées** ─ Il n'est plus possible de citer d'autre membres")
-        else:
-            self.get_sys(server)["QUOTE"] = True
-            await self.bot.say("**Citations disponibles** ─ Vous pouvez citer quelqu'un en mettant une réaction"
-                               " 💬 à son message **[Expérimental]**")
-        self.save()
-
-    @_tools.command(pass_context=True)
-    async def chrono(self, ctx):
-        """Active/Désactive la création de chronos instantanés"""
-        server = ctx.message.server
-        get = self.get_sys(server)
-        if get["CHRONO"]:
-            get["CHRONO"] = False
-            await self.bot.say("**Chronomètre désactivé** ─ Il ne sera plus possible de créer des chronos instantanés")
-        else:
-            get["CHRONO"] = True
-            await self.bot.say("**Chronomètres autorisés** ─ Vous pouvez créer un chronomètre instantané en faisant "
-                               "[Xs] avec X le nombre de secondes dans vos messages")
-        self.save()
 
     def find_poll(self, message: discord.Message):
         """Retrouve le poll lié à un message"""
@@ -464,48 +383,6 @@ class Community:
                 else:
                     await self.bot.remove_reaction(message, reaction.emoji, user)
 
-            if reaction.emoji == "👁":
-                if message.id in session["SPOIL"]:
-                    try:
-                        await self.bot.remove_reaction(message, "👁", user)
-                    except:
-                        pass
-                    rs = lambda: random.randint(0, 255)
-                    color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
-                    param = session["SPOIL"][message.id]
-                    em = discord.Embed(color=color, description=param["TEXTE"])
-                    em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
-                    try:
-                        await self.bot.send_message(user, embed=em)
-                    except:
-                        print("SPOIL - Impossible d'envoyer un message à {} (Bloqué)".format(str(user)))
-
-            if reaction.emoji == "💬":
-                if self.get_sys(server, "QUOTE"):
-                    texte = message.content if message.content else ""
-                    if message.embeds:
-                        if "description" in message.embeds[0]:
-                            texte += "\n\n" + message.embeds[0]["description"]
-                    url = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
-                    out = re.compile(r'(https?:\/\/(?:.*)\/\w*\.[A-z]*)',
-                                     re.DOTALL | re.IGNORECASE).findall(message.content)
-                    if out:
-                        incop_url = out[0]
-                    else:
-                        incop_url = False
-                    session["QUOTE"][user.id] = {"texte": texte,
-                                                 "color": author.color,
-                                                 "name": author.name,
-                                                 "image":author.avatar_url,
-                                                 "url": url,
-                                                 "incop_url":incop_url}
-                    await self.bot.remove_reaction(message, reaction.emoji, user)
-
-            if reaction.emoji == "🔗":
-                url = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
-                await self.bot.remove_reaction(message, reaction.emoji, user)
-                await self.bot.send_message(user, "**Lien du message** — " + url)
-
     async def grab_reaction_remove(self, reaction, user):
         message = reaction.message
         if self.find_poll(message):
@@ -522,105 +399,6 @@ class Community:
                                     await self.bot.send_message(user, "**POLL #{}** — Vote `{}` retiré !".format(
                                         numero, r))
                                 return
-
-    async def grab_message(self, message):
-        author = message.author
-        server, channel = message.server, message.channel
-        content = message.content
-        opts = self.get_sys(server)
-        session = self.get_session(server)
-
-        output = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(\d{1,3})-(.*)",
-                            re.IGNORECASE | re.DOTALL).findall(message.content)
-        output2 = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(.*)",
-                            re.IGNORECASE | re.DOTALL).findall(message.content)
-        if output: # 2018
-            output = output[0]
-            new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
-                output[0], output[1], output[2], output[3])
-            await self.bot.send_message(channel, "**Correction de l'URL** — " + new_url)
-        elif output2:
-            output2 = output2[0]
-            new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
-                output2[0], output2[1], output2[2])
-            await self.bot.send_message(channel, "**Correction de l'URL** — " + new_url)
-
-        if "twitter.com" in message.content:
-            for e in message.content.split():
-                if e.startswith("https://mobile.twitter.com/"):
-                    new = e.replace("mobile.twitter.com", "twitter.com", 1)
-                    await self.bot.send_message(channel, "**Conversion du lien mobile** — " + new)
-
-        if opts["AFK"]:
-            for afk in session["AFK_LIST"]:
-                if author.id == afk[0]:
-                    session["AFK_LIST"].remove([afk[0], afk[1], afk[2]])
-            if "afk" in content.lower():
-                raison = " ".join([m.strip() for m in content.split() if "afk" not in m.lower()])
-                session["AFK_LIST"].append([author.id, author.name, raison])
-            if message.mentions:
-                for m in message.mentions:
-                    for afk in session["AFK_LIST"]:
-                        if m.id == afk[0]:
-                            if afk[2] != "":
-                                msg = await self.bot.send_message(channel, "**{}** est AFK — *{}*".format(afk[1], afk[2]))
-                            else:
-                                msg = await self.bot.send_message(channel, "**{}** est AFK — "
-                                                                     "Ce membre sera de retour sous peu".format(afk[1]))
-                            await asyncio.sleep(5)
-                            await self.bot.delete_message(msg)
-
-        if opts["SPOIL"]:
-            if content.startswith("§") or content.lower().startswith("spoil:"):
-                rs = lambda: random.randint(0, 255)
-                color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
-                balise = "spoil:" if content.lower().startswith("spoil:") else "§"
-                await self.bot.delete_message(message)
-                em = discord.Embed(color=color)
-                em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-                em.set_footer(text="👁 ─ Voir le spoil")
-                msg = await self.bot.send_message(channel, embed=em)
-                session["SPOIL"][msg.id] = {"TEXTE": content.replace(balise, ""),
-                                                         "AUTEUR": message.author.name,
-                                                         "AUTEURIMG": message.author.avatar_url}
-                await self.bot.add_reaction(msg, "👁")
-                return
-
-        if opts["REPOST"]:
-            if content.startswith("http"):
-                if content in session["REPOST_LIST"]:
-                    if not author.bot:
-                        await self.bot.add_reaction(message, "♻")
-                else:
-                    session["REPOST_LIST"].append(content)
-
-        if opts["CHRONO"]:
-            r = False
-            regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
-            regex2 = re.compile(r"\.(\d+)s", re.IGNORECASE | re.DOTALL).findall(content)
-            if regex:
-                r = regex[0]
-            elif regex2:
-                r = regex2[0]
-            if r:
-                temps = int(r) if int(r) <= 60 else 60
-                await self.bot.add_reaction(message, "⏱")
-                await asyncio.sleep(temps)
-                await self.bot.delete_message(message)
-
-        if self.get_sys(server, "QUOTE"):
-            if author.id in session["QUOTE"]:
-                texte = session["QUOTE"][author.id]["texte"]
-                image = session["QUOTE"][author.id]["incop_url"] if session["QUOTE"][author.id]["incop_url"] else None
-                em = discord.Embed(description=texte, color=session["QUOTE"][author.id]["color"])
-                em.set_author(name="Message de {}".format(session["QUOTE"][author.id]["name"]),
-                              icon_url= session["QUOTE"][author.id]["image"], url=session["QUOTE"][author.id]["url"])
-                em.add_field(name="• Réponse de {}".format(author.name), value=message.content)
-                if image:
-                    em.set_image(url=image)
-                await self.bot.delete_message(message)
-                await self.bot.send_message(channel, embed=em)
-                del session["QUOTE"][author.id]
 
 def check_folders():
     if not os.path.exists("data/community"):
@@ -642,6 +420,5 @@ def setup(bot):
     check_files()
     n = Community(bot)
     bot.add_cog(n)
-    bot.add_listener(n.grab_message, "on_message")
     bot.add_listener(n.grab_reaction_add, "on_reaction_add")
     bot.add_listener(n.grab_reaction_remove, "on_reaction_remove")

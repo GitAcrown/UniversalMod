@@ -442,29 +442,6 @@ class Assist:
                     await self.bot.process_commands(new_message)
                     return"""
 
-    async def react(self, reaction, user):
-        message = reaction.message
-        server = message.channel.server
-        if server.id not in self.sys:
-            self.sys[server.id] = self.def_sys
-            fileIO("data/assist/sys.json", "save", self.sys)
-        if reaction.emoji == "👁":
-            if not user.bot:
-                if message.id in self.sys[server.id]["SPOILS"]:
-                    try:
-                        await self.bot.remove_reaction(message, "👁", user)
-                    except:
-                        pass
-                    rs = lambda: random.randint(0, 255)
-                    color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
-                    param = self.sys[server.id]["SPOILS"][message.id]
-                    em = discord.Embed(color=color, description=param["TEXTE"])
-                    em.set_author(name=param["AUTEUR"], icon_url=param["AUTEURIMG"])
-                    try:
-                        await self.bot.send_message(user, embed=em)
-                    except:
-                        print("SPOIL - Impossible d'envoyer un message à {} (Bloqué)".format(str(user)))
-
 
 def check_folders():
     if not os.path.exists("data/assist"):
@@ -486,5 +463,4 @@ def setup(bot):
     check_files()
     n = Assist(bot)
     bot.add_listener(n.read, "on_message")
-    bot.add_listener(n.react, "on_reaction_add")
     bot.add_cog(n)
