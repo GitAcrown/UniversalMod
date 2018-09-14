@@ -1,16 +1,16 @@
 import os
 import random
 import re
-from copy import deepcopy
+# from copy import deepcopy
 
 import asyncio
 import aiohttp
 import discord
-import wikipedia
-import wikipediaapi
+# import wikipedia
+# import wikipediaapi
 from __main__ import send_cmd_help
 from discord.ext import commands
-from sympy import sympify
+# from sympy import sympify
 
 from .utils import checks
 from .utils.dataIO import fileIO, dataIO
@@ -64,7 +64,7 @@ class Companion:
                                        "SPOILS": {}}
         return self.session[server.id]
 
-    @commands.group(aliases=["gs"], pass_context=True)
+    @commands.group(aliases=["gset"], pass_context=True)
     @checks.admin_or_permissions(manage_messages=True)
     async def globalset(self, ctx):
         """Paramètres globaux de Companion (appliqués sur tout le serveur)"""
