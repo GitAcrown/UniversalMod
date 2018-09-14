@@ -271,7 +271,7 @@ class Companion:
                         txt += "• https://www.reddit.com/r/{}/\n".format(r)
                     await self.bot.send_message(channel, txt)
 
-    async def on_reaction_add(self, reaction, user):
+    async def get_on_reaction_add(self, reaction, user):
         message = reaction.message
         author = message.author
         server, channel = message.server, message.channel
@@ -335,5 +335,5 @@ def setup(bot):
     check_files()
     n = Companion(bot)
     bot.add_listener(n.on_message_post, "on_message")
-    bot.add_listener(n.on_reaction_add, "on_reaction_add")
+    bot.add_listener(n.get_on_reaction_add, "on_reaction_add")
     bot.add_cog(n)
