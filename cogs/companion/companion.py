@@ -278,7 +278,7 @@ class Companion:
         content = message.content
         opts, cache = self.api.get_server(server, "OPTIONS"), self.api.get_server(server, "CACHE")
         session = self.get_session(server)
-        if not author.bot:
+        if not user.bot:
             if reaction.emoji == "👁" and opts["spoil"]:
                 if message.id in session["SPOILS"]:
                     await self.bot.remove_reaction(message, "👁", user)
