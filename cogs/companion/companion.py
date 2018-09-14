@@ -168,6 +168,7 @@ class Companion:
                     img = False
                     if message.attachments:
                         up = message.attachments[0]["url"]
+                        content += " [image]({})".format(up)
                         for i in ["png", "jpeg", "jpg", "gif"]:
                             if i in up:
                                 img = up
@@ -303,6 +304,7 @@ class Companion:
                     img = False
                     if message.attachments:
                         up = message.attachments[0]["url"]
+                        contenu += " [image]({})".format(up)
                         for i in ["png", "jpeg", "jpg", "gif"]:
                             if i in up:
                                 img = up
