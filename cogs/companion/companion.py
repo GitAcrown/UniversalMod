@@ -230,13 +230,13 @@ class Companion:
 
         if opts["quote"]:
             if author.id in session["QUOTES"]:
-                await self.bot.delete_message(message)
                 q = session["QUOTES"][author.id]
                 em = discord.Embed(description=q["contenu"], color=q["color"], timestamp=q["timestamp"])
                 em.set_author(name=q["auteur"], icon_url=q["avatar"], url=q["msg_url"])
-                em.add_field(name="• Réponse de {}".format(author.name), value=message.content)
+                em.add_field(name="• Réponse de {}".format(author.name), value=content)
                 if q["img"]:
                     em.set_thumbnail(url=q["img"])
+                await self.bot.delete_message(message)
                 await self.bot.send_message(channel, embed=em)
                 del session["QUOTES"][author.id]
 
@@ -290,30 +290,31 @@ class Companion:
                 except:
                     print("Impossible d'envoyer le Spoil à {} (Bloqué)".format(user.name))
 
-        if reaction.emoji == "💬" and opts["quote"]:
-            contenu = content if content else ""
-            if message.embeds:
-                if "description" in message.embeds[0]:
-                    contenu += "\n```{}```".format(message.embeds[0]["description"])
-            msgurl = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
-            timestamp = message.timestamp
-            img = False
-            if message.attachments:
-                up = message.attachments[0]["url"]
-                for i in ["png", "jpeg", "jpg", "gif"]:
-                    if i in up:
-                        img = up
-            reg = re.compile(r'(https?://(?:.*)/\w*\.[A-z]*)', re.DOTALL | re.IGNORECASE).findall(message.content)
-            if reg:
-                img = reg[0]
-            session["QUOTES"][user.id] = {"contenu": contenu,
-                                          "color": author.color,
-                                          "name": author.name,
-                                          "avatar": author.avatar_url,
-                                          "msg_url": msgurl,
-                                          "img": img,
-                                          "timestamp": timestamp}
-            await self.bot.remove_reaction(message, reaction.emoji, user)
+        if reaction.emoji in ["💬","🗨"] and opts["quote"]:
+            if user.id not in session["QUOTES"]:
+                contenu = content if content else ""
+                if message.embeds:
+                    if "description" in message.embeds[0]:
+                        contenu += "\n```{}```".format(message.embeds[0]["description"])
+                msgurl = "https://discordapp.com/channels/{}/{}/{}".format(server.id, message.channel.id, message.id)
+                timestamp = message.timestamp
+                img = False
+                if message.attachments:
+                    up = message.attachments[0]["url"]
+                    for i in ["png", "jpeg", "jpg", "gif"]:
+                        if i in up:
+                            img = up
+                reg = re.compile(r'(https?://(?:.*)/\w*\.[A-z]*)', re.DOTALL | re.IGNORECASE).findall(message.content)
+                if reg:
+                    img = reg[0]
+                session["QUOTES"][user.id] = {"contenu": contenu,
+                                              "color": author.color,
+                                              "auteur": author.name,
+                                              "avatar": author.avatar_url,
+                                              "msg_url": msgurl,
+                                              "img": img,
+                                              "timestamp": timestamp}
+                await self.bot.remove_reaction(message, reaction.emoji, user)
 
 
 def check_folders():
