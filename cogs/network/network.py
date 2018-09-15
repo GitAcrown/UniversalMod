@@ -199,8 +199,7 @@ class NetworkApp:
         """Retourne une liste de tous les jeux mis en cache"""
         total = []
         for s in self.data:
-            server = self.bot.get_server(s)
-            data = self.get_server_raw_data(server, "USERS")
+            data = self.data[s]["USERS"]
             for user in data:
                 for g in data[user]["SYS"]["_cache_games"]:
                     if g not in total:
