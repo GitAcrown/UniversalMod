@@ -491,7 +491,7 @@ def check_folders():
 
 
 def check_files():
-    if not os.ath.isfile("data/pendu/data.json"):
+    if not os.path.isfile("data/pendu/data.json"):
         print("Création du fichier Jeu du pendu")
         fileIO("data/pendu/data.json", "save", {})
 
