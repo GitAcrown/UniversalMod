@@ -113,7 +113,8 @@ class Pendu:
                                        "AVANCEMENT": [],
                                        "PROPOSE": [],
                                        "MOT": None,
-                                       "THEMES": []}
+                                       "THEMES": [],
+                                       "CHANNEL": None}
         return self.session[server.id]
 
     def load_themes(self, server: discord.Server, themes):
@@ -257,6 +258,7 @@ class Pendu:
                         session["JOUEURS"][author.id] = {"BONUS": 0,
                                                          "MALUS": 0}
                         session["TIMEOUT"] = 0
+                        session["CHANNEL"] = ctx.message.channel.id
                         if self.get_embed(server):
                             await self.bot.say(embed=self.get_embed(server))
                         while session["VIES"] > 0 and session["AVANCEMENT"] != mot.lettres and session["TIMEOUT"] <= 60:
@@ -429,7 +431,7 @@ class Pendu:
         session = self.get_session(server)
         if not author.bot:
             if not content[0] in ["?", "!", "&", "\\", ";;", "§"] or len(content.split(" ")) > 1:
-                if session["ON"]:
+                if session["ON"] and session["CHANNEL"] == message.channel.id:
                     mot = session["MOT"]
                     if author.id in session["JOUEURS"]:
                         content = self.normal(content).upper()
