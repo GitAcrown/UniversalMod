@@ -266,12 +266,15 @@ class Pendu:
                             session["TIMEOUT"] += 1
                         session["ON"] = False
                         if session["TIMEOUT"] > 60:
-                            msg = "Le mot était **{}**\nVos comptes ne sont pas affectés".format(mot.literal.upper())
-                            em = discord.Embed(title="PENDU — Partie annulée", description=msg, color=0xFFC125)
-                            em.set_footer(text=self.msgbye())
-                            await self.bot.say(embed=em)
-                            self.get_session(server, True)
-                            return
+                            if session["AVANCEMENT"]:
+                                msg = "Le mot était **{}**\nVos comptes ne sont pas affectés".format(mot.literal.upper())
+                                em = discord.Embed(title="PENDU — Partie annulée", description=msg, color=0xFFC125)
+                                em.set_footer(text=self.msgbye())
+                                await self.bot.say(embed=em)
+                                self.get_session(server, True)
+                                return
+                            else:
+                                return
                         if not session["VIES"]:
                             image = random.choice(["https://i.imgur.com/4Rgj1iI.png"])
                             msg = "Le mot était **{}**".format(mot.literal.upper())
