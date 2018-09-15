@@ -154,122 +154,121 @@ class Companion:
 
     async def on_message_post(self, message):
         author = message.author
-        if not hasattr(message, "server"):
-            return
-        server, channel = message.server, message.channel
-        content = message.content
-        opts, cache = self.api.get_server(server, "OPTIONS"), self.api.get_server(server, "CACHE")
-        session = self.get_session(server)
-        if not author.bot:
-            if opts["spoil"]:
-                if content.startswith("§") or content.lower().startswith("spoil:"):
-                    await self.bot.delete_message(message)
-                    rs = lambda: random.randint(0, 255)
-                    color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
-                    balise = "spoil:" if content.lower().startswith("spoil:") else "§"
-                    img = False
-                    reg = re.compile(r'(https?:\/\/(?:.*)\/\w*\.[A-z]*)', re.DOTALL | re.IGNORECASE).findall(
-                        message.content)
-                    if reg:
-                        img = reg[0]
-                    em = discord.Embed(color=color)
-                    em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-                    em.set_footer(text="👁 ─ Dévoiler le spoil (MP)")
-                    msg = await self.bot.send_message(channel, embed=em)
-                    session["SPOILS"][msg.id] = {"contenu": content.replace(balise, ""),
-                                                 "auteur": message.author.name,
-                                                 "avatar": message.author.avatar_url,
-                                                 "color": color,
-                                                 "img": img}
-                    await self.bot.add_reaction(msg, "👁")
-                    return
+        if message.server:
+            server, channel = message.server, message.channel
+            content = message.content
+            opts, cache = self.api.get_server(server, "OPTIONS"), self.api.get_server(server, "CACHE")
+            session = self.get_session(server)
+            if not author.bot:
+                if opts["spoil"]:
+                    if content.startswith("§") or content.lower().startswith("spoil:"):
+                        await self.bot.delete_message(message)
+                        rs = lambda: random.randint(0, 255)
+                        color = int('0x%02X%02X%02X' % (rs(), rs(), rs()), 16)
+                        balise = "spoil:" if content.lower().startswith("spoil:") else "§"
+                        img = False
+                        reg = re.compile(r'(https?:\/\/(?:.*)\/\w*\.[A-z]*)', re.DOTALL | re.IGNORECASE).findall(
+                            message.content)
+                        if reg:
+                            img = reg[0]
+                        em = discord.Embed(color=color)
+                        em.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+                        em.set_footer(text="👁 ─ Dévoiler le spoil (MP)")
+                        msg = await self.bot.send_message(channel, embed=em)
+                        session["SPOILS"][msg.id] = {"contenu": content.replace(balise, ""),
+                                                     "auteur": message.author.name,
+                                                     "avatar": message.author.avatar_url,
+                                                     "color": color,
+                                                     "img": img}
+                        await self.bot.add_reaction(msg, "👁")
+                        return
 
-            if opts["afk"]:
-                for afk in session["AFK"]:
-                    if author.id == afk[0]:
-                        session["AFK"].remove([afk[0], afk[1], afk[2]])
-                if "afk" in content.lower():
-                    raison = " ".join([m.strip() for m in content.split() if "afk" not in m.lower()])
-                    session["AFK"].append([author.id, author.name, raison])
-                if message.mentions:
-                    for m in message.mentions:
-                        for afk in session["AFK"]:
-                            if m.id == afk[0]:
-                                if afk[2] != "":
-                                    msg = await self.bot.send_message(channel, "**{}** est AFK — *{}*".format(afk[1], afk[2]))
-                                else:
-                                    msg = await self.bot.send_message(channel, "**{}** est AFK — "
-                                                                         "Ce membre sera de retour sous peu".format(afk[1]))
-                                await asyncio.sleep(8)
-                                await self.bot.delete_message(msg)
-                                return
+                if opts["afk"]:
+                    for afk in session["AFK"]:
+                        if author.id == afk[0]:
+                            session["AFK"].remove([afk[0], afk[1], afk[2]])
+                    if "afk" in content.lower():
+                        raison = " ".join([m.strip() for m in content.split() if "afk" not in m.lower()])
+                        session["AFK"].append([author.id, author.name, raison])
+                    if message.mentions:
+                        for m in message.mentions:
+                            for afk in session["AFK"]:
+                                if m.id == afk[0]:
+                                    if afk[2] != "":
+                                        msg = await self.bot.send_message(channel, "**{}** est AFK — *{}*".format(afk[1], afk[2]))
+                                    else:
+                                        msg = await self.bot.send_message(channel, "**{}** est AFK — "
+                                                                             "Ce membre sera de retour sous peu".format(afk[1]))
+                                    await asyncio.sleep(8)
+                                    await self.bot.delete_message(msg)
+                                    return
 
-            if opts["repost"]:
-                if content.startswith("http"):
-                    if content in cache["repost"]:
-                        if not author.bot:
-                            await self.bot.add_reaction(message, "♻")
-                    else:
-                        cache["repost"].append(content)
-                        self.api.save()
+                if opts["repost"]:
+                    if content.startswith("http"):
+                        if content in cache["repost"]:
+                            if not author.bot:
+                                await self.bot.add_reaction(message, "♻")
+                        else:
+                            cache["repost"].append(content)
+                            self.api.save()
 
-            if opts["msgchrono"]:
-                r = False
-                regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
-                regex2 = re.compile(r"\.(\d+)s", re.IGNORECASE | re.DOTALL).findall(content)
-                if regex:
-                    r = regex[0]
-                elif regex2:
-                    r = regex2[0]
-                if r:
-                    temps = int(r) if int(r) <= 60 else 60
-                    await self.bot.add_reaction(message, "⏱")
-                    await asyncio.sleep(temps)
-                    await self.bot.delete_message(message)
+                if opts["msgchrono"]:
+                    r = False
+                    regex = re.compile(r"\[(\d+)s\]", re.IGNORECASE | re.DOTALL).findall(content)
+                    regex2 = re.compile(r"\.(\d+)s", re.IGNORECASE | re.DOTALL).findall(content)
+                    if regex:
+                        r = regex[0]
+                    elif regex2:
+                        r = regex2[0]
+                    if r:
+                        temps = int(r) if int(r) <= 60 else 60
+                        await self.bot.add_reaction(message, "⏱")
+                        await asyncio.sleep(temps)
+                        await self.bot.delete_message(message)
 
-            if opts["quote"]:
-                if author.id in session["QUOTES"]:
-                    q = session["QUOTES"][author.id]
-                    em = discord.Embed(description=q["contenu"], color=q["color"], timestamp=q["timestamp"])
-                    em.set_author(name=q["auteur"], icon_url=q["avatar"], url=q["msg_url"])
-                    em.add_field(name="• Réponse de {}".format(author.name), value=content)
-                    em.set_footer(text="Sur #" + q["channel"])
-                    if q["img"]:
-                        em.set_thumbnail(url=q["img"])
-                    await self.bot.delete_message(message)
-                    await self.bot.send_message(channel, embed=em)
-                    del session["QUOTES"][author.id]
+                if opts["quote"]:
+                    if author.id in session["QUOTES"]:
+                        q = session["QUOTES"][author.id]
+                        em = discord.Embed(description=q["contenu"], color=q["color"], timestamp=q["timestamp"])
+                        em.set_author(name=q["auteur"], icon_url=q["avatar"], url=q["msg_url"])
+                        em.add_field(name="• Réponse de {}".format(author.name), value=content)
+                        em.set_footer(text="Sur #" + q["channel"])
+                        if q["img"]:
+                            em.set_thumbnail(url=q["img"])
+                        await self.bot.delete_message(message)
+                        await self.bot.send_message(channel, embed=em)
+                        del session["QUOTES"][author.id]
 
-            if opts["autolink"]:
-                output = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(\d{1,3})-(.*)",
-                                    re.IGNORECASE | re.DOTALL).findall(content)
-                output2 = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(.*)",
-                                     re.IGNORECASE | re.DOTALL).findall(content)
-                if output:  # 2018
-                    output = output[0]
-                    new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
-                        output[0], output[1], output[2], output[3])
-                    await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
-                elif output2:
-                    output2 = output2[0]
-                    new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
-                        output2[0], output2[1], output2[2])
-                    await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
+                if opts["autolink"]:
+                    output = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(\d{1,3})-(.*)",
+                                        re.IGNORECASE | re.DOTALL).findall(content)
+                    output2 = re.compile(r"https*://www.noelshack.com/(\d{4})-(\d{2,3})-(.*)",
+                                         re.IGNORECASE | re.DOTALL).findall(content)
+                    if output:  # 2018
+                        output = output[0]
+                        new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
+                            output[0], output[1], output[2], output[3])
+                        await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
+                    elif output2:
+                        output2 = output2[0]
+                        new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
+                            output2[0], output2[1], output2[2])
+                        await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
 
-                if "twitter.com" in content:
-                    for e in content.split():
-                        if e.startswith("https://mobile.twitter.com/"):
-                            new = e.replace("mobile.twitter.com", "twitter.com", 1)
-                            await self.bot.send_message(channel, "**Lien mobile converti** — " + new)
+                    if "twitter.com" in content:
+                        for e in content.split():
+                            if e.startswith("https://mobile.twitter.com/"):
+                                new = e.replace("mobile.twitter.com", "twitter.com", 1)
+                                await self.bot.send_message(channel, "**Lien mobile converti** — " + new)
 
-                routput = re.compile(r"(?<!/)r/(\w*)(?!/|\w)", re.IGNORECASE | re.DOTALL).findall(content)
-                if routput:
-                    txt = ""
-                    for r in routput:
-                        if r:
-                            txt += "• https://www.reddit.com/r/{}/\n".format(r)
-                    if txt:
-                        await self.bot.send_message(channel, "**Liens Reddit complétés :**\n" + txt)
+                    routput = re.compile(r"(?<!/)r/(\w*)(?!/|\w)", re.IGNORECASE | re.DOTALL).findall(content)
+                    if routput:
+                        txt = ""
+                        for r in routput:
+                            if r:
+                                txt += "• https://www.reddit.com/r/{}/\n".format(r)
+                        if txt:
+                            await self.bot.send_message(channel, "**Liens Reddit complétés :**\n" + txt)
 
     async def get_on_reaction_add(self, reaction, user):
         message = reaction.message
