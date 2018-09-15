@@ -25,11 +25,11 @@ class Pendu:
 
     def bottomtext(self, status: str):
         if status.lower() == "good":
-            return random.choice(["Exact", "Bien joué", "Excellent", "Absolument", "Correct"])
+            return "**{}**".format(random.choice(["Exact", "Bien joué", "Excellent", "Absolument", "Correct"]))
         elif status.lower() == "bad":
-            return random.choice(["Loupé", "Dommage", "Incorrect", "Nope", "C'est pas ça"])
+            return "**{}**".format(random.choice(["Loupé", "Dommage", "Incorrect", "Nope", "C'est pas ça"]))
         else:
-            return random.choice(["Désolé", "Invalide", "Oups...", "Pardon ?"])
+            return "**{}**".format(random.choice(["Désolé", "Invalide", "Oups...", "Pardon ?"]))
 
     def get_base(self, server: discord.Server):
         """Charge les listes d'origine"""
@@ -221,15 +221,17 @@ class Pendu:
 
     def get_embed(self, server: discord.Server):
         session = self.get_session(server)
-        txt = "**Vies** — {}\n".format(session["VIES"])
-        txt += "**Joueurs** — {}\n".format(", ".join([server.get_member(i).name for
-                                                      i in session["JOUEURS"]]))
-        txt += "\n{}".format("".join(session["AVANCEMENT"]))
-        em = discord.Embed(title="PENDU — {}".format(", ".join(session["THEMES"])),
-                           description=txt, color=0x286fff)
-        if session["PROPOSE"]:
-            em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
-        return em
+        if session["ON"]:
+            txt = "**Vies** — {}\n".format(session["VIES"])
+            txt += "**Joueurs** — {}\n".format(", ".join([server.get_member(i).name for
+                                                          i in session["JOUEURS"]]))
+            txt += "\n{}".format("".join(session["AVANCEMENT"]))
+            em = discord.Embed(title="PENDU — {}".format(", ".join(session["THEMES"])),
+                               description=txt, color=0x286fff)
+            if session["PROPOSE"]:
+                em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
+            return em
+        return False
 
     @commands.command(pass_context=True, no_pm=True)
     async def pendu(self, ctx, *themes):
@@ -255,9 +257,12 @@ class Pendu:
                         session["JOUEURS"][author.id] = {"BONUS": 0,
                                                          "MALUS": 0}
                         session["TIMEOUT"] = 0
+                        if self.get_embed(server):
+                            await self.bot.say(embed=self.get_embed(server))
                         while session["VIES"] > 0 and session["AVANCEMENT"] != mot.lettres and session["TIMEOUT"] <= 60:
-                            await asyncio.sleep(1)
+                            await asyncio.sleep(0.75)
                             session["TIMEOUT"] += 1
+                        session["ON"] = False
                         if session["TIMEOUT"] > 60:
                             msg = "Le mot était **{}**\nVos comptes ne sont pas affectés".format(mot.literal.upper())
                             em = discord.Embed(title="PENDU — Partie annulée", description=msg, color=0xFFC125)
@@ -429,8 +434,8 @@ class Pendu:
                     content = self.normal(content).upper()
                     indexes = lambda c: [[i, x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == c]
                     if content == "STOP":
-                        await self.bot.say("**Partie terminée prématurément** — "
-                                           "Vos comptes ne sont pas affectés.")
+                        await self.bot.send_message(message.channel, "**Partie terminée prématurément** — "
+                                                                     "Vos comptes ne sont pas affectés.")
                         self.get_session(server, True)
                         return
                     elif len(content) == 1:
@@ -446,21 +451,24 @@ class Pendu:
                                     phx = "Une lettre trouvée !"
                                 await self.bot.send_message(message.channel, self.bottomtext("good") + " — " + phx)
                                 session["TIMEOUT"] = 0
-                                await asyncio.sleep(1)
-                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                await asyncio.sleep(0.75)
+                                if self.get_embed(server):
+                                    await self.bot.send_message(message.channel, embed=self.get_embed(server))
                             else:
                                 await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
                                                             "Vous avez déjà trouvé cette lettre !")
                                 session["TIMEOUT"] = 0
-                                await asyncio.sleep(1)
-                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                await asyncio.sleep(0.75)
+                                if self.get_embed(server):
+                                    await self.bot.send_message(message.channel, embed=self.get_embed(server))
                         else:
                             if content in session["PROPOSE"]:
                                 await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
                                                             "Vous avez déjà proposé cette lettre !")
                                 session["TIMEOUT"] = 0
-                                await asyncio.sleep(1)
-                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                await asyncio.sleep(0.75)
+                                if self.get_embed(server):
+                                    await self.bot.send_message(message.channel, embed=self.get_embed(server))
                             else:
                                 session["VIES"] -= 1
                                 session["JOUEURS"][author.id]["MALUS"] -= 1
@@ -468,8 +476,9 @@ class Pendu:
                                 await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
                                                             "Cette lettre ne s'y trouve pas !")
                                 session["TIMEOUT"] = 0
-                                await asyncio.sleep(1)
-                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                await asyncio.sleep(0.75)
+                                if self.get_embed(server):
+                                    await self.bot.send_message(message.channel, embed=self.get_embed(server))
                     elif content == "".join(mot.literal):
                         session["JOUEURS"][author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
                             sys["ENCODE_CHAR"])
@@ -480,8 +489,9 @@ class Pendu:
                         await self.bot.send_message(message.channel, self.bottomtext("bad") + " — " +
                                                     "Ce n'est pas le mot recherché")
                         session["TIMEOUT"] = 0
-                        await asyncio.sleep(1)
-                        await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                        await asyncio.sleep(0.75)
+                        if self.get_embed(server):
+                            await self.bot.send_message(message.channel, embed=self.get_embed(server))
 
 
 def check_folders():
