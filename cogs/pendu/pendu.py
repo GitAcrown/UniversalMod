@@ -252,7 +252,6 @@ class Pendu:
                         mot = self.get_mot(server, mots)
                         session["THEMES"] = [i.title() for i in themes]
                         session["VIES"] = 7 + len(themes)
-                        session["ON"] = True
                         session["MOT"] = mot
                         session["AVANCEMENT"] = mot.encode
                         session["JOUEURS"][author.id] = {"BONUS": 0,
@@ -261,6 +260,8 @@ class Pendu:
                         session["CHANNEL"] = ctx.message.channel.id
                         if self.get_embed(server):
                             await self.bot.say(embed=self.get_embed(server))
+                            await asyncio.sleep(0.25)
+                            session["ON"] = True
                         while session["VIES"] > 0 and session["AVANCEMENT"] != mot.lettres and session["TIMEOUT"] <= 60:
                             await asyncio.sleep(0.75)
                             session["TIMEOUT"] += 1
