@@ -633,7 +633,8 @@ class Network:
     # ======== TRIGGERS ==========
     async def network_msgadd(self, message):
         """Détection des nouveaux messages"""
-        if hasattr(message, "server") and self.app.get_account(message.author):
+        if hasattr(message, "server"):
+            if self.app.get_account(message.author):
                 date, hier = datetime.now().strftime("%d/%m/%Y"), (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
                 author, server = message.author, message.server
                 p = self.app.get_account(author)
@@ -655,6 +656,8 @@ class Network:
 
     async def network_msgdel(self, message):
         """Détection des suppressions de messages"""
+        if not hasattr(message, "server"):
+            return
         if hasattr(message, "server") and self.app.get_account(message.author):
             author = message.author
             p = self.app.get_account(author)
@@ -663,6 +666,8 @@ class Network:
 
     async def network_react(self, reaction, author):
         """Détection des réactions"""
+        if not hasattr(author, "server"):
+            return
         message = reaction.message
         if hasattr(message, "server") and self.app.get_account(author):
             miniemote = self.app.get_server_raw_data(message.server, "SYS")
@@ -684,6 +689,8 @@ class Network:
 
     async def network_join(self, user: discord.Member):
         """Détection des arrivées sur le serveur"""
+        if not hasattr(user, "server"):
+            return
         p = self.app.get_account(user, "STATS")
         p["join"] += 1
         if p["quit"] > 0:
@@ -694,6 +701,8 @@ class Network:
 
     async def network_quit(self, user: discord.Member):
         """Détection des départs du serveur"""
+        if not hasattr(user, "server"):
+            return
         p = self.app.get_account(user)
         p["STATS"]["quit"] += 1
         roles = [r.id for r in user.roles if r.name != "@everyone"]
@@ -704,6 +713,8 @@ class Network:
 
     async def network_ban(self, user):
         """Détection des bans"""
+        if not hasattr(user, "server"):
+            return
         p = self.app.get_account(user)
         p["STATS"]["ban"] += 1
         self.app.add_log(user, "Banni du serveur")

@@ -154,6 +154,8 @@ class Companion:
 
     async def on_message_post(self, message):
         author = message.author
+        if not hasattr(message, "server"):
+            return
         server, channel = message.server, message.channel
         content = message.content
         opts, cache = self.api.get_server(server, "OPTIONS"), self.api.get_server(server, "CACHE")
@@ -271,6 +273,8 @@ class Companion:
 
     async def get_on_reaction_add(self, reaction, user):
         message = reaction.message
+        if not hasattr(message, "server"):
+            return
         author = message.author
         server, channel = message.server, message.channel
         content = message.content
