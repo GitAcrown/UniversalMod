@@ -111,7 +111,9 @@ class Pendu:
                                        "JOUEURS": {},
                                        "VIES": 0,
                                        "AVANCEMENT": [],
-                                       "PROPOSE": []}
+                                       "PROPOSE": [],
+                                       "MOT": None,
+                                       "THEMES": []}
         return self.session[server.id]
 
     def load_themes(self, server: discord.Server, themes):
@@ -217,6 +219,18 @@ class Pendu:
     def simplecheck(self, reaction, user):
         return not user.bot
 
+    def get_embed(self, server: discord.Server):
+        session = self.get_session(server)
+        txt = "**Vies** — {}\n".format(session["VIES"])
+        txt += "**Joueurs** — {}\n".format(", ".join([server.get_member(i).name for
+                                                      i in session["JOUEURS"]]))
+        txt += "\n{}".format("".join(session["AVANCEMENT"]))
+        em = discord.Embed(title="PENDU — {}".format(", ".join(session["THEMES"])),
+                           description=txt, color=0x286fff)
+        if session["PROPOSE"]:
+            em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
+        return em
+
     @commands.command(pass_context=True, no_pm=True)
     async def pendu(self, ctx, *themes):
         """Lance une partie de Pendu classique"""
@@ -233,91 +247,24 @@ class Pendu:
                     if type(mots) != str:
                         session = self.get_session(server, True)
                         mot = self.get_mot(server, mots)
+                        session["THEMES"] = [i.title() for i in themes]
                         session["VIES"] = 7 + len(themes)
                         session["ON"] = True
+                        session["MOT"] = mot
                         session["AVANCEMENT"] = mot.encode
                         session["JOUEURS"][author.id] = {"BONUS": 0,
                                                          "MALUS": 0}
-                        indexes = lambda c: [[i,x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == c]
-                        reload = True
-                        while session["VIES"] > 0 and "".join(session["AVANCEMENT"]) != mot.literal:
-                            if reload:
-                                txt = "**Vies** — {}\n".format(session["VIES"])
-                                txt += "**Joueurs** — {}\n".format(", ".join([server.get_member(i).name for
-                                                                              i in session["JOUEURS"]]))
-                                txt += "\n{}".format("".join(session["AVANCEMENT"]))
-                                em = discord.Embed(title="PENDU — {}".format(", ".join([i.title() for i in themes])),
-                                                   description=txt, color=0x286fff)
-                                if session["PROPOSE"]:
-                                    em.set_footer(text="Lettres proposées — {}".format("·".join(session["PROPOSE"])))
-                                msg = await self.bot.say(embed=em)
-                            rep = await self.bot.wait_for_message(channel=ctx.message.channel, timeout=90,
-                                                                  check=self.check)
-                            if not rep:
-                                if session["ON"]:
-                                    em.set_footer(text="× Partie terminée pour cause d'inactivité")
-                                    await self.bot.edit_message(msg, embed=em)
-                                    self.get_session(server, True)
-                                else:
-                                    pass
-                                return
-                            elif self.ignore(rep):
-                                reload = False
-                                pass
-                            elif rep.author.id in [i for i in session["JOUEURS"]]:
-                                reload = True
-                                content = self.normal(rep.content).upper()
-                                if content == "STOP":
-                                    await self.bot.say("**Partie terminée prématurément** — "
-                                                       "Vos comptes ne sont pas affectés.")
-                                    self.get_session(server, True)
-                                    return
-                                elif len(content) == 1:
-                                    if content in mot.lettres:
-                                        if content not in session["PROPOSE"]:
-                                            for l in indexes(content):
-                                                session["AVANCEMENT"][l[0]] = l[1].upper()
-                                            session["PROPOSE"].append(content)
-                                            session["JOUEURS"][rep.author.id]["BONUS"] += mot.lettres.count(content)
-                                            if mot.lettres.count(content) > 1:
-                                                phx = "{} lettres trouvées !".format(mot.lettres.count(content))
-                                            else:
-                                                phx = "Une lettre trouvée !"
-                                            em.set_footer(text=self.bottomtext("good") + " — " + phx)
-                                            await self.bot.edit_message(msg, embed=em)
-                                            await asyncio.sleep(0.75)
-                                        else:
-                                            em.set_footer(text="{} — Vous avez déjà trouvé cette lettre !".format(
-                                                self.bottomtext("neutre")))
-                                            await self.bot.edit_message(msg, embed=em)
-                                            await asyncio.sleep(0.75)
-                                    else:
-                                        if content in session["PROPOSE"]:
-                                            em.set_footer(text="{} — Vous avez déjà proposé cette lettre !".format(
-                                                self.bottomtext("neutre")))
-                                            await self.bot.edit_message(msg, embed=em)
-                                            await asyncio.sleep(0.75)
-                                        else:
-                                            session["VIES"] -= 1
-                                            session["JOUEURS"][rep.author.id]["MALUS"] -= 1
-                                            session["PROPOSE"].append(content)
-                                            em.set_footer(text="{} — Cette lettre ne s'y trouve pas !".format(
-                                                self.bottomtext("neutre")))
-                                            await self.bot.edit_message(msg, embed=em)
-                                            await asyncio.sleep(0.75)
-                                elif content == "".join(mot.literal):
-                                        session["JOUEURS"][rep.author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
-                                            sys["ENCODE_CHAR"])
-                                        session["AVANCEMENT"] = mot.lettres
-                                else:
-                                    session["VIES"] -= 1
-                                    session["JOUEURS"][rep.author.id]["MALUS"] -= 2
-                                    em.set_footer(text="{} — Ce n'est pas le mot recherché".format(
-                                        self.bottomtext("bad")))
-                                    await self.bot.edit_message(msg, embed=em)
-                                    await asyncio.sleep(0.75)
-                            else:
-                                pass
+                        session["TIMEOUT"] = 0
+                        while session["VIES"] > 0 and session["AVANCEMENT"] != mot.lettres and session["TIMEOUT"] <= 60:
+                            await asyncio.sleep(1)
+                            session["TIMEOUT"] += 1
+                        if session["TIMEOUT"] > 60:
+                            msg = "Le mot était **{}**\nVos comptes ne sont pas affectés".format(mot.literal.upper())
+                            em = discord.Embed(title="PENDU — Partie annulée", description=msg, color=0xFFC125)
+                            em.set_footer(text=self.msgbye())
+                            await self.bot.say(embed=em)
+                            self.get_session(server, True)
+                            return
                         if not session["VIES"]:
                             image = random.choice(["https://i.imgur.com/4Rgj1iI.png"])
                             msg = "Le mot était **{}**".format(mot.literal.upper())
@@ -469,6 +416,74 @@ class Pendu:
         em.set_footer(text="Les mots éventuellement non-affichés n'ont pas pu être supprimés")
         await self.bot.say(embed=em)
 
+    async def grab_msg(self, message):
+        author = message.author
+        server = message.server
+        content = message.content
+        sys = self.get_system(server)
+        session = self.get_session(server)
+        if not author.bot:
+            if session["ON"]:
+                mot = session["MOT"]
+                if author.id in session["JOUEURS"]:
+                    content = self.normal(content).upper()
+                    indexes = lambda c: [[i, x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == c]
+                    if content == "STOP":
+                        await self.bot.say("**Partie terminée prématurément** — "
+                                           "Vos comptes ne sont pas affectés.")
+                        self.get_session(server, True)
+                        return
+                    elif len(content) == 1:
+                        if content in mot.lettres:
+                            if content not in session["PROPOSE"]:
+                                for l in indexes(content):
+                                    session["AVANCEMENT"][l[0]] = l[1].upper()
+                                session["PROPOSE"].append(content)
+                                session["JOUEURS"][author.id]["BONUS"] += mot.lettres.count(content)
+                                if mot.lettres.count(content) > 1:
+                                    phx = "{} lettres trouvées !".format(mot.lettres.count(content))
+                                else:
+                                    phx = "Une lettre trouvée !"
+                                await self.bot.send_message(message.channel, self.bottomtext("good") + " — " + phx)
+                                session["TIMEOUT"] = 0
+                                await asyncio.sleep(1)
+                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                            else:
+                                await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
+                                                            "Vous avez déjà trouvé cette lettre !")
+                                session["TIMEOUT"] = 0
+                                await asyncio.sleep(1)
+                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                        else:
+                            if content in session["PROPOSE"]:
+                                await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
+                                                            "Vous avez déjà proposé cette lettre !")
+                                session["TIMEOUT"] = 0
+                                await asyncio.sleep(1)
+                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                            else:
+                                session["VIES"] -= 1
+                                session["JOUEURS"][author.id]["MALUS"] -= 1
+                                session["PROPOSE"].append(content)
+                                await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
+                                                            "Cette lettre ne s'y trouve pas !")
+                                session["TIMEOUT"] = 0
+                                await asyncio.sleep(1)
+                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                    elif content == "".join(mot.literal):
+                        session["JOUEURS"][author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
+                            sys["ENCODE_CHAR"])
+                        session["AVANCEMENT"] = mot.lettres
+                    else:
+                        session["VIES"] -= 1
+                        session["JOUEURS"][author.id]["MALUS"] -= 2
+                        await self.bot.send_message(message.channel, self.bottomtext("bad") + " — " +
+                                                    "Ce n'est pas le mot recherché")
+                        session["TIMEOUT"] = 0
+                        await asyncio.sleep(1)
+                        await self.bot.send_message(message.channel, embed=self.get_embed(server))
+
+
 def check_folders():
     if not os.path.exists("data/pendu/"):
         print("Creation du dossier Jeu du pendu...")
@@ -476,7 +491,7 @@ def check_folders():
 
 
 def check_files():
-    if not os.path.isfile("data/pendu/data.json"):
+    if not os.ath.isfile("data/pendu/data.json"):
         print("Création du fichier Jeu du pendu")
         fileIO("data/pendu/data.json", "save", {})
 
@@ -485,4 +500,5 @@ def setup(bot):
     check_folders()
     check_files()
     n = Pendu(bot)
+    bot.add_listener(n.grab_msg, "on_message")
     bot.add_cog(n)
