@@ -157,8 +157,11 @@ class Companion:
         if message.server:
             server, channel = message.server, message.channel
             content = message.content
-            opts, cache = self.api.get_server(server, "OPTIONS"), self.api.get_server(server, "CACHE")
-            session = self.get_session(server)
+            try:
+                opts, cache = self.api.get_server(server, "OPTIONS"), self.api.get_server(server, "CACHE")
+                session = self.get_session(server)
+            except:
+                return
             if not author.bot:
                 if opts["spoil"]:
                     if content.startswith("§") or content.lower().startswith("spoil:"):
