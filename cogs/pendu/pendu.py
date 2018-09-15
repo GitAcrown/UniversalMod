@@ -258,10 +258,10 @@ class Pendu:
                                                          "MALUS": 0}
                         session["TIMEOUT"] = 0
                         session["CHANNEL"] = ctx.message.channel.id
+                        session["ON"] = True
                         if self.get_embed(server):
                             await self.bot.say(embed=self.get_embed(server))
                             await asyncio.sleep(0.25)
-                            session["ON"] = True
                         while session["VIES"] > 0 and session["AVANCEMENT"] != mot.lettres and session["TIMEOUT"] <= 60:
                             await asyncio.sleep(0.75)
                             session["TIMEOUT"] += 1
@@ -434,71 +434,72 @@ class Pendu:
         sys = self.get_system(server)
         session = self.get_session(server)
         if not author.bot:
-            if not content[0] in ["?", "!", "&", "\\", ";;", "§"] or len(content.split(" ")) > 1:
-                if session["ON"] and session["CHANNEL"] == message.channel.id:
-                    mot = session["MOT"]
-                    if author.id in session["JOUEURS"]:
-                        content = self.normal(content).upper()
-                        indexes = lambda c: [[i, x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == c]
-                        if content == "STOP":
-                            await self.bot.send_message(message.channel, "**Partie terminée prématurément** — "
-                                                                         "Vos comptes ne sont pas affectés.")
-                            self.get_session(server, True)
-                            return
-                        elif len(content) == 1:
-                            if content in mot.lettres:
-                                if content not in session["PROPOSE"]:
-                                    for l in indexes(content):
-                                        session["AVANCEMENT"][l[0]] = l[1].upper()
-                                    session["PROPOSE"].append(content)
-                                    session["JOUEURS"][author.id]["BONUS"] += mot.lettres.count(content)
-                                    if mot.lettres.count(content) > 1:
-                                        phx = "{} lettres trouvées !".format(mot.lettres.count(content))
+            if content[0] not in ["?", "!", "&", "\\", ";", "§", ":"]:
+                if len(content.split(" ")) == 1:
+                    if session["ON"] and session["CHANNEL"] == message.channel.id:
+                        mot = session["MOT"]
+                        if author.id in session["JOUEURS"]:
+                            content = self.normal(content).upper()
+                            indexes = lambda c: [[i, x] for i, x in enumerate(mot.lettres) if self.normal(x).upper() == c]
+                            if content == "STOP":
+                                await self.bot.send_message(message.channel, "**Partie terminée prématurément** — "
+                                                                             "Vos comptes ne sont pas affectés.")
+                                self.get_session(server, True)
+                                return
+                            elif len(content) == 1:
+                                if content in mot.lettres:
+                                    if content not in session["PROPOSE"]:
+                                        for l in indexes(content):
+                                            session["AVANCEMENT"][l[0]] = l[1].upper()
+                                        session["PROPOSE"].append(content)
+                                        session["JOUEURS"][author.id]["BONUS"] += mot.lettres.count(content)
+                                        if mot.lettres.count(content) > 1:
+                                            phx = "{} lettres trouvées !".format(mot.lettres.count(content))
+                                        else:
+                                            phx = "Une lettre trouvée !"
+                                        await self.bot.send_message(message.channel, self.bottomtext("good") + " — " + phx)
+                                        session["TIMEOUT"] = 0
+                                        await asyncio.sleep(0.75)
+                                        if self.get_embed(server):
+                                            await self.bot.send_message(message.channel, embed=self.get_embed(server))
                                     else:
-                                        phx = "Une lettre trouvée !"
-                                    await self.bot.send_message(message.channel, self.bottomtext("good") + " — " + phx)
-                                    session["TIMEOUT"] = 0
-                                    await asyncio.sleep(0.75)
-                                    if self.get_embed(server):
-                                        await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                        await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
+                                                                    "Vous avez déjà trouvé cette lettre !")
+                                        session["TIMEOUT"] = 0
+                                        await asyncio.sleep(0.75)
+                                        if self.get_embed(server):
+                                            await self.bot.send_message(message.channel, embed=self.get_embed(server))
                                 else:
-                                    await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
-                                                                "Vous avez déjà trouvé cette lettre !")
-                                    session["TIMEOUT"] = 0
-                                    await asyncio.sleep(0.75)
-                                    if self.get_embed(server):
-                                        await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                    if content in session["PROPOSE"]:
+                                        await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
+                                                                    "Vous avez déjà proposé cette lettre !")
+                                        session["TIMEOUT"] = 0
+                                        await asyncio.sleep(0.75)
+                                        if self.get_embed(server):
+                                            await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                    else:
+                                        session["VIES"] -= 1
+                                        session["JOUEURS"][author.id]["MALUS"] -= 1
+                                        session["PROPOSE"].append(content)
+                                        await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
+                                                                    "Cette lettre ne s'y trouve pas !")
+                                        session["TIMEOUT"] = 0
+                                        await asyncio.sleep(0.75)
+                                        if self.get_embed(server):
+                                            await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                            elif content == "".join(mot.literal):
+                                session["JOUEURS"][author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
+                                    sys["ENCODE_CHAR"])
+                                session["AVANCEMENT"] = mot.lettres
                             else:
-                                if content in session["PROPOSE"]:
-                                    await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
-                                                                "Vous avez déjà proposé cette lettre !")
-                                    session["TIMEOUT"] = 0
-                                    await asyncio.sleep(0.75)
-                                    if self.get_embed(server):
-                                        await self.bot.send_message(message.channel, embed=self.get_embed(server))
-                                else:
-                                    session["VIES"] -= 1
-                                    session["JOUEURS"][author.id]["MALUS"] -= 1
-                                    session["PROPOSE"].append(content)
-                                    await self.bot.send_message(message.channel, self.bottomtext("neutre") + " — " +
-                                                                "Cette lettre ne s'y trouve pas !")
-                                    session["TIMEOUT"] = 0
-                                    await asyncio.sleep(0.75)
-                                    if self.get_embed(server):
-                                        await self.bot.send_message(message.channel, embed=self.get_embed(server))
-                        elif content == "".join(mot.literal):
-                            session["JOUEURS"][author.id]["BONUS"] += 2 * session["AVANCEMENT"].count(
-                                sys["ENCODE_CHAR"])
-                            session["AVANCEMENT"] = mot.lettres
-                        else:
-                            session["VIES"] -= 1
-                            session["JOUEURS"][author.id]["MALUS"] -= 2
-                            await self.bot.send_message(message.channel, self.bottomtext("bad") + " — " +
-                                                        "Ce n'est pas le mot recherché")
-                            session["TIMEOUT"] = 0
-                            await asyncio.sleep(0.75)
-                            if self.get_embed(server):
-                                await self.bot.send_message(message.channel, embed=self.get_embed(server))
+                                session["VIES"] -= 1
+                                session["JOUEURS"][author.id]["MALUS"] -= 2
+                                await self.bot.send_message(message.channel, self.bottomtext("bad") + " — " +
+                                                            "Ce n'est pas le mot recherché")
+                                session["TIMEOUT"] = 0
+                                await asyncio.sleep(0.75)
+                                if self.get_embed(server):
+                                    await self.bot.send_message(message.channel, embed=self.get_embed(server))
 
 
 def check_folders():
