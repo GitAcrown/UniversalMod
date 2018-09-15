@@ -722,6 +722,8 @@ class Network:
 
     async def network_perso(self, before, after):
         """Détection des changements sur un profil d'un membre"""
+        if not hasattr(after, "server"):
+            return
         p = self.app.get_account(after)
         if after.name != before.name:
             self.app.add_log(after, "Changement de pseudo pour *{}*".format(after.name))
