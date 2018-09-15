@@ -429,6 +429,8 @@ class Pendu:
 
     async def grab_msg(self, message):
         author = message.author
+        if not hasattr(author, "server"):
+            return
         server = message.server
         content = message.content
         sys = self.get_system(server)
