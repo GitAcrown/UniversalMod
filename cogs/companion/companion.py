@@ -251,27 +251,27 @@ class Companion:
                         output = output[0]
                         new_url = "http://image.noelshack.com/fichiers/{}/{}/{}/{}".format(
                             output[0], output[1], output[2], output[3])
-                        await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
+                        await self.bot.send_message(channel, new_url)
                     elif output2:
                         output2 = output2[0]
                         new_url = "http://image.noelshack.com/fichiers/{}/{}/{}".format(
                             output2[0], output2[1], output2[2])
-                        await self.bot.send_message(channel, "**URL Noelshack corrigé** — " + new_url)
+                        await self.bot.send_message(channel, new_url)
 
                     if "twitter.com" in content:
                         for e in content.split():
                             if e.startswith("https://mobile.twitter.com/"):
                                 new = e.replace("mobile.twitter.com", "twitter.com", 1)
-                                await self.bot.send_message(channel, "**Lien mobile converti** — " + new)
+                                await self.bot.send_message(channel, new)
 
-                    routput = re.compile(r"(?<!/)r/(\w*)(?!/|\w)", re.IGNORECASE | re.DOTALL).findall(content)
+                    routput = re.compile(r"(?<!\/|\w|[.-:;])r\/(\w*)(?!\/|\w|[.-:;])", re.IGNORECASE | re.DOTALL).findall(content)
                     if routput:
                         txt = ""
                         for r in routput:
                             if r:
                                 txt += "• https://www.reddit.com/r/{}/\n".format(r)
                         if txt:
-                            await self.bot.send_message(channel, "**Liens Reddit complétés :**\n" + txt)
+                            await self.bot.send_message(channel, txt)
 
     async def get_on_reaction_add(self, reaction, user):
         message = reaction.message
