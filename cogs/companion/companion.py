@@ -45,7 +45,8 @@ class CompanionAPI:
                                                 "msgchrono": True,
                                                 "spoil": True,
                                                 "quote": True,
-                                                "autolink": True},
+                                                "autolink": True,
+                                                "assistant": True},
                                     "CACHE": {"repost": []}}
         return self.data[server.id][sub] if sub else self.data[server.id]
 
@@ -72,11 +73,25 @@ class Companion:
             await send_cmd_help(ctx)
 
     @globalset.command(pass_context=True)
+    async def assistant(self, ctx):
+        """Active ou désactive l'assistant sur le serveur"""
+        server = ctx.message.server
+        sys = self.api.get_server(server, "OPTIONS")
+        if sys.get("assistant", False):
+            sys["assistant"] = False
+            await self.bot.say("**Assistant** ─ Désactivé sur le serveur")
+        else:
+            sys["assistant"] = True
+            await self.bot.say("**Assistant** ─ Activé\nChaque membre peut séparément le désactiver pour eux-même avec "
+                               "`{}companioset assistant`".format(ctx.prefix))
+        self.api.forcesave()
+
+    @globalset.command(pass_context=True)
     async def autolink(self, ctx):
         """Active ou désactive l'aide automatique pour convertir des liens défectueux etc."""
         server = ctx.message.server
         sys = self.api.get_server(server, "OPTIONS")
-        if sys["autolink"]:
+        if sys.get("autolink", False):
             sys["autolink"] = False
             await self.bot.say("**Aide automatique** ─ Désactivée")
         else:
@@ -89,7 +104,7 @@ class Companion:
         """Active ou désactive la notification de vos Reposts"""
         server = ctx.message.server
         sys = self.api.get_server(server, "OPTIONS")
-        if sys["repost"]:
+        if sys.get("repost", False):
             sys["repost"] = False
             await self.bot.say("**Notificateur de Reposts** ─ Désactivé")
         else:
@@ -103,7 +118,7 @@ class Companion:
         """Active ou désactive la notification des AFK"""
         server = ctx.message.server
         sys = self.api.get_server(server, "OPTIONS")
-        if sys["afk"]:
+        if sys.get("afk", False):
             sys["afk"] = False
             await self.bot.say("**Notificateur d'AFK** ─ Désactivé")
         else:
@@ -117,7 +132,7 @@ class Companion:
         """Active ou désactive la balise Spoil"""
         server = ctx.message.server
         sys = self.api.get_server(server, "OPTIONS")
-        if sys["spoil"]:
+        if sys.get("spoil", False):
             sys["spoil"] = False
             await self.bot.say("**Balise Spoil** ─ Désactivé")
         else:
@@ -130,7 +145,7 @@ class Companion:
         """Active ou désactive la possibilité de faire des citations"""
         server = ctx.message.server
         sys = self.api.get_server(server, "OPTIONS")
-        if sys["quote"]:
+        if sys.get("quote", False):
             sys["quote"] = False
             await self.bot.say("**Bloc de citation** ─ Désactivé")
         else:
@@ -143,7 +158,7 @@ class Companion:
         """Active ou désactive la possibilité de créer des messages chronométrés"""
         server = ctx.message.server
         sys = self.api.get_server(server, "OPTIONS")
-        if sys["msgchrono"]:
+        if sys.get("msgchrono", False):
             sys["msgchrono"] = False
             await self.bot.say("**Messages chronométrés** ─ Désactivés")
         else:

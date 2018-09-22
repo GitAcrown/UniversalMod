@@ -355,7 +355,7 @@ class Echo:
         if nom in [s.nom for s in self.approb_list(server)]:
             await self.bot.say("**Impossible** | Un sticker avec ce nom est en attente d'approbation")
             return
-        if nom in ["list", "liste", "vent", "fullreset"]:
+        if nom in ["list", "liste", "vent", "fullreset", "astuces"]:
             await self.bot.say("**Impossible** | Ce nom est réservé à un processus système")
             return
         if ":" in nom:
@@ -1244,199 +1244,202 @@ class Echo:
         author = message.author
         content = message.content
         server = message.server
-        if not server:
-            return
-        channel = message.channel
-        self._set_server(server)
+        if server:
+            channel = message.channel
+            self._set_server(server)
 
-        if author.id not in self.sys[server.id]["BLACKLIST"]:
-            if ":" in content:
-                stickers = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
-                if stickers:
-                    stickers_list = self.get_all_stickers(server, True, "NOM")
-                    for e in stickers:
-                        if e[1] in [e.name for e in server.emojis]:
-                            continue
+            if author.id not in self.sys[server.id]["BLACKLIST"]:
+                if ":" in content:
+                    stickers = re.compile(r'([\w?]+)?:(.*?):', re.DOTALL | re.IGNORECASE).findall(message.content)
+                    if stickers:
+                        stickers_list = self.get_all_stickers(server, True, "NOM")
+                        for e in stickers:
+                            if e[1] in [e.name for e in server.emojis]:
+                                continue
 
-                        if e[1] in stickers_list:
-                            stk = self.get_sticker(server, e[1])
-                            stkmod = self.get_sticker(server, e[1], w=True)
-                            affichage = stk.display
+                            if e[1] in stickers_list:
+                                stk = self.get_sticker(server, e[1])
+                                affichage = stk.display
 
-                            # Gestion des options
-                            option = e[0] if e[0] else False
-                            if option:
-                                output = re.compile(r"([A-z]+)(\d*)?", re.DOTALL | re.IGNORECASE).findall(stk.nom)[0]
-                                racine = output[0]
-                                if "r" in option:
-                                    stk = self.get_sticker(server, racine)
-                                    if not stk:
-                                        continue
-                                if "m" in option:
-                                    if self.get_perms(author, "EDITER"):
+                                # Gestion des options
+                                option = e[0] if e[0] else False
+                                if option:
+                                    racine = stk.racine
+                                    if "r" in option:
+                                        stk = self.get_sticker(server, racine)
+                                        if not stk:
+                                            continue
+                                    if "m" in option:
+                                        if self.get_perms(author, "EDITER"):
+                                            col = self.get_collection(server, racine)
+                                            if not col:
+                                                continue
+                                            liste = [e.nom for e in col]
+                                            liste.sort()
+                                            for i in liste:
+                                                n = self.get_sticker(server, i)
+                                                if n.path:
+                                                    await self.bot.send_file(channel, n.path)
+                                                else:
+                                                    await self.bot.send_message(channel, n.url)
+                                            return
+                                        else:
+                                            await self.bot.send_message(author, "**Interdit** | Vou)s n'avez pas le droit "
+                                                                                "de faire ça.")
+                                            continue
+                                    if "c" in option:
                                         col = self.get_collection(server, racine)
                                         if not col:
                                             continue
                                         liste = [e.nom for e in col]
                                         liste.sort()
-                                        for i in liste:
-                                            n = self.get_sticker(server, i)
-                                            if n.path:
-                                                await self.bot.send_file(channel, n.path)
-                                            else:
-                                                await self.bot.send_message(channel, n.url)
-                                        return
-                                    else:
-                                        await self.bot.send_message(author, "**Interdit** | Vou)s n'avez pas le droit "
-                                                                            "de faire ça.")
+                                        txt = ""
+                                        for e in liste:
+                                            txt += "`{}`\n".format(e)
+                                        em = discord.Embed(title="Collection '{}'".format(racine), description=txt,
+                                                           color=author.color)
+                                        em.set_footer(text="Composée de {} stickers au total".format(len(liste)))
+                                        await self.bot.send_message(author, embed=em)
                                         continue
-                                if "c" in option:
-                                    col = self.get_collection(server, racine)
-                                    if not col:
+                                    if "?" in option:
+                                        col = self.get_collection(server, racine)
+                                        if not col:
+                                            continue
+                                        liste = [e.nom for e in col]
+                                        r = random.choice(liste)
+                                        stk = self.get_sticker(server, r)
+                                        if not stk:
+                                            continue
+                                    if "w" in option:
+                                        affichage = "web"
+                                    if "u" in option:
+                                        affichage = "upload"
+                                    if "i" in option:
+                                        if stk.type == "IMAGE":
+                                            affichage = "integre"
+                                    if "d" in option:
+                                        txt = "**ID** ─ `{}`\n" \
+                                              "**Type** ─ `{}`\n" \
+                                              "**Affichage** ─ `{}`\n" \
+                                              "**URL** ─ `{}`\n" \
+                                              "**Emplacement** ─ `{}`\n".format(stk.id, stk.type, stk.display, stk.url,
+                                                                                stk.path)
+                                        em = discord.Embed(title="{}".format(stk.nom), description=txt, color= author.color)
+                                        if stk.type == "IMAGE":
+                                            em.set_image(url=stk.url)
+                                        em.set_footer(text="Proposé par {}".format(server.get_member(stk.author).name))
+                                        await self.bot.send_message(author, embed=em)
                                         continue
-                                    liste = [e.nom for e in col]
-                                    liste.sort()
+                                    if "f" in option:
+                                        await self.bot.delete_message(message)
+                                    if "p" in option:
+                                        await self.bot.send_message(author, stk.url)
+                                        continue
+
+                                await self.bot.send_typing(channel)
+
+                                if not self.get_perms(author, "UTILISER"):
+                                    return
+
+                                # Système anti-flood
+                                heure = time.strftime("%H:%M", time.localtime())
+                                if heure not in self.cooldown:
+                                    self.cooldown = {heure: []}
+                                self.cooldown[heure].append(author.id)
+                                if self.cooldown[heure].count(author.id) > self.sys[server.id]["COOLDOWN"]:
+                                    await self.bot.send_message(author,
+                                                                "**Cooldown** | Patientez quelques secondes avant de"
+                                                                " poster d'autres stickers...")
+                                    return
+
+                                # Publication du sticker
+                                if affichage == "integre":
+                                    if stk.type == "IMAGE":
+                                        em = discord.Embed(color=author.color)
+                                        em.set_image(url=stk.url)
+                                        try:
+                                            await self.bot.send_message(channel, embed=em)
+
+                                            continue
+                                        except Exception as e:
+                                            print("Impossible d'afficher {} en billet : {}".format(stk.nom, e))
+                                elif affichage == "upload":
+                                    if stk.path:
+                                        try:
+                                            await self.bot.send_file(channel, stk.path)
+
+                                            continue
+                                        except Exception as e:
+                                            print("Impossible d'afficher {} en upload : {}".format(stk.nom, e))
+                                try:
+                                    await self.bot.send_message(channel, stk.url)
+
+                                except Exception as e:
+                                    print("Impossible d'afficher {} en URL : {}".format(stk.nom, e))
+
+                            elif e[1] == "astuces":
+                                em = discord.Embed(color=discord.Color.dark_red(), title="Companion ─ Astuces utiles")
+                                em.set_image(url="https://i.imgur.com/wcyNXtF.png")
+                                await self.bot.send_message(author, embed=em)
+                                continue
+
+                            elif e[1] in ["liste", "list"]:
+                                if e[0] == "c":
+                                    liste = self.get_all_stickers(server, True)
+                                    sorteds = []
+                                    for e in liste:
+                                        if e.racine not in sorteds:
+                                            sorteds.append(e.racine)
+                                    sorteds.sort()
                                     txt = ""
+                                    n = 1
+                                    for e in sorteds:
+                                        if len(self.get_collection(server, e)) > 1:
+                                            colltxt = " ({}#)".format(len(self.get_collection(server, e)))
+                                        else:
+                                            colltxt = ""
+                                        txt += "`{}`{}\n".format(e, colltxt)
+                                        if len(txt) > 1980 * n:
+                                            em = discord.Embed(title="Liste des stickers {} (Par collection)".format(server.name),
+                                                               description=txt,
+                                                               color=author.color)
+                                            em.set_footer(text="─ Page {}".format(n))
+                                            await self.bot.send_message(author, embed=em)
+                                            n += 1
+                                            txt = ""
+                                    em = discord.Embed(title="Liste des stickers {} (Par collection)".format(server.name),
+                                                       description=txt,
+                                                       color=author.color)
+                                    em.set_footer(text="─ Page {}".format(n))
+                                    await self.bot.send_message(author, embed=em)
+                                    continue
+                                else:
+                                    liste = [e.nom for e in self.get_all_stickers(server, True)]
+                                    txt = ""
+                                    liste.sort()
+                                    n = 1
                                     for e in liste:
                                         txt += "`{}`\n".format(e)
-                                    em = discord.Embed(title="Collection '{}'".format(racine), description=txt,
+                                        if len(txt) > 1980 * n:
+                                            em = discord.Embed(title="Liste des stickers {}".format(server.name),
+                                                               description=txt,
+                                                               color=author.color)
+                                            em.set_footer(text="─ Page {}".format(n))
+                                            await self.bot.send_message(author, embed=em)
+                                            n += 1
+                                            txt = ""
+                                    em = discord.Embed(title="Liste des stickers {}".format(server.name),
+                                                       description=txt,
                                                        color=author.color)
-                                    em.set_footer(text="Composée de {} stickers au total".format(len(liste)))
+                                    em.set_footer(text="─ Page {}".format(n))
                                     await self.bot.send_message(author, embed=em)
                                     continue
-                                if "?" in option:
-                                    col = self.get_collection(server, racine)
-                                    if not col:
-                                        continue
-                                    liste = [e.nom for e in col]
-                                    r = random.choice(liste)
-                                    stk = self.get_sticker(server, r)
-                                    if not stk:
-                                        continue
-                                if "w" in option:
-                                    affichage = "web"
-                                if "u" in option:
-                                    affichage = "upload"
-                                if "i" in option:
-                                    if stk.type == "IMAGE":
-                                        affichage = "integre"
-                                if "d" in option:
-                                    txt = "**ID** ─ `{}`\n" \
-                                          "**Type** ─ `{}`\n" \
-                                          "**Affichage** ─ `{}`\n" \
-                                          "**URL** ─ `{}`\n" \
-                                          "**Emplacement** ─ `{}`\n".format(stk.id, stk.type, stk.display, stk.url,
-                                                                            stk.path)
-                                    em = discord.Embed(title="{}".format(stk.nom), description=txt, color= author.color)
-                                    if stk.type == "IMAGE":
-                                        em.set_image(url=stk.url)
-                                    em.set_footer(text="Proposé par {}".format(server.get_member(stk.author).name))
-                                    await self.bot.send_message(author, embed=em)
-                                    continue
-                                if "f" in option:
-                                    await self.bot.delete_message(message)
-                                if "p" in option:
-                                    await self.bot.send_message(author, stk.url)
-                                    continue
-
-                            await self.bot.send_typing(channel)
-
-                            if not self.get_perms(author, "UTILISER"):
-                                return
-
-                            # Système anti-flood
-                            heure = time.strftime("%H:%M", time.localtime())
-                            if heure not in self.cooldown:
-                                self.cooldown = {heure: []}
-                            self.cooldown[heure].append(author.id)
-                            if self.cooldown[heure].count(author.id) > self.sys[server.id]["COOLDOWN"]:
-                                await self.bot.send_message(author,
-                                                            "**Cooldown** | Patientez quelques secondes avant de"
-                                                            " poster d'autres stickers...")
-                                return
-
-                            # Publication du sticker
-                            if affichage == "integre":
-                                if stk.type == "IMAGE":
-                                    em = discord.Embed(color=author.color)
-                                    em.set_image(url=stk.url)
-                                    try:
-                                        await self.bot.send_message(channel, embed=em)
-
-                                        continue
-                                    except Exception as e:
-                                        print("Impossible d'afficher {} en billet : {}".format(stk.nom, e))
-                            elif affichage == "upload":
-                                if stk.path:
-                                    try:
-                                        await self.bot.send_file(channel, stk.path)
-
-                                        continue
-                                    except Exception as e:
-                                        print("Impossible d'afficher {} en upload : {}".format(stk.nom, e))
-                            try:
-                                await self.bot.send_message(channel, stk.url)
-
-                            except Exception as e:
-                                print("Impossible d'afficher {} en URL : {}".format(stk.nom, e))
-
-                        elif e[1] in ["liste", "list"]:
-                            if e[0] == "c":
-                                liste = self.get_all_stickers(server, True)
-                                sorteds = []
-                                for e in liste:
-                                    if e.racine not in sorteds:
-                                        sorteds.append(e.racine)
-                                sorteds.sort()
-                                txt = ""
-                                n = 1
-                                for e in sorteds:
-                                    if len(self.get_collection(server, e)) > 1:
-                                        colltxt = " ({}#)".format(len(self.get_collection(server, e)))
-                                    else:
-                                        colltxt = ""
-                                    txt += "`{}`{}\n".format(e, colltxt)
-                                    if len(txt) > 1980 * n:
-                                        em = discord.Embed(title="Liste des stickers {} (Par collection)".format(server.name),
-                                                           description=txt,
-                                                           color=author.color)
-                                        em.set_footer(text="─ Page {}".format(n))
-                                        await self.bot.send_message(author, embed=em)
-                                        n += 1
-                                        txt = ""
-                                em = discord.Embed(title="Liste des stickers {} (Par collection)".format(server.name),
-                                                   description=txt,
-                                                   color=author.color)
-                                em.set_footer(text="─ Page {}".format(n))
-                                await self.bot.send_message(author, embed=em)
+                            elif e[1] == "vent":
+                                await asyncio.sleep(0.10)
+                                await self.bot.send_typing(channel)
                                 continue
                             else:
-                                liste = [e.nom for e in self.get_all_stickers(server, True)]
-                                txt = ""
-                                liste.sort()
-                                n = 1
-                                for e in liste:
-                                    txt += "`{}`\n".format(e)
-                                    if len(txt) > 1980 * n:
-                                        em = discord.Embed(title="Liste des stickers {}".format(server.name),
-                                                           description=txt,
-                                                           color=author.color)
-                                        em.set_footer(text="─ Page {}".format(n))
-                                        await self.bot.send_message(author, embed=em)
-                                        n += 1
-                                        txt = ""
-                                em = discord.Embed(title="Liste des stickers {}".format(server.name),
-                                                   description=txt,
-                                                   color=author.color)
-                                em.set_footer(text="─ Page {}".format(n))
-                                await self.bot.send_message(author, embed=em)
-                                continue
-                        elif e[1] == "vent":
-                            await asyncio.sleep(0.10)
-                            await self.bot.send_typing(channel)
-                            continue
-                        else:
-                            pass
+                                pass
 
     @commands.group(name="departmsg", aliases=["dpm"], pass_context=True, no_pm=True)
     @checks.admin_or_permissions(ban_members=True)
